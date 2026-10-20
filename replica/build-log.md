@@ -1,7 +1,7 @@
 # Build log: promo-br
 
-Camada de dados: **falsa (em memória)** em `lib/data/memory.ts`, com as mesmas assinaturas da futura camada Supabase.
-Sessão: cookie HMAC provisório em `lib/auth.ts` (troca por Supabase Auth no `/replica-backend`).
+Camada de dados: **Supabase** (`lib/data/supabase.ts`) quando `.env.local` tem URL, chave publicável e chave secreta. Sem elas, a camada em memória (`lib/data/memory.ts`).
+Sessão: Supabase Auth (cookies do `@supabase/ssr` e `proxy.ts`). Sem Supabase, cookie HMAC de desenvolvimento. Detalhes em `replica/backend.md`.
 Teste local: `npm run build && npx next start -p 3100`. Admin de teste: `admin@promo-br.test`, senha em `.env.local` (`DEV_ADMIN_PASSWORD`).
 
 | ID | data | status | o que falta | mais difícil que o esperado |
@@ -26,3 +26,6 @@ Teste local: `npm run build && npx next start -p 3100`. Admin de teste: `admin@p
 6. Código inexistente → volta para a home. Rotas protegidas sem login → `/entrar?next=...`.
 
 Capturas: `replica/clone-screens/` (desktop 1440 e celular 390).
+
+| backend | 2026-10-20 | partial | chave secreta + seed + teste com 2 contas; SMTP; templates de e-mail | limite de 2 projetos gratuitos no Supabase (Big pausado a pedido) |
+| S08b Recuperar/nova senha | 2026-10-20 | done (código) | testar com e-mail real | — |

@@ -48,7 +48,7 @@ Envio WhatsApp (UAZAPI),distribuição,should,no,no,opt-in e limite por hora
 Textos de oferta com IA,distribuição,could,no,no,chave configurada no painel
 Slots de anúncio sem CLS,monetização,should,yes,partial,"AdSlot com altura reservada; sem AdSense"
 Deploy ghcr + Portainer Swarm + Traefik,infra,must,no,no,padrão Big Assessoria
-Cadastro com e-mail e senha (+ Google opcional) com verificação de e-mail,conta,must,yes,partial,"camada falsa: sem verificação de e-mail, sem Google, sem Turnstile"
+Cadastro com e-mail e senha (+ Google opcional) com verificação de e-mail,conta,must,yes,partial,"Supabase Auth com confirmação por e-mail e recuperação de senha; falta Google e Turnstile"
 Usuário publica oferta (link + preço + cupom + imagem),comunidade,must,yes,partial,"link+título+preço+cupom+categoria; sem imagem"
 Link de afiliado do próprio usuário,afiliados,must,no,no,política configurável: manter / trocar / dividir
 Votação quente/frio,comunidade,must,yes,partial,"otimista, desfaz no 2º clique; contagem em memória"
@@ -62,3 +62,15 @@ Placar de caçadores (ranking de usuários),comunidade,should,yes,no,incentivo a
 Ofertas patrocinadas,monetização,could,yes,no,marcar Patrocinado
 Marca/layout/textos do Promodescuentos,skip,skip,yes,skip,propriedade de terceiros
 Comunidade e audiência existentes,skip,skip,yes,skip,construir do zero
+Publicar em assistente de passos (link > essenciais > imagens > descrição > detalhes > revisão),comunidade,must,yes,no,"hoje é formulário único em /publicar"
+Checagem de duplicata pelo link ao colar,comunidade,must,yes,no,"mesmo link/anúncio com oferta ativa = aviso"
+Preenchimento automático pelo link (título/imagem/preço),comunidade,should,yes,no,"og:/JSON-LD públicos ou API oficial; nunca scraping pesado"
+Tipo de desconto do cupom (% / R$ / frete grátis / outro),comunidade,must,yes,no,
+Disponibilidade online x loja física (frete e origem),comunidade,could,yes,no,
+Galeria de até 8 imagens com principal e reordenação,comunidade,should,yes,no,"6 MB, 150-6000 px"
+Logo da loja como imagem padrão do cupom,comunidade,should,yes,no,
+Rascunho automático da publicação,comunidade,should,yes,no,
+Editor rico na descrição (link/lista/negrito/@menção),comunidade,could,yes,no,
+Datas de início e fim da oferta,comunidade,must,yes,no,"alimenta a expiração automática"
+Níveis de reputação que liberam recursos,comunidade,could,yes,no,"ex.: nível prata libera indicação"
+Discussão (post sem oferta),comunidade,could,yes,no,

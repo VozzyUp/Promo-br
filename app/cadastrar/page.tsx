@@ -1,12 +1,13 @@
 import { redirect } from "next/navigation";
 import { SignupForm } from "@/components/forms/auth-forms";
 import { getSession } from "@/lib/auth";
+import { safeNext } from "@/lib/links";
 
 export const metadata = { title: "Criar conta" };
 
 export default async function SignupPage({ searchParams }: PageProps<"/cadastrar">) {
   const sp = await searchParams;
-  const next = typeof sp.next === "string" && sp.next.startsWith("/") ? sp.next : "/";
+  const next = safeNext(sp.next);
   if (await getSession()) redirect(next);
   return (
     <div className="mx-auto max-w-md px-4 py-10">

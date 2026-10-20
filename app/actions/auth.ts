@@ -2,21 +2,16 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { authenticate, createUser } from "@/lib/data";
-import { endSession, startSession } from "@/lib/auth";
+import { requestPasswordReset, signIn, signOut, signUp, updatePassword } from "@/lib/auth";
+import { safeNext } from "@/lib/links";
 
-export type AuthState = { error?: string; fields?: Record<string, string> } | undefined;
-
-function safeNext(next: FormDataEntryValue | null) {
-  const n = typeof next === "string" ? next : "/";
-  return n.startsWith("/") && !n.startsWith("//") ? n : "/";
-}
+export type AuthState = { error?: string; notice?: string; fields?: Record<string, string> } | undefined;
 
 const signupSchema = z.object({
   displayName: z.string().trim().min(2, "Conte como quer ser chamado (mín. 2 letras).").max(40),
   username: z.string().trim().toLowerCase().regex(/^[a-z0-9_]{3,24}$/, "Use de 3 a 24 letras minúsculas, números ou _."),
-  email: z.string().trim().email("Esse e-mail não parece válido."),
-  password: z.string().min(8, "A senha precisa ter pelo menos 8 caracteres.").max(128),
+  email: z.string().trim().toLowerCase().email("Esse e-mail não parece válido.").max(254),
+  password: z.string().min(8, "A senha precisa ter pelo menos 8 caracteres.").max(72),
   terms: z.literal("on", { message: "Você precisa aceitar os termos para criar a conta." }),
 });
 
@@ -25,24 +20,42 @@ export async function signupAction(_prev: AuthState, form: FormData): Promise<Au
   const parsed = signupSchema.safeParse(raw);
   const fields = { displayName: String(raw.displayName ?? ""), username: String(raw.username ?? ""), email: String(raw.email ?? "") };
   if (!parsed.success) return { error: parsed.error.issues[0]?.message, fields };
-  const result = await createUser(parsed.data);
+  const next = safeNext(form.get("next"));
+  const result = await signUp({ ...parsed.data, next });
   if ("error" in result) return { error: result.error, fields };
-  await startSession(result.profile.id);
-  redirect(safeNext(form.get("next")));
+  if (result.status === "confirm_email") {
+    return { notice: `Enviamos um link de confirmação para ${parsed.data.email}. Abra o e-mail e clique no link para ativar a conta.` };
+  }
+  redirect(next);
 }
 
 export async function loginAction(_prev: AuthState, form: FormData): Promise<AuthState> {
-  const email = String(form.get("email") ?? "");
+  const email = String(form.get("email") ?? "").trim().toLowerCase();
   const password = String(form.get("password") ?? "");
   if (!email || !password) return { error: "Preencha e-mail e senha.", fields: { email } };
-  const profile = await authenticate(email, password);
-  if (!profile) return { error: "E-mail ou senha incorretos.", fields: { email } };
-  if (profile.bannedAt) return { error: "Esta conta está suspensa.", fields: { email } };
-  await startSession(profile.id);
+  const result = await signIn(email, password);
+  if ("error" in result) return { error: result.error, fields: { email } };
   redirect(safeNext(form.get("next")));
 }
 
 export async function logoutAction() {
-  await endSession();
+  await signOut("local");
   redirect("/");
+}
+
+export async function forgotPasswordAction(_prev: AuthState, form: FormData): Promise<AuthState> {
+  const email = z.string().trim().toLowerCase().email().safeParse(form.get("email"));
+  if (!email.success) return { error: "Esse e-mail não parece válido.", fields: { email: String(form.get("email") ?? "") } };
+  await requestPasswordReset(email.data);
+  // Mesma resposta exista a conta ou não.
+  return { notice: "Se existir uma conta com esse e-mail, você vai receber um link para criar uma nova senha." };
+}
+
+export async function newPasswordAction(_prev: AuthState, form: FormData): Promise<AuthState> {
+  const password = String(form.get("password") ?? "");
+  if (password.length < 8 || password.length > 72) return { error: "A senha precisa ter de 8 a 72 caracteres." };
+  if (password !== form.get("confirm")) return { error: "As duas senhas não são iguais." };
+  const result = await updatePassword(password);
+  if ("error" in result) return { error: result.error };
+  redirect("/?senha=1");
 }

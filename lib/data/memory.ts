@@ -203,7 +203,12 @@ export async function countDealsByAuthorSince(authorId: string, sinceIso: string
   return [...db.deals.values()].filter((d) => d.authorId === authorId && d.createdAt >= sinceIso).length;
 }
 
-export async function moderateDeal(id: string, action: "approve" | "reject", reason: string | null) {
+export async function isUsernameTaken(username: string) {
+  return [...db.profiles.values()].some((p) => p.username === username);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- mesma assinatura da camada Supabase (auditoria)
+export async function moderateDeal(id: string, action: "approve" | "reject", reason: string | null, moderatorId: string | null = null) {
   const d = db.deals.get(id);
   if (!d || d.status !== "pending") return null;
   if (action === "approve") {

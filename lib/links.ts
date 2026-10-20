@@ -24,6 +24,12 @@ export function checkSubmittedUrl(raw: string): LinkCheck {
   return { ok: true, url, host };
 }
 
+/** Destino depois do login: só caminhos internos. Bloqueia "//site", "/\site" e esquemas. */
+export function safeNext(next: unknown): string {
+  const n = typeof next === "string" ? next : "";
+  return /^\/(?![/\\])[^\s\\]*$/.test(n) ? n : "/";
+}
+
 export function findStoreForHost(host: string, stores: Store[]): Store | undefined {
   return stores.find((s) => s.domains.some((d) => host === d || host.endsWith(`.${d}`)));
 }

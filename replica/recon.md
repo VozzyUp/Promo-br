@@ -109,6 +109,70 @@ F07 (pós-BF) Usuário publica / vota / cria alerta
     S08 -> S06 -> link trocado pelo nosso afiliado -> moderação A02 -> S02 ; votos -> temperatura ; S07 -> notificação
 ```
 
+### S06 em detalhe (observado em 20/10/2026, conta do próprio usuário, nada publicado)
+
+Fonte: uso da tela como usuário, em `/submission/add`. Sem leitura de código nem de chamadas internas.
+
+**Passo 0. Tipo:** quatro cartões: Oferta, Cupom, Discussão e Oferta de indicação.
+- A Oferta de indicação fica **bloqueada até o nível "Colaborador Prata"**. Os níveis de reputação liberam recursos.
+
+**Oferta: assistente com 6 passos** e barra lateral de progresso.
+- Passos: Link → Essenciais → Imagens → Descrição → Detalhes → Revisão.
+- Passo concluído ganha ✓. Passo com erro ganha ⓘ vermelho.
+
+1. **Link.**
+   - Campo de URL com botão "Começar" e a opção "Não precisa de link".
+   - Ao enviar, uma barra de progresso mostra **"checando possíveis duplicadas"** e depois **"obtendo preço"**. Ou seja: há busca de duplicata e leitura de preço a partir do link.
+2. **Essenciais.**
+   - Título obrigatório, com contador regressivo de 140.
+   - Preço da oferta e preço normal.
+     - O preço é formatado com milhar.
+     - Um chip de **% de desconto** aparece ao vivo (-25%).
+   - Cupom (opcional).
+   - Disponibilidade: Online ou Loja física.
+     - Online mostra frete e "enviado de" (país).
+     - Loja física esconde esses dois campos.
+   - Validação ao avançar: borda vermelha e "há um erro, verifique os campos obrigatórios". O erro some ao corrigir.
+3. **Imagens.**
+   - Até 8 imagens (cupom: 6).
+   - Arrastar para reordenar e escolher a principal.
+   - Upload ou "subir por link".
+   - Limites: 6 MB, mínimo 150×150 e máximo 6000 px.
+   - Opcional.
+4. **Descrição.**
+   - Editor rico com imagem, link, GIF/emoji, negrito, itálico, tachado, lista, @menção e divisor.
+   - **Rascunho salvo automaticamente**, com a opção "ignorar a descrição recuperada".
+5. **Detalhes.**
+   - Data de início e de fim (opcionais).
+   - **Categoria obrigatória**, com 15 opções.
+     - A escolha é única.
+     - Depois de escolher, os outros chips somem, com "clique para trocar".
+6. **Revisão.**
+   - Resumo por bloco, cada um com "Editar".
+   - Botões "Descartar" e "Compartilhar".
+   - "Compartilhar" também aparece no passo 5, para quem não quer revisar.
+- Sair com dados preenchidos dispara o aviso "sair do site?".
+
+**Cupom:** os mesmos 6 passos, com estas diferenças:
+- Passo 1 pede **código + link** (ou "não tenho código nem link").
+- Essenciais pede título e **tipo de desconto obrigatório**: % (abre campo de %), R$, frete grátis ou outro. Também pede disponibilidade.
+- Imagens: **identifica a loja pelo link e usa o logo dela como imagem padrão**, com a opção "ignorar e subir imagens".
+
+**O que entra no promo-br (decisões nossas):**
+- Assistente em passos, com a mesma ordem.
+- Checagem de duplicata pelo link.
+- Leitura de título, imagem e preço pelo link.
+  - Usar só og:/JSON-LD públicos da página.
+  - Ou a API oficial da loja, quando houver integração.
+- % ao vivo.
+- Online/loja física.
+- Cupom com tipo de desconto.
+- Logo da loja como imagem padrão.
+- Rascunho automático.
+- Categoria obrigatória.
+- Revisão antes de enviar.
+- Níveis de reputação que liberam recursos.
+
 ## 5. Componentes
 
 Público: DealCard (normal, destaque, patrocinado, expirado) · PriceBlock · PriceHistoryChart · TemperatureVote ·
