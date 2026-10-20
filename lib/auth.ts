@@ -120,6 +120,10 @@ function authMessage(code: string | undefined, fallback: string) {
     case "over_email_send_rate_limit":
     case "over_request_rate_limit": return "Muitas tentativas. Espere alguns minutos e tente de novo.";
     case "signup_disabled": return "Cadastros estão fechados no momento.";
+    case "email_address_invalid": return "Esse e-mail não parece válido.";
+    case "email_address_not_authorized": return "Não conseguimos enviar e-mail para esse endereço agora. Tente outro e-mail.";
+    case "user_already_exists":
+    case "email_exists": return "Já existe uma conta com esse e-mail. Tente entrar ou recuperar a senha.";
     case "unexpected_failure": return "Não foi possível criar a conta. Tente outro nome de usuário.";
     default:
       console.error("[auth]", code, fallback);

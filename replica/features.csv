@@ -74,3 +74,21 @@ Editor rico na descrição (link/lista/negrito/@menção),comunidade,could,yes,n
 Datas de início e fim da oferta,comunidade,must,yes,no,"alimenta a expiração automática"
 Níveis de reputação que liberam recursos,comunidade,could,yes,no,"ex.: nível prata libera indicação"
 Discussão (post sem oferta),comunidade,could,yes,no,
+Painel de notificações (buzón) no cabeçalho,conta,must,yes,no,"lista + abas; vazio amigável"
+Preferências de notificação por evento (site + e-mail),conta,should,yes,no,"voto/comentário/hot/expirar/menção/medalha; por grupo 'também por e-mail'"
+Pontos e níveis (Prata/Ouro/Platina) com benefícios,comunidade,should,yes,no,"pontos por oferta 100°, comentário útil, votos semanais e sequência"
+Medalhas com progresso e cadeias de níveis,comunidade,should,yes,no,"~40; selo ao lado do nome em ofertas e comentários"
+Estatísticas privadas do usuário,conta,could,yes,no,"ofertas, temperatura média/máx, votos, pessoas ajudadas"
+Conteúdo salvo (favoritos),conta,should,yes,no,
+Seguir / ignorar membros,comunidade,could,yes,no,
+Mensagens privadas entre membros,comunidade,could,yes,no,"com opção de bloquear nas preferências"
+Preferências do feed (página inicial padrão / scroll infinito / widgets),conta,could,yes,no,
+Exportar dados da conta e apagar conta (LGPD),conta,must,yes,no,"obrigatório pela LGPD"
+Trocar nome de usuário 1x por ano / trocar e-mail / definir senha,conta,should,yes,no,
+Comentários com respostas aninhadas e reações (curtir/útil/haha),comunidade,must,yes,no,"útil alimenta pontos"
+Inscrever-se em uma oferta (notifica novos comentários),comunidade,should,yes,no,"autoinscrição ao comentar"
+Marcar oferta como expirada (pelo usuário),comunidade,must,yes,no,"diálogo não exercido no recon"
+Denunciar anúncio (Publicidade > Denunciar),monetização,could,yes,partial,"botão existe no AdSlot; sem fluxo"
+Onboarding de alertas com sugestões populares,conta,should,yes,no,
+Boletim diário por e-mail,distribuição,should,yes,no,
+Feed Para você / Tendências / Todas,descoberta,should,yes,partial,"temos Quentes/Descontos/Novas"

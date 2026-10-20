@@ -173,6 +173,131 @@ Fonte: uso da tela como usuário, em `/submission/add`. Sem leitura de código n
 - Revisão antes de enviar.
 - Níveis de reputação que liberam recursos.
 
+### Área logada (mapeada com REA em 20/10/2026, conta do próprio usuário, só leitura)
+
+Fonte: capturas de acessibilidade pelo REA, no Chrome do usuário (porta 9222, perfil separado). A evidência bruta está em `replica/screens/rea-area-logada-2026-10-20.json`, fora do git porque contém o e-mail da conta.
+
+Não houve envio de formulário, voto, comentário, denúncia nem mudança de ajuste.
+
+**Cabeçalho logado:**
+- Alertas, Buzón (painel de notificações) e avatar.
+- Menu do avatar: ver perfil público, conteúdo salvo, contribuições, pontos e recompensas, estatísticas, medalhas, ajustes, sair.
+- Navegação: Categorias, Cupons e Grátis (os três com menu), Ofertas, Discussões, Club.
+- Abas do feed: Para você / Tendências / Todas.
+
+**Alertas** (`/alerts/feed`): sem alertas, redireciona para `/alerts/onboarding`, que tem:
+- Campo "crie seu alerta".
+- 10 ideias populares em chips.
+- Atalho "ofertas super hot".
+
+**Buzón:** painel suspenso com 3 abas de ícone e lista de notificações. Vazio: "por enquanto você não tem notificações".
+
+**Perfil** (`/profile/{user}`): cabeçalho com avatar, "membro desde" e link "ver perfil público" (`?viewAs=public`). Abas:
+- Contribuições (vazia: "Hmmm.").
+- Conteúdo salvo.
+- Pontos e recompensas.
+- Estatísticas (privadas, marcadas com ícone).
+- Medalhas.
+- Ajustes.
+
+**Pontos e níveis (Club):**
+- Níveis: Prata (10 pts), Ouro (40) e Platina (300).
+- Como ganhar pontos:
+  - Oferta que chega a 100° vale 10.
+  - Comentário com 3 reações "útil" vale 10.
+  - Votar 3 vezes na semana vale 1.
+  - Sequência de semanas votando dá bônus: 2 semanas +1, 5 semanas +5, 10 semanas +10.
+- Recompensas:
+  - Até $200 semanais.
+  - Recompensas por sequência de categoria (até $1.000; na Platina, $2.000).
+  - Ofertas de indicação: Prata 2, Ouro 10, Platina ilimitadas.
+  - Ícones do app.
+  - Mais estatísticas a partir do Ouro.
+- A conta das pontuações cobre os últimos 12 meses. Há FAQ e um "gostou do programa?".
+
+**Estatísticas:**
+- Suas ofertas: ativas, interações, % hot, temperatura média e máxima.
+- Comentários: ativos, interações, reações.
+- Comunidade: seguidores, discussões.
+- Votos: total, ofertas que ficaram hot (meta 0/15), categorias votadas, pessoas ajudadas (meta mensal 0/20, que mantém a medalha Observador).
+
+**Medalhas:** cerca de 40, quase todas em cadeias de 3 níveis com progresso (0/100), "bloqueada" e a regra escrita. Exemplos:
+- Votante → Árbitro → Juiz (100 votos).
+- Buscaofertas → Comprador compulsivo (10 e 40 ofertas).
+- Platicador (100 comentários).
+- Chispa → Fogata → Tormenta (oferta com 100°, 500° e 1.000°).
+- Popular (40 comentários numa oferta).
+- Amigável → Amado → Moedinha de ouro (50, 200 e 600 likes).
+- Jalapeño (oferta mais hot do dia).
+- Servicial (comentários úteis).
+- Observador (votos mensais).
+- Únicas: "Rei da colina" (oferta mais hot dos últimos 15 dias), VIP, "Consentido" (perfil completo), além de medalhas de eventos (renas).
+
+**Ajustes, 6 abas:**
+1. **Perfil:**
+   - Avatar.
+   - Nome de usuário (troca 1 vez a cada 12 meses).
+   - Descrição.
+   - E-mail.
+   - Senha (pode ser adicionada a contas criadas por rede social).
+   - "Gerar dados da conta" (exportação, LGPD).
+   - Apagar conta.
+2. **Preferências:**
+   - Página inicial padrão: mais hot, Para você, Tendências ou Todas.
+   - Rolagem infinita.
+   - 7 widgets ligáveis: atividade, mais hot, categorias, cupons, discussões, notícias na home e notícias nas categorias.
+   - Autoinscrição nas ofertas em que comento.
+   - Conteúdo adulto.
+   - Privacidade: deixar que me sigam, que me mandem mensagem, coleta de rastreamento.
+3. **Conexão social:** Google/Apple. Só dá para desvincular a rede depois de ter e-mail e senha.
+4. **Notificações** (cada grupo com "também por e-mail"):
+   - Navegador: mensagem privada.
+   - Menção com @.
+   - Minhas ofertas: voto, comentário, virou hot, informação adicional, vai expirar, expirou, reativada, vai reativar, checar se ainda está disponível, estatísticas prontas.
+   - Ofertas que sigo: comentário, informação adicional.
+   - Meus comentários: reação, publicado, resposta, resposta a comentário que respondi, apagado ao unir ofertas, destacado.
+   - Like na minha informação adicional.
+   - Pontos: subir de nível, perder benefícios, comentário útil, pontos semanais, indicações usadas.
+   - Medalha obtida.
+   - Alguém que sigo publicou.
+   - Mensagens.
+5. **Inscrições:** boletim "ofertas diárias".
+6. **Seguindo / Ignorado:** listas, com os botões de seguir e ignorar ficando no perfil de cada membro.
+
+**Oferta, logado** (`/cupones/...`):
+- Voto frio/quente com a temperatura no meio.
+- Contador de comentários, compartilhar, salvar.
+- Selo de medalha do autor, "Editor de ofertas", membro desde, contadores do autor.
+- "Cupom expira sexta às 23:59".
+- "Copiar e visitar".
+- Bloco "seus votos nos ajudam".
+- "Nova resposta", "Oferta expirada?", "Denunciar", "Salvar".
+- Anúncios marcados "Publicidade" com botão "Denunciar".
+- "Te podem interessar".
+- Comentários:
+  - Ordem (ascendente).
+  - Inscrever-se no tópico.
+  - Respostas aninhadas com "ver mais respostas (n)".
+  - Reações: Curtir / Útil / Haha.
+  - Medalha do autor do comentário ao lado do nome.
+- O clique sai por `/visit/homeyou/{id}`, o equivalente ao nosso `/ir/`.
+
+**Publicar Discussão** (`/submission/discusiones/add`): formulário de uma tela só.
+- Título (140).
+- Descrição em editor rico: imagem, link, carinhas, negrito, itálico, tachado, lista, menção, linha.
+- Tipo de discussão: Apresente-se, Lojas (opiniões), Peça uma oferta, Compras internacionais, Dicas para economizar, Concursos, Tudo o mais.
+- Categoria de oferta relacionada, opcional, com as 15.
+- Botões Descartar e Compartilhar.
+
+**Oferta sem link:** "Não precisa de link" pula direto para Essenciais, com os mesmos campos. A etapa Link fica sem URL.
+
+**Não exercido (exigiria ação na conta):**
+- Conteúdo do diálogo "Denunciar" e de "Oferta expirada?".
+- Responder ou reagir a um comentário.
+- Criar um alerta.
+- Mensagem privada.
+- Seguir ou ignorar.
+
 ## 5. Componentes
 
 Público: DealCard (normal, destaque, patrocinado, expirado) · PriceBlock · PriceHistoryChart · TemperatureVote ·
