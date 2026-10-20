@@ -1,0 +1,72 @@
+/* promo-br: tokens (gerado de tokens.json). Tailwind v4: importar em app/globals.css depois de `@import "tailwindcss";`
+   Uso: bg-page, bg-surface, text-muted, text-price, bg-accent text-on-accent, rounded-card, shadow-card...
+   Nunca usar hex direto nos componentes. */
+
+@theme {
+  --color-bg: #ffffff;
+  --color-page: #eef0f3;
+  --color-surface: #f6f7f9;
+  --color-border: #e2e5ea;
+  --color-border-input: #7b8490;
+  --color-text: #0e1116;
+  --color-muted: #5a6370;
+  --color-accent: #c2410c;
+  --color-accent-hover: #9a3412;
+  --color-on-accent: #ffffff;
+  --color-accent-soft: #fff1e8;
+  --color-price: #157a3a;
+  --color-price-soft: #e8f6ec;
+  --color-hot: #c01c34;
+  --color-cold: #1f56c7;
+  --color-info: #1e4f9c;
+  --color-info-soft: #eaf1fb;
+  --color-danger: #b42318;
+  --color-success: #157a3a;
+  --color-warning: #8a5a00;
+  --color-focus: #c2410c;
+
+  --font-sans: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --text-xs: 12px;      --text-xs--line-height: 16px;
+  --text-sm: 14px;      --text-sm--line-height: 20px;
+  --text-base: 16px;    --text-base--line-height: 24px;
+  --text-title: 18px;   --text-title--line-height: 26px;
+  --text-price: 24px;   --text-price--line-height: 32px;
+  --text-xl: 28px;      --text-xl--line-height: 36px;
+  --text-display: 48px; --text-display--line-height: 60px;
+
+  --spacing: 4px;       /* escala 4/8: p-1=4, p-2=8, p-3=12, p-4=16, p-6=24, p-8=32 */
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-card: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 4px 12px rgba(11, 22, 44, .09);
+  --shadow-card-hover: 0 6px 18px rgba(11, 22, 44, .14);
+  --shadow-pop: 0 12px 32px rgba(11, 22, 44, .18);
+
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+}
+
+:root {
+  --layout-max: 1024px;
+  --layout-main: 732px;
+  --layout-aside: 250px;
+  --layout-gutter: 16px;
+  --header-top: 56px;
+  --header-nav: 46px;
+  --card-image: 198px;
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+}
+
+html { background: var(--color-page); color: var(--color-text); font-family: var(--font-sans); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; } }
