@@ -25,8 +25,8 @@ const INSTITUTIONAL = [
 
 /** Gaveta de navegação: o botão que a abre vem de fora (cabeçalho ou barra inferior). */
 export function MenuDrawer({
-  categories, loggedIn, unread = 0, className, label = "Abrir menu", children,
-}: { categories: MenuCategory[]; loggedIn: boolean; unread?: number; className?: string; label?: string; children: ReactNode }) {
+  categories, loggedIn, isStaff = false, unread = 0, className, label = "Abrir menu", children,
+}: { categories: MenuCategory[]; loggedIn: boolean; isStaff?: boolean; unread?: number; className?: string; label?: string; children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
   const row = "flex min-h-11 items-center gap-3 rounded-sm px-2 text-base hover:bg-surface";
@@ -49,6 +49,7 @@ export function MenuDrawer({
               <>
                 <Link href="/conta/notificacoes" onClick={close} className={row}><LayoutGrid className="size-5 text-muted" aria-hidden /> Notificações{unread > 0 ? ` (${unread})` : ""}</Link>
                 <Link href="/conta" onClick={close} className={row}><LayoutGrid className="size-5 text-muted" aria-hidden /> Minha conta</Link>
+                {isStaff ? <Link href="/painel" onClick={close} className={row}><LayoutGrid className="size-5 text-muted" aria-hidden /> Painel da equipe</Link> : null}
                 <form action={logoutAction}>
                   <button type="submit" className={`${row} w-full text-left text-danger`}><LogOut className="size-5" aria-hidden /> Sair</button>
                 </form>

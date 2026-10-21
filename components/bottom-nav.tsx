@@ -5,13 +5,13 @@ import { usePathname } from "next/navigation";
 import { MenuDrawer, type MenuCategory } from "./menu-drawer";
 
 /** Barra fixa de navegação no celular: o que a pessoa mais usa com o polegar. */
-export function BottomNav({ categories, loggedIn, unread }: { categories: MenuCategory[]; loggedIn: boolean; unread: number }) {
+export function BottomNav({ categories, loggedIn, isStaff = false, unread }: { categories: MenuCategory[]; loggedIn: boolean; isStaff?: boolean; unread: number }) {
   const path = usePathname();
   const item = "flex h-full flex-1 flex-col items-center justify-center gap-0.5 text-xs font-medium";
   const active = (p: string) => (path === p || path.startsWith(`${p}/`) ? "text-accent" : "text-text");
   return (
     <nav aria-label="Navegação principal" className="fixed inset-x-0 bottom-0 z-40 flex h-16 border-t border-border bg-bg md:hidden">
-      <MenuDrawer categories={categories} loggedIn={loggedIn} unread={unread} className={`${item} text-text`} label="Abrir menu">
+      <MenuDrawer categories={categories} loggedIn={loggedIn} isStaff={isStaff} unread={unread} className={`${item} text-text`} label="Abrir menu">
         <Menu className="size-6" aria-hidden /> Menu
       </MenuDrawer>
       <Link href="/alertas" className={`${item} relative ${active("/alertas")}`}>

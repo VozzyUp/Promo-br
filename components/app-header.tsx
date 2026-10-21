@@ -23,7 +23,7 @@ export function AppHeader({
       <a href="#conteudo" className="skip-link">Pular para o conteúdo</a>
       <div className="mx-auto flex h-14 max-w-(--layout-max) items-center gap-3 px-4">
         <Logo />
-        <MenuDrawer categories={categories} loggedIn={!!session} unread={unread} className="hidden items-center gap-1.5 rounded-pill border border-border px-3 py-1.5 text-sm md:flex">
+        <MenuDrawer categories={categories} loggedIn={!!session} isStaff={session?.role === "admin" || session?.role === "moderator"} unread={unread} className="hidden items-center gap-1.5 rounded-pill border border-border px-3 py-1.5 text-sm md:flex">
           <Menu className="size-4" aria-hidden /> Menu
         </MenuDrawer>
         <form action="/busca" role="search" className="relative flex-1 md:max-w-56">

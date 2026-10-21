@@ -51,7 +51,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <AppHeader session={session} unread={unread} notifications={notifications} categories={categories} />
           <main id="conteudo" className="flex-1">{children}</main>
           <Footer notice={brand.commissionNotice} />
-          <BottomNav categories={categories} loggedIn={!!session} unread={unread} />
+          <BottomNav categories={categories} loggedIn={!!session} isStaff={session?.role === "admin" || session?.role === "moderator"} unread={unread} />
           <ConsentBanner />
           <AdScript />
         </AdsProvider>
