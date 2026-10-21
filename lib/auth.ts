@@ -39,6 +39,12 @@ export async function requireModerator() {
   return s;
 }
 
+export async function requireAdmin() {
+  const s = await requireUser("/painel");
+  if (s.role !== "admin") redirect("/painel");
+  return s;
+}
+
 /* ------------------------------------------------------------------ contas */
 
 export type SignUpResult = { error: string } | { status: "signed_in" } | { status: "confirm_email" };

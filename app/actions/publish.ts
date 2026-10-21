@@ -9,6 +9,7 @@ import { parsePriceToCents } from "@/lib/format";
 import { checkImage } from "@/lib/image-check";
 import { fetchImageBytes, fetchPreview } from "@/lib/link-preview";
 import type { Preview } from "@/lib/link-preview-parse";
+import { isHostBlocked } from "@/lib/data/admin";
 import { checkSubmittedUrl, findStoreForHost } from "@/lib/links";
 import { supabaseEnabled } from "@/lib/supabase/server";
 import { urlKey } from "@/lib/url-key";
@@ -31,7 +32,9 @@ export async function checkLinkAction(raw: string): Promise<LinkCheckResult> {
   if (!link.ok) return { ok: false, error: link.reason };
   const stores = await listStores();
   const store = findStoreForHost(link.host, stores);
-  if (store?.status === "blocked") return { ok: false, error: "Não aceitamos ofertas desta loja." };
+  if (store?.status === "blocked" || (supabaseEnabled() && (await isHostBlocked(link.host)))) {
+    return { ok: false, error: "Não aceitamos ofertas desta loja." };
+  }
   const [duplicate, preview] = await Promise.all([
     supabaseEnabled() ? findDuplicateByKey(urlKey(link.url)) : Promise.resolve(null),
     fetchPreview(link.url.toString()),
@@ -161,7 +164,9 @@ export async function publishAction(_prev: PublishState, form: FormData): Promis
   // Loja: pelo domínio do link; sem link (loja física), uma loja genérica criada na primeira vez.
   const stores = await listStores();
   let store = link?.ok ? findStoreForHost(link.host, stores) : stores.find((s) => s.slug === "loja-fisica");
-  if (store?.status === "blocked") return { fieldErrors: { url: "Não aceitamos ofertas desta loja." }, error: "Confira os campos marcados." };
+  if (store?.status === "blocked" || (link?.ok && supabaseEnabled() && (await isHostBlocked(link.host)))) {
+    return { fieldErrors: { url: "Não aceitamos ofertas desta loja." }, error: "Confira os campos marcados." };
+  }
   store ??= await createStoreForHost(link?.ok ? link.host : "loja-fisica.local");
 
   const key = link?.ok ? urlKey(link.url) : null;
