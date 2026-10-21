@@ -376,7 +376,7 @@ export function PublishWizard({ kind, categories, trusted }: { kind: Kind; categ
           <dt className="text-muted">Imagens</dt><dd>{imgs.length > 0 ? `${imgs.length} escolhida(s)` : v.previewImageUrl ? "Imagem da página do link" : "Nenhuma"}</dd>
           {v.startsAt || v.expiresAt ? (<><dt className="text-muted">Período</dt><dd>{v.startsAt || "agora"} até {v.expiresAt || "sem prazo"}</dd></>) : null}
         </dl>
-        <p className="text-sm text-muted">Antes de publicar, conferimos o preço em outras lojas. Desconto inflado não é publicado.</p>
+        <p className="text-sm text-muted">Comparamos o preço com o histórico do produto. Desconto inflado, com o preço “de” aumentado, não é publicado.</p>
       </section>
 
       <div className="flex items-center justify-between gap-3">

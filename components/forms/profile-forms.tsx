@@ -80,6 +80,9 @@ export function EmailForm({ current }: { current: string }) {
       <Field label="E-mail" htmlFor="email" hint="Mandamos um link de confirmação para o endereço novo.">
         <Input id="email" name="email" type="email" defaultValue={current} required autoComplete="email" aria-describedby="email-hint" />
       </Field>
+      <Field label="Senha atual" htmlFor="email-password">
+        <Input id="email-password" name="password" type="password" required autoComplete="current-password" maxLength={72} />
+      </Field>
       <Status state={state} />
       <div><Button type="submit" loading={pending}>Trocar e-mail</Button></div>
     </form>
@@ -115,6 +118,9 @@ export function DeleteAccountForm({ username }: { username: string }) {
       </p>
       <Field label={`Para confirmar, digite ${username}`} htmlFor="confirm-delete">
         <Input id="confirm-delete" name="confirm" required autoComplete="off" />
+      </Field>
+      <Field label="Sua senha atual" htmlFor="delete-password">
+        <Input id="delete-password" name="password" type="password" required autoComplete="current-password" maxLength={72} />
       </Field>
       <Status state={state} />
       <div><Button type="submit" variant="danger" loading={pending}>Apagar minha conta</Button></div>

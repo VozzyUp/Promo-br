@@ -54,3 +54,25 @@ test("F-PUB mobile @mobile: sem rolagem horizontal na home, na oferta e nas list
     expect(overflow, path).toBeLessThanOrEqual(1);
   }
 });
+test("F-SEO oferta com preço tem dados estruturados válidos (Product/Offer)", async ({ page }) => {
+  await page.goto("/");
+  const links = await page.locator('a[href^="/oferta/"]').evaluateAll((els) => [...new Set(els.map((e) => e.getAttribute("href")))]);
+  let found = false;
+  for (const href of links.slice(0, 8)) {
+    await page.goto(href!);
+    const raw = await page.locator('script[type="application/ld+json"]').first().textContent({ timeout: 1500 }).catch(() => null);
+    if (!raw) continue; // cupom sem preço não tem
+    const data = JSON.parse(raw);
+    expect(data["@type"]).toBe("Product");
+    expect(data.offers.priceCurrency).toBe("BRL");
+    expect(data.offers.price).toMatch(/^\d+\.\d{2}$/);
+    found = true;
+    break;
+  }
+  expect(found).toBe(true);
+});
+
+test("F-BF hub da Black Friday mostra a contagem regressiva", async ({ page }) => {
+  await page.goto("/black-friday");
+  await expect(page.getByText(/Faltam \d+ dias para a Black Friday|começa amanhã|É hoje|passou/)).toBeVisible();
+});

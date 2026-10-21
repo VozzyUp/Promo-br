@@ -50,6 +50,11 @@ export function slugify(text: string): string {
 }
 
 /** true se a data ainda não chegou (fica fora do componente por causa da regra de pureza do React). */
+/** Dias inteiros (para cima) até a data; 0 se for hoje, negativo se já passou. Fica fora do componente por causa da regra de pureza do React. */
+export function daysUntil(iso: string): number {
+  return Math.ceil((new Date(iso).getTime() - Date.now()) / 86400_000);
+}
+
 export function isFuture(iso: string | null | undefined): boolean {
   if (!iso) return false;
   return new Date(iso).getTime() > Date.now();

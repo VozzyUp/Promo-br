@@ -8,10 +8,11 @@ import { trackNewDeal } from "@/lib/data/verification";
 import { findDuplicateByKey, notifyPublished, saveDealImages, type DuplicateDeal } from "@/lib/data/publish";
 import { parsePriceToCents } from "@/lib/format";
 import { checkImage } from "@/lib/image-check";
-import { fetchImageBytes, fetchPreview } from "@/lib/link-preview";
+import { fetchImageBytes, fetchLinkInfo, resolveFinalUrl } from "@/lib/link-preview";
 import type { Preview } from "@/lib/link-preview-parse";
 import { isHostBlocked } from "@/lib/data/admin";
 import { checkSubmittedUrl, findStoreForHost } from "@/lib/links";
+import { db } from "@/lib/supabase/db";
 import { supabaseEnabled } from "@/lib/supabase/server";
 import { urlKey } from "@/lib/url-key";
 
@@ -36,11 +37,19 @@ export async function checkLinkAction(raw: string): Promise<LinkCheckResult> {
   if (store?.status === "blocked" || (supabaseEnabled() && (await isHostBlocked(link.host)))) {
     return { ok: false, error: "Não aceitamos ofertas desta loja." };
   }
-  const [duplicate, preview] = await Promise.all([
+  const [duplicate, info] = await Promise.all([
     supabaseEnabled() ? findDuplicateByKey(urlKey(link.url)) : Promise.resolve(null),
-    fetchPreview(link.url.toString()),
+    fetchLinkInfo(link.url.toString()),
   ]);
-  return { ok: true, host: link.host, storeName: store?.name ?? null, duplicate, preview };
+  // Encurtador que termina em loja bloqueada (ou domínio da lista negra) também é recusado.
+  const finalHost = info.finalUrl?.hostname.toLowerCase().replace(/^www\./, "");
+  if (finalHost && finalHost !== link.host) {
+    const finalStore = findStoreForHost(finalHost, stores);
+    if (finalStore?.status === "blocked" || (supabaseEnabled() && (await isHostBlocked(finalHost)))) {
+      return { ok: false, error: "Esse link leva para uma loja que não aceitamos." };
+    }
+  }
+  return { ok: true, host: link.host, storeName: store?.name ?? null, duplicate, preview: info.preview };
 }
 
 const text = (max: number) => z.string().trim().max(max);
@@ -170,6 +179,15 @@ export async function publishAction(_prev: PublishState, form: FormData): Promis
   }
   store ??= await createStoreForHost(link?.ok ? link.host : "loja-fisica.local");
 
+  // O servidor confere sozinho para onde o link leva: o formulário pode ter sido montado à mão.
+  const finalUrl = link?.ok ? await resolveFinalUrl(link.url.toString()) : null;
+  if (link?.ok && finalUrl) {
+    const finalHost = finalUrl.hostname.toLowerCase().replace(/^www\./, "");
+    if (finalHost !== link.host && (findStoreForHost(finalHost, stores)?.status === "blocked" || (supabaseEnabled() && (await isHostBlocked(finalHost))))) {
+      return { fieldErrors: { url: "Esse link leva para uma loja que não aceitamos." }, error: "Confira os campos marcados." };
+    }
+  }
+
   const key = link?.ok ? urlKey(link.url) : null;
   if (key && supabaseEnabled()) {
     const dup = await findDuplicateByKey(key);
@@ -204,6 +222,10 @@ export async function publishAction(_prev: PublishState, form: FormData): Promis
       await saveDealImages(deal.id, images);
     } catch (e) {
       console.error("[publish] imagens", e);
+    }
+    if (link?.ok && finalUrl && finalUrl.toString() !== link.url.toString()) {
+      // Guarda para onde o link realmente leva (útil para conferir o preço e investigar denúncias).
+      await db().from("deals").update({ url_resolved: finalUrl.toString().slice(0, 2000) }).eq("id", deal.id);
     }
     await trackNewDeal({ dealId: deal.id, storeId: store.id, urlKey: key, url: link?.ok ? link.url.toString() : null, priceCents, source: "post" });
     if (deal.status === "published") await notifyPublished(deal.id);

@@ -81,11 +81,21 @@ export async function removeAvatarAction(): Promise<void> {
 
 const emailSchema = z.string().trim().toLowerCase().email("Esse e-mail não parece válido.").max(254);
 
+/** Confere a senha atual antes de mudar algo sensível (protege quem deixou o navegador aberto). */
+async function passwordMatches(password: string): Promise<boolean> {
+  if (!password) return false;
+  const supabase = await supabaseAuth();
+  const { data: user } = await supabase.auth.getUser();
+  if (!user.user?.email) return false;
+  return !(await supabase.auth.signInWithPassword({ email: user.user.email, password })).error;
+}
+
 export async function changeEmailAction(_prev: AccountState, form: FormData): Promise<AccountState> {
   const session = await getSession();
   if (!session) return NOT_LOGGED;
   const parsed = emailSchema.safeParse(form.get("email"));
   if (!parsed.success) return { error: parsed.error.issues[0]?.message };
+  if (!(await passwordMatches(String(form.get("password") ?? "")))) return { error: "A senha atual não confere." };
   const supabase = await supabaseAuth();
   const { error } = await supabase.auth.updateUser({ email: parsed.data });
   if (error) {
@@ -121,6 +131,7 @@ export async function deleteAccountAction(_prev: AccountState, form: FormData): 
   if (!info || String(form.get("confirm") ?? "").trim().toLowerCase() !== info.username) {
     return { error: "Digite o seu nome de usuário para confirmar." };
   }
+  if (!(await passwordMatches(String(form.get("password") ?? "")))) return { error: "A senha atual não confere." };
   try {
     const r = await deleteAccount(session.userId);
     if (r.error) return { error: r.error };

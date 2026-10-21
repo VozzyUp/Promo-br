@@ -56,7 +56,7 @@ export function DealForm({ categories, trusted }: { categories: Category[]; trus
       </Field>
 
       <p className="text-sm text-muted">
-        Antes de publicar, conferimos o preço em outras lojas. Desconto inflado (preço &ldquo;de&rdquo; aumentado para parecer promoção) não é publicado.
+        Comparamos o preço com o histórico do produto. Desconto inflado (preço &ldquo;de&rdquo; aumentado para parecer promoção) não é publicado.
       </p>
       <Button type="submit" size="lg" loading={pending} className="sm:self-end">Publicar oferta</Button>
     </form>

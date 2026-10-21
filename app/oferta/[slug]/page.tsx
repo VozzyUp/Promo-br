@@ -18,6 +18,7 @@ import { listDealGallery } from "@/lib/data/publish";
 import { supabaseEnabled } from "@/lib/supabase/server";
 import { RichText } from "@/lib/rich-text";
 import { PriceHistory } from "@/components/price-history";
+import { dealJsonLd, jsonLdScript } from "@/lib/structured-data";
 import { getPriceHistory } from "@/lib/data/verification";
 
 export async function generateMetadata({ params }: PageProps<"/oferta/[slug]">) {
@@ -35,6 +36,7 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
   if (!deal) notFound();
 
   const history = supabaseEnabled() ? await getPriceHistory(deal.id).catch(() => []) : [];
+  const jsonLd = dealJsonLd(deal, process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000");
   const expired = deal.status === "expired";
   const live = deal.status === "published" || expired;
   const [thread, subscribed] = live
@@ -48,6 +50,7 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
   const canClose = !!session && (session.userId === deal.authorId || session.role === "admin" || session.role === "moderator");
   return (
     <div className="mx-auto flex max-w-(--layout-max) flex-col gap-4 px-4 py-4">
+      {jsonLd ? <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }} /> : null}
       <nav aria-label="Trilha" className="flex items-center gap-1 text-sm text-muted">
         <Link href="/" className="hover:text-text">Início</Link>
         {deal.category ? (

@@ -85,12 +85,26 @@ export async function safeGet(rawUrl: string, opts: { maxBytes: number; accept: 
   throw new Error("redirecionamentos demais");
 }
 
-/** Lê título, imagem e preço do link. Devolve null se a página não responder como HTML. */
-export async function fetchPreview(rawUrl: string): Promise<Preview | null> {
+/** Uma só ida ao link: o endereço final (depois de expandir encurtadores) e, se for HTML, o que a página mostra. */
+export async function fetchLinkInfo(rawUrl: string): Promise<{ finalUrl: URL | null; preview: Preview | null }> {
   try {
     const got = await safeGet(rawUrl, { maxBytes: 600_000, accept: "text/html,application/xhtml+xml" });
-    if (got.status < 200 || got.status >= 300 || !/html/i.test(got.contentType)) return null;
-    return parsePreview(got.body.toString("utf8"), got.finalUrl.toString());
+    const ok = got.status >= 200 && got.status < 300 && /html/i.test(got.contentType);
+    return { finalUrl: got.finalUrl, preview: ok ? parsePreview(got.body.toString("utf8"), got.finalUrl.toString()) : null };
+  } catch {
+    return { finalUrl: null, preview: null };
+  }
+}
+
+/** Lê título, imagem e preço do link. Devolve null se a página não responder como HTML. */
+export async function fetchPreview(rawUrl: string): Promise<Preview | null> {
+  return (await fetchLinkInfo(rawUrl)).preview;
+}
+
+/** Só segue os redirecionamentos e devolve o endereço final (para encurtadores como amzn.to). */
+export async function resolveFinalUrl(rawUrl: string): Promise<URL | null> {
+  try {
+    return (await safeGet(rawUrl, { maxBytes: 20_000, accept: "text/html,*/*" })).finalUrl;
   } catch {
     return null;
   }
