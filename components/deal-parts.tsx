@@ -51,9 +51,10 @@ export function DiscountChip({ pct }: { pct: number }) {
 }
 
 const verdicts: Partial<Record<Verdict, { label: string; tip: string; className: string; Icon: typeof BadgeCheck }>> = {
-  verified: { label: "Desconto verificado", tip: "Menor preço dos últimos 30 dias e abaixo das outras lojas que comparamos.", className: "text-price", Icon: BadgeCheck },
-  good_price: { label: "Bom preço", tip: "É o mais barato entre as lojas comparadas, mas o desconto real é pequeno.", className: "text-info", Icon: Tag },
-  no_comparison: { label: "Sem comparação", tip: "Ainda não achamos esse produto em outras lojas para comparar.", className: "text-muted", Icon: CircleHelp },
+  verified: { label: "Desconto verificado", tip: "Está no menor preço que registramos nos últimos 30 dias, com pelo menos 10% abaixo do preço de costume.", className: "text-price", Icon: BadgeCheck },
+  good_price: { label: "Bom preço", tip: "Está abaixo do preço de costume que registramos, mas a diferença é pequena.", className: "text-info", Icon: Tag },
+  inflated: { label: "Desconto inflado", tip: "O preço anterior informado está bem acima do que costuma custar; o desconto real é pequeno.", className: "text-danger", Icon: CircleHelp },
+  no_comparison: { label: "Sem comparação", tip: "Ainda não temos histórico suficiente deste produto para comparar.", className: "text-muted", Icon: CircleHelp },
 };
 
 export function VerifyBadge({ verdict }: { verdict: Verdict }) {

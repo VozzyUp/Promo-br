@@ -1,0 +1,57 @@
+// Verificação de preço: compara o preço da oferta com o histórico que registramos do mesmo anúncio.
+// Sem scraping de outras lojas: o selo só afirma o que o nosso histórico prova.
+import type { Verdict } from "./types";
+
+export type PricePoint = { priceCents: number; at: Date };
+
+export type PriceCheck = {
+  verdict: Exclude<Verdict, "pending">;
+  referenceCents: number | null;
+  realDiscountBp: number | null;
+  historyDays: number;
+  min30Cents: number | null;
+  medianCents: number | null;
+};
+
+const DAY = 86400_000;
+export const MIN_HISTORY_DAYS = 7;
+
+function median(values: number[]): number {
+  const s = [...values].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : Math.round((s[m - 1] + s[m]) / 2);
+}
+
+/**
+ * history: preços anteriores do mesmo anúncio (sem o preço que está sendo avaliado).
+ * - referência = mediana dos últimos 30 dias
+ * - verified: desconto real >= 10%, histórico >= 7 dias e preço no menor valor dos 30 dias
+ * - good_price: desconto real >= 5%
+ * - inflated: o "de" da loja é >= 20% acima da referência e o desconto real fica abaixo de 5%
+ * - no_comparison: histórico curto ou sem diferença
+ */
+export function checkPrice(o: { priceCents: number; listPriceCents: number | null; history: PricePoint[]; now?: Date }): PriceCheck {
+  const now = (o.now ?? new Date()).getTime();
+  const recent = o.history.filter((p) => now - p.at.getTime() <= 30 * DAY && p.priceCents > 0);
+  const historyDays = recent.length ? Math.floor((now - Math.min(...recent.map((p) => p.at.getTime()))) / DAY) : 0;
+  const none = { referenceCents: null, realDiscountBp: null, historyDays, min30Cents: null, medianCents: null };
+  if (recent.length === 0 || o.priceCents <= 0) return { verdict: "no_comparison", ...none };
+
+  const prices = recent.map((p) => p.priceCents);
+  const med = median(prices);
+  const min30 = Math.min(...prices);
+  const realBp = Math.round(((med - o.priceCents) / med) * 10000);
+  const base = { referenceCents: med, realDiscountBp: realBp > 0 ? realBp : null, historyDays, min30Cents: min30, medianCents: med };
+
+  if (o.listPriceCents && o.listPriceCents >= med * 1.2 && realBp < 500) return { verdict: "inflated", ...base };
+  if (historyDays < MIN_HISTORY_DAYS) return { verdict: "no_comparison", ...base };
+  if (realBp >= 1000 && o.priceCents <= min30 * 1.01) return { verdict: "verified", ...base };
+  if (realBp >= 500) return { verdict: "good_price", ...base };
+  return { verdict: "no_comparison", ...base };
+}
+
+/** O preço da página subiu o bastante, duas vezes seguidas, para dizer que a oferta acabou? */
+export function priceRoseTwice(postedCents: number, lastTwoCheckedCents: number[], tolerance = 0.15): boolean {
+  if (lastTwoCheckedCents.length < 2) return false;
+  return lastTwoCheckedCents.slice(0, 2).every((c) => c > postedCents * (1 + tolerance));
+}

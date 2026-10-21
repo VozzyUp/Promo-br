@@ -17,6 +17,8 @@ import { DealGallery } from "@/components/deal-gallery";
 import { listDealGallery } from "@/lib/data/publish";
 import { supabaseEnabled } from "@/lib/supabase/server";
 import { RichText } from "@/lib/rich-text";
+import { PriceHistory } from "@/components/price-history";
+import { getPriceHistory } from "@/lib/data/verification";
 
 export async function generateMetadata({ params }: PageProps<"/oferta/[slug]">) {
   const { slug } = await params;
@@ -32,6 +34,7 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
   const deal = await getDealBySlug(slug, session ? { id: session.userId, role: session.role } : null);
   if (!deal) notFound();
 
+  const history = supabaseEnabled() ? await getPriceHistory(deal.id).catch(() => []) : [];
   const expired = deal.status === "expired";
   const live = deal.status === "published" || expired;
   const [thread, subscribed] = live
@@ -116,6 +119,8 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
           <TemperatureVote dealId={deal.id} initial={{ temperature: deal.temperature, myVote: deal.myVote }} loggedIn={!!session} />
         </section>
       ) : null}
+
+      <PriceHistory points={history} />
 
       <AdSlot minHeight={120} />
 

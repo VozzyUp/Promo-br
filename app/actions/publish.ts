@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { countDealsByAuthorSince, createDeal, createStoreForHost, getProfile, listStores } from "@/lib/data";
+import { trackNewDeal } from "@/lib/data/verification";
 import { findDuplicateByKey, notifyPublished, saveDealImages, type DuplicateDeal } from "@/lib/data/publish";
 import { parsePriceToCents } from "@/lib/format";
 import { checkImage } from "@/lib/image-check";
@@ -203,6 +204,7 @@ export async function publishAction(_prev: PublishState, form: FormData): Promis
     } catch (e) {
       console.error("[publish] imagens", e);
     }
+    await trackNewDeal({ dealId: deal.id, storeId: store.id, urlKey: key, url: link?.ok ? link.url.toString() : null, priceCents, source: "post" });
     if (deal.status === "published") await notifyPublished(deal.id);
   }
   redirect(`/oferta/${deal.slug}?enviada=1`);
