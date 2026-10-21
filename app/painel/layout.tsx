@@ -8,12 +8,13 @@ export default async function PanelLayout({ children }: LayoutProps<"/painel">) 
   const tab = "rounded-pill px-4 py-1.5 text-sm font-bold hover:bg-surface";
   return (
     <>
-      <nav aria-label="Painel" className="mx-auto flex max-w-(--layout-max) gap-1 px-4 pt-6">
+      <nav aria-label="Painel" className="mx-auto flex max-w-(--layout-max) flex-wrap gap-1 px-4 pt-6">
         <Link href="/painel" className={tab}>Fila de ofertas</Link>
         {session.role === "admin" ? (
           <>
             <Link href="/painel/lojas" className={tab}>Lojas</Link>
             <Link href="/painel/robo" className={tab}>Robô</Link>
+            <Link href="/painel/canais" className={tab}>Canais</Link>
             <Link href="/painel/integracoes" className={tab}>Integrações</Link>
             <Link href="/painel/execucoes" className={tab}>Execuções</Link>
           </>

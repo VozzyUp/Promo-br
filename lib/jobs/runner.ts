@@ -29,7 +29,9 @@ export async function runJob(job: string, trigger: "schedule" | "manual"): Promi
     out = { status: "error", stats: {}, error: e instanceof Error ? e.message.slice(0, 500) : "Falha desconhecida." };
     console.error(`[job ${job}]`, e);
   }
-  await db().from("job_runs").update({ status: out.status, stats: out.stats, error: out.error ?? null, finished_at: new Date().toISOString() }).eq("id", id);
+  const idle = job === "dispatch" && trigger === "schedule" && out.status === "ok" && Object.values(out.stats).every((v) => v === 0);
+  if (idle) await db().from("job_runs").delete().eq("id", id); // rodada vazia a cada minuto não vale registro
+  else await db().from("job_runs").update({ status: out.status, stats: out.stats, error: out.error ?? null, finished_at: new Date().toISOString() }).eq("id", id);
   return out;
 }
 
@@ -41,6 +43,7 @@ const FIXED: Due[] = [
   { job: "expire", every: 5 },
   { job: "recheck", every: 30 },
   { job: "sync:shopee", at: "10 * * * *" },
+  { job: "cleanup", at: "30 3 * * *" },
 ];
 
 export async function tick(now = new Date()): Promise<string[]> {
