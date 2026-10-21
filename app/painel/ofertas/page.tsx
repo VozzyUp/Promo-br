@@ -73,7 +73,7 @@ export default async function PanelDealsPage({ searchParams }: PageProps<"/paine
               </form>
             </div>
             <details className="mt-3"><summary className="cursor-pointer text-sm font-bold text-accent">Editar</summary>
-              <div className="mt-3"><DealEditForm id={d.id} title={d.title} categoryId={d.categoryId} categories={categories} /></div>
+              <div className="mt-3"><DealEditForm id={d.id} title={d.title} categoryId={d.categoryId} ean={d.ean} categories={categories} /></div>
             </details>
           </li>
         ))}

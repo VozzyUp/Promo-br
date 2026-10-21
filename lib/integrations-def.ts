@@ -1,5 +1,5 @@
 // Quais integrações existem e quais campos cada uma pede. Campos "secret" ficam criptografados e nunca voltam para a tela.
-export type IntegrationKey = "shopee" | "telegram" | "uazapi" | "smtp";
+export type IntegrationKey = "shopee" | "telegram" | "uazapi" | "smtp" | "anthropic";
 
 export type FieldDef = { name: string; label: string; secret: boolean; placeholder?: string };
 
@@ -40,6 +40,15 @@ export const INTEGRATIONS: IntegrationDef[] = [
       { name: "user", label: "Usuário", secret: false },
       { name: "password", label: "Senha", secret: true },
       { name: "from", label: "Remetente", secret: false, placeholder: "Nome do site <ofertas@seudominio.com.br>" },
+    ],
+  },
+  {
+    key: "anthropic",
+    title: "IA para textos (Claude)",
+    help: "Chave da API da Anthropic. Liga o botão que sugere título e descrição na hora de publicar. A pessoa sempre vê a sugestão e decide se usa; nada é publicado sozinho.",
+    fields: [
+      { name: "apiKey", label: "Chave da API", secret: true },
+      { name: "model", label: "Modelo", secret: false, placeholder: "claude-haiku-5-5" },
     ],
   },
 ];

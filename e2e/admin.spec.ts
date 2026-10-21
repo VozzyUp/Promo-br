@@ -5,7 +5,7 @@ const PANEL = [
   ["/painel", "Fila de ofertas"], ["/painel/ofertas", "Ofertas e cupons"], ["/painel/usuarios", "Usuários"], ["/painel/lojas", "Lojas"],
   ["/painel/metricas", "Métricas"], ["/painel/robo", /Robô de captação/], ["/painel/canais", "Canais de envio"], ["/painel/integracoes", "Integrações"],
   ["/painel/execucoes", "Execuções"], ["/painel/anuncios", "Anúncios"], ["/painel/aparencia", "Aparência e SEO"], ["/painel/paginas", "Páginas e textos"],
-  ["/painel/denuncias", /Denúncias/],
+  ["/painel/denuncias", /Denúncias/], ["/painel/ranking", "Ranking das ofertas quentes"],
 ] as const;
 
 test.describe("admin", () => {

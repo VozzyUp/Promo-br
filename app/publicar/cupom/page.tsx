@@ -1,4 +1,5 @@
 import { PublishWizard } from "@/components/publish/wizard";
+import { aiAvailable } from "@/lib/data/integrations";
 import { requireUser } from "@/lib/auth";
 import { getProfile, listCategories } from "@/lib/data";
 
@@ -12,7 +13,7 @@ export default async function PublishCouponPage() {
       <div className="rounded-card bg-bg p-6 shadow-card">
         <h1 className="mb-1 text-xl font-bold">Publicar cupom</h1>
         <p className="mb-6 text-sm text-muted">Tem um código de desconto? Compartilhe com a comunidade.</p>
-        <PublishWizard kind="coupon" categories={categories.map((c) => ({ id: c.id, name: c.name }))} trusted={!!profile?.trusted || session.role !== "user"} />
+        <PublishWizard kind="coupon" categories={categories.map((c) => ({ id: c.id, name: c.name }))} trusted={!!profile?.trusted || session.role !== "user"} aiEnabled={await aiAvailable()} />
       </div>
     </div>
   );

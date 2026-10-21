@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin, requireModerator } from "@/lib/auth";
 import { moderateDeal } from "@/lib/data";
 import { editDeal, getUserRole, logModeration, setDealBoost, setDealSponsored, setDealStatus, updateUser } from "@/lib/data/staff";
+import { linkDealToProduct, unlinkDealProduct } from "@/lib/data/verification";
+import { normalizeGtin } from "@/lib/ean";
 import { canActOn } from "@/lib/staff-rules";
 
 const BOOST_HOURS = [6, 12, 24, 48, 72];
@@ -35,7 +37,15 @@ export async function editDealAction(_prev: DealEditState, form: FormData): Prom
   const title = text(form, "title", 140);
   if (title.length < 10) return { error: "O título precisa ter ao menos 10 caracteres." };
   const cat = text(form, "categoryId", 40);
+  const eanRaw = text(form, "ean", 20);
+  const ean = eanRaw ? normalizeGtin(eanRaw) : null;
+  if (eanRaw && !ean) return { error: "Código de barras inválido. Use 8, 12, 13 ou 14 dígitos com o dígito verificador correto." };
   await editDeal(id, { title, categoryId: UUID.test(cat) ? cat : null });
+  if (ean) {
+    if (!(await linkDealToProduct(id, ean, title))) return { error: "Esta oferta não tem anúncio vinculado (precisa de link e preço) para ligar a um produto." };
+  } else {
+    await unlinkDealProduct(id);
+  }
   await logModeration(s.userId, "deal", id, "edit", null);
   refresh();
   return { ok: true };

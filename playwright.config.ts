@@ -36,6 +36,7 @@ export default defineConfig({
         MASTER_KEY: "ab".repeat(32), // chave só de teste
         SHOPEE_API_URL: `http://127.0.0.1:${STUB_PORT}/graphql`,
         TELEGRAM_API_BASE: `http://127.0.0.1:${STUB_PORT}`,
+        ANTHROPIC_API_BASE: `http://127.0.0.1:${STUB_PORT}`,
         NEXT_PUBLIC_SITE_URL: `http://127.0.0.1:${INT_PORT}`,
       },
     },

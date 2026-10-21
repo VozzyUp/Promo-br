@@ -4,15 +4,15 @@ Card de oferta com preço/antes/%off/loja,descoberta,must,yes,yes,DealCard + ske
 Página de detalhe da oferta,descoberta,must,yes,yes,"galeria, histórico de preço, dados estruturados, comentários"
 Redirect /ir/[codigo] com log de clique e subId,monetização,must,yes,yes,"1 clique por visitante/dia, sem robôs, canal e subId"
 Histórico de preço diário por anúncio,verificação,must,no,yes,"por anúncio da loja, 90 dias, gráfico na oferta"
-Identificação do produto (EAN + marca/modelo + IA),verificação,must,no,no,Product/Listing com match_confidence
+Identificação do produto (EAN + marca/modelo + IA),verificação,must,no,partial,"EAN lido da página da loja (JSON-LD/meta) ou informado pela equipe; liga ofertas ao mesmo produto. Marca/modelo e IA ainda não"
 Comparação do mesmo produto em outras lojas,verificação,must,no,no,via APIs/feeds conectados; sem scraping
 Desconto real contra preço de referência,verificação,must,no,yes,compara com o histórico do próprio anúncio (mediana de 30 dias)
 Selos Verificado / Bom preço / Sem comparação / Inflado,verificação,must,no,yes,"verificado, bom preço, sem comparação e inflado (só com 7+ dias de histórico)"
-Prova de preço na página da oferta,verificação,must,no,partial,gráfico do histórico; sem comparação com outras lojas (sem API)
+Prova de preço na página da oferta,verificação,must,no,yes,"gráfico do histórico + bloco Este produto em outras lojas (por EAN); sem API de preços de terceiros"
 Revalidação antes do envio e periódica + expiração automática,verificação,must,no,yes,recheck a cada 30 min por anúncio de 6 em 6 h; expira se o preço subir 2 vezes; expira pelo fim da validade
 Botões funcionou / preço mudou / cupom falhou,verificação,should,no,yes,reportAction: funcionou / preço mudou / cupom falhou; 3 denúncias encerram
 Ranking Maiores descontos (desconto real),ranking,must,no,yes,aba Maiores descontos usa o desconto real
-Ranking Mais quentes (desconto + cliques + vendas + votos com decaimento),ranking,must,yes,partial,fórmula do recon com pesos fixos; painel depois
+Ranking Mais quentes (desconto + cliques + vendas + votos com decaimento),ranking,must,yes,yes,"pesos editáveis em Painel > Ranking (precisa da migração 7 no banco)"
 Antifraude de cliques (IP/aparelho/bot),ranking,should,no,no,
 Cupons copiáveis,descoberta,must,yes,yes,CouponCTA copia e abre a loja; página /cupons
 Páginas de loja,SEO,must,yes,yes,/loja/[slug]
@@ -27,7 +27,7 @@ Painel: cupons,painel,must,yes,yes,cupons entram em Ofertas e cupons (filtro por
 Painel: lojas e modelo de link de afiliado,painel,must,no,yes,/painel/lojas
 Modo de link por loja (programa / rede / monetizador / direto),afiliados,must,no,partial,modo e modelo guardados; nada os aplica ainda (depende das integrações das lojas)
 Preservar link de afiliado do autor (sem alterar),afiliados,must,no,yes,/ir/ redireciona para url_submitted sem alterar
-Impulsionar oferta (usuário paga destaque),monetização,should,no,no,receita nova vinda dos caçadores
+Impulsionar oferta (usuário paga destaque),monetização,should,no,partial,"equipe destaca por 6 a 72 h no painel; compra pelo usuário (Pix) depende de provedor de pagamento"
 Cadastro automático de loja desconhecida em modo direto,afiliados,should,no,yes,loja criada como pending_review
 Relatório cliques sem comissão por loja,afiliados,should,no,yes,Métricas > Por loja marca em vermelho lojas com clique e sem venda
 Painel: integrações com credenciais criptografadas e testar conexão,painel,must,no,yes,AES-256-GCM com MASTER_KEY; testar conexão
@@ -45,10 +45,10 @@ Captação por feed de redes (Awin/Lomadee/etc),captação,could,no,no,dezembro
 Amazon Creators API,captação,could,no,no,após vendas qualificadas
 Envio Telegram,distribuição,must,no,partial,testado contra servidor de mentira; falta bot real
 Envio WhatsApp (UAZAPI),distribuição,should,no,partial,envio implementado; falta instância UAZAPI real
-Textos de oferta com IA,distribuição,could,no,no,chave configurada no painel
+Textos de oferta com IA,distribuição,could,no,yes,"sugestão de título e descrição com a chave Claude no painel; usuário confere e aplica"
 Slots de anúncio sem CLS,monetização,should,yes,yes,"altura reservada, anúncio só após o aceite"
 Deploy ghcr + Portainer Swarm + Traefik,infra,must,no,partial,"Dockerfile, Actions e stack prontos; falta primeiro push e deploy"
-Cadastro com e-mail e senha (+ Google opcional) com verificação de e-mail,conta,must,yes,partial,Supabase Auth; falta SMTP próprio (você) e Google login
+Cadastro com e-mail e senha (+ Google opcional) com verificação de e-mail,conta,must,yes,partial,"Google pronto no código (GOOGLE_LOGIN=1 + provedor no Supabase + migração 7); falta SMTP do Supabase (você)"
 Usuário publica oferta (link + preço + cupom + imagem),comunidade,must,yes,yes,assistente completo
 Link de afiliado do próprio usuário,afiliados,must,no,yes,política keep_author: o link do usuário nunca muda
 Votação quente/frio,comunidade,must,yes,yes,quente/frio otimista
@@ -59,7 +59,7 @@ Validação do link postado (domínio de loja + expandir encurtador + bloqueio d
 Banimento e lista de domínios bloqueados,comunidade,must,no,yes,suspender usuário e domínios bloqueados
 Alertas,retenção,could,yes,yes,alertas
 Placar de caçadores (ranking de usuários),comunidade,should,yes,yes,placar
-Ofertas patrocinadas,monetização,could,yes,no,marcar Patrocinado
+Ofertas patrocinadas,monetização,could,yes,yes,"selo Patrocinada no cartão e na página; equipe marca no painel"
 Marca/layout/textos do Promodescuentos,skip,skip,yes,skip,propriedade de terceiros
 Comunidade e audiência existentes,skip,skip,yes,skip,construir do zero
 Publicar em assistente de passos (link > essenciais > imagens > descrição > detalhes > revisão),comunidade,must,yes,yes,hoje é formulário único em /publicar
@@ -90,5 +90,5 @@ Inscrever-se em uma oferta (notifica novos comentários),comunidade,should,yes,y
 Marcar oferta como expirada (pelo usuário),comunidade,must,yes,yes,diálogo não exercido no recon
 Denunciar anúncio (Publicidade > Denunciar),monetização,could,yes,yes,botão existe no AdSlot; sem fluxo
 Onboarding de alertas com sugestões populares,conta,should,yes,no,
-Boletim diário por e-mail,distribuição,should,yes,no,
+Boletim diário por e-mail,distribuição,should,yes,partial,"boletim semanal (segunda 9h) com confirmação e cancelamento; precisa de SMTP no painel e da migração 7"
 Feed Para você / Tendências / Todas,descoberta,should,yes,yes,temos Quentes/Descontos/Novas

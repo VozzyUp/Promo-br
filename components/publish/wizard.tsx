@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useActionState, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { checkLinkAction, publishAction, type LinkCheckResult } from "@/app/actions/publish";
 import { RichEditor } from "@/components/forms/rich-editor";
+import { AiSuggest } from "@/components/publish/ai-suggest";
 import { Button } from "@/components/ui/button";
 import { Field, FormMessage, Input, Select } from "@/components/ui/field";
 import { discountPercent, parsePriceToCents } from "@/lib/format";
@@ -37,7 +38,7 @@ const COUPON_KINDS = [
 
 const brl = (cents: number) => (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-export function PublishWizard({ kind, categories, trusted }: { kind: Kind; categories: { id: string; name: string }[]; trusted: boolean }) {
+export function PublishWizard({ kind, categories, trusted, aiEnabled = false }: { kind: Kind; categories: { id: string; name: string }[]; trusted: boolean; aiEnabled?: boolean }) {
   const isCoupon = kind === "coupon";
   const draftKey = `promo-br:draft:${kind}`;
   const maxImages = isCoupon ? 6 : 8;
@@ -84,6 +85,11 @@ export function PublishWizard({ kind, categories, trusted }: { kind: Kind; categ
     setStep(Math.min(...keys.map((k) => STEP_OF_FIELD[k] ?? 5)));
   }, [state]);
 
+  const [bump, setDraftKeyBump] = useState(0);
+  const aiInput = () => ({
+    title: v.title, description: v.description, store: lc && lc.ok ? (lc.storeName ?? "") : "", price: v.price, listPrice: v.listPrice,
+    couponCode: v.couponCode, couponKind: v.couponKind, couponValue: v.couponValue,
+  });
   const set = <K extends keyof Values>(k: K, val: Values[K]) => setV((p) => ({ ...p, [k]: val }));
 
   const priceCents = v.price ? parsePriceToCents(v.price) : null;
@@ -263,6 +269,7 @@ export function PublishWizard({ kind, categories, trusted }: { kind: Kind; categ
         <Field label="Título" htmlFor="w-title" error={fe.title} hint="Produto e principal detalhe. Ex.: Fone Bluetooth com cancelamento de ruído">
           <Input id="w-title" maxLength={140} value={v.title} aria-invalid={!!fe.title} onChange={(e) => set("title", e.target.value)} />
         </Field>
+        {aiEnabled ? <AiSuggest field="title" getInput={aiInput} onUse={(t) => set("title", t.slice(0, 140))} /> : null}
         {isCoupon ? (
           <>
             <Field label="Tipo de desconto" htmlFor="w-ckind" error={fe.couponKind}>
@@ -344,8 +351,9 @@ export function PublishWizard({ kind, categories, trusted }: { kind: Kind; categ
       <section hidden={step !== 3} className="flex flex-col gap-1.5" aria-label="Descrição">
         <span className="text-sm font-bold">Descrição (opcional)</span>
         <p className="text-sm text-muted">Como aplicar o cupom, formas de pagamento, estoque, avisos...</p>
+        {aiEnabled ? <AiSuggest field="description" getInput={aiInput} onUse={(t) => { set("description", t.slice(0, 5000)); setDraftKeyBump((n) => n + 1); }} /> : null}
         {draftReady ? (
-          <RichEditor key={draftKey} name="description-ui" label="Descrição" max={5000} defaultValue={v.description} rows={8}
+          <RichEditor key={`${draftKey}:${bump}`} name="description-ui" label="Descrição" max={5000} defaultValue={v.description} rows={8}
             onChange={(val) => set("description", val)} invalid={!!fe.description} />
         ) : null}
       </section>

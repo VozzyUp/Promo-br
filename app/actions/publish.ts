@@ -1,10 +1,11 @@
 "use server";
 
+import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { countDealsByAuthorSince, createDeal, createStoreForHost, getProfile, listStores } from "@/lib/data";
-import { trackNewDeal } from "@/lib/data/verification";
+import { linkProductFromPage, trackNewDeal } from "@/lib/data/verification";
 import { findDuplicateByKey, notifyPublished, saveDealImages, type DuplicateDeal } from "@/lib/data/publish";
 import { parsePriceToCents } from "@/lib/format";
 import { checkImage } from "@/lib/image-check";
@@ -234,6 +235,8 @@ export async function publishAction(_prev: PublishState, form: FormData): Promis
       await db().from("deals").update({ url_resolved: finalUrl.toString().slice(0, 2000) }).eq("id", deal.id);
     }
     await trackNewDeal({ dealId: deal.id, storeId: store.id, urlKey: key, url: link?.ok ? link.url.toString() : null, priceCents, source: "post" });
+    // O código de barras sai da página da loja; lê depois da resposta para a publicação não esperar a loja.
+    if (link?.ok) after(() => linkProductFromPage(deal.id, link.url.toString(), d.title));
     if (deal.status === "published") await notifyPublished(deal.id);
   }
   redirect(`/oferta/${deal.slug}?enviada=1`);

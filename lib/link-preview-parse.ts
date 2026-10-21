@@ -1,7 +1,9 @@
 // Leitor de HTML do preview de link. Função pura (sem rede), por isso é fácil de testar.
 // Entende og:*, twitter:*, meta de produto e JSON-LD (schema.org/Product).
 
-export type Preview = { title: string | null; imageUrl: string | null; priceCents: number | null; currency: string | null };
+export type Preview = { title: string | null; imageUrl: string | null; priceCents: number | null; currency: string | null; gtin?: string };
+
+import { normalizeGtin } from "./ean";
 
 const ENTITIES: Record<string, string> = { "&amp;": "&", "&quot;": '"', "&#39;": "'", "&apos;": "'", "&lt;": "<", "&gt;": ">", "&nbsp;": " " };
 
@@ -70,7 +72,7 @@ function isProduct(o: Record<string, unknown>): boolean {
 }
 
 function fromJsonLd(html: string) {
-  const out: { title?: string; image?: string; price?: number; currency?: string } = {};
+  const out: { title?: string; image?: string; price?: number; currency?: string; gtin?: string } = {};
   for (const m of html.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) {
     let data: Json;
     try {
@@ -81,6 +83,10 @@ function fromJsonLd(html: string) {
     for (const o of walk(data)) {
       if (!isProduct(o)) continue;
       if (!out.title && typeof o.name === "string") out.title = o.name;
+      for (const k of ["gtin", "gtin13", "gtin14", "gtin12", "gtin8"]) {
+        const g = normalizeGtin(o[k]);
+        if (!out.gtin && g) out.gtin = g;
+      }
       const img = Array.isArray(o.image) ? o.image[0] : o.image;
       if (!out.image && typeof img === "string") out.image = img;
       const offers = Array.isArray(o.offers) ? o.offers : o.offers ? [o.offers] : [];
@@ -115,10 +121,12 @@ export function parsePreview(html: string, baseUrl: string): Preview {
 
   // Só preço em reais serve; outra moeda é descartada em vez de virar um preço errado.
   const usable = currency === null || currency === "BRL";
+  const gtin = normalizeGtin(meta.get("product:ean") ?? meta.get("og:upc") ?? meta.get("gtin13") ?? meta.get("gtin")) ?? ld.gtin;
   return {
     title: title ? title.slice(0, 140) : null,
     imageUrl,
     priceCents: usable ? priceCents : null,
     currency,
+    ...(gtin ? { gtin } : {}),
   };
 }

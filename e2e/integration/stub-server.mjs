@@ -1,12 +1,53 @@
 // Servidor de mentira para os testes de integração: imita a API de afiliados da Shopee (conferindo a assinatura) e a Bot API do Telegram.
 import { createHash } from "node:crypto";
 import { createServer } from "node:http";
+import { createServer as createTcp } from "node:net";
 
 const PORT = Number(process.env.STUB_PORT ?? 4010);
 const APP_ID = "app-teste";
 const SECRET = "segredo-teste";
 
 const calls = []; // tudo que o site enviou
+const mails = []; // e-mails recebidos pelo SMTP de mentira
+const SMTP_PORT = Number(process.env.STUB_SMTP_PORT ?? 4025);
+
+// SMTP de mentira: EHLO, AUTH PLAIN (senha "senha-stub"), MAIL, RCPT, DATA, QUIT. Guarda destinatário e corpo.
+createTcp((sock) => {
+  let mode = "cmd";
+  let buf = "";
+  let to = [];
+  sock.write("220 stub ESMTP\r\n");
+  sock.on("data", (chunk) => {
+    buf += chunk.toString("utf8");
+    for (;;) {
+      if (mode === "data") {
+        const end = buf.indexOf("\r\n.\r\n");
+        if (end === -1) return;
+        mails.push({ to: [...to], data: buf.slice(0, end) });
+        buf = buf.slice(end + 5);
+        to = [];
+        mode = "cmd";
+        sock.write("250 queued\r\n");
+        continue;
+      }
+      const nl = buf.indexOf("\r\n");
+      if (nl === -1) return;
+      const line = buf.slice(0, nl);
+      buf = buf.slice(nl + 2);
+      const up = line.toUpperCase();
+      if (up.startsWith("EHLO") || up.startsWith("HELO")) sock.write("250-stub\r\n250 AUTH PLAIN\r\n");
+      else if (up.startsWith("AUTH PLAIN")) {
+        const cred = Buffer.from(line.split(" ")[2] ?? "", "base64").toString("utf8");
+        sock.write(cred.endsWith("\0senha-stub") ? "235 ok\r\n" : "535 credenciais erradas\r\n");
+      } else if (up.startsWith("MAIL FROM")) sock.write("250 ok\r\n");
+      else if (up.startsWith("RCPT TO")) { to.push(/<([^>]+)>/.exec(line)?.[1] ?? ""); sock.write("250 ok\r\n"); }
+      else if (up === "DATA") { mode = "data"; sock.write("354 go\r\n"); }
+      else if (up === "QUIT") { sock.write("221 bye\r\n"); sock.end(); return; }
+      else sock.write("250 ok\r\n");
+    }
+  });
+  sock.on("error", () => {});
+}).listen(SMTP_PORT, "127.0.0.1");
 let conversionSubId = null;
 
 let idBase = Date.now(); // cada rodada de teste usa itens novos: o robô não repete oferta dos últimos 14 dias
@@ -35,6 +76,16 @@ createServer(async (req, res) => {
   const url = new URL(req.url, "http://x");
   if (url.pathname === "/health") return json(res, 200, { ok: true });
   if (url.pathname === "/_calls") return json(res, 200, calls);
+  if (url.pathname === "/_mails") return json(res, 200, mails);
+  if (url.pathname === "/_mails_reset") { mails.length = 0; return json(res, 200, { ok: true }); }
+  if (url.pathname === "/v1/messages" && req.method === "POST") {
+    if (req.headers["x-api-key"] !== "sk-stub") return json(res, 401, { error: { message: "invalid x-api-key" } });
+    const payload = JSON.parse(await body(req));
+    const user = String(payload.messages?.[0]?.content ?? "");
+    calls.push({ kind: "anthropic.messages", model: payload.model, user });
+    const text = user.includes("Reescreva o título") ? "Cupom E2E de 10% de desconto em loja de exemplo" : user.includes("Escreva uma descrição") ? "Cupom de teste da IA. Vale para a primeira compra e não acumula com outras promoções." : "ok";
+    return json(res, 200, { content: [{ type: "text", text }] });
+  }
   if (url.pathname === "/_reset") { calls.length = 0; conversionSubId = null; idBase = Date.now(); return json(res, 200, { ok: true }); }
   if (url.pathname === "/_conversion" && req.method === "POST") { conversionSubId = JSON.parse(await body(req)).subId; return json(res, 200, { ok: true }); }
 

@@ -1,6 +1,7 @@
 // Boletim por e-mail: inscrição com confirmação, cancelamento sem login e o envio semanal. Só Supabase.
 import "server-only";
 import { randomBytes } from "node:crypto";
+import { hasMasterKey } from "../crypto";
 import { confirmationMail, digestMail, isValidEmail, normalizeEmail, NEWSLETTER_MAX_DEALS } from "../newsletter";
 import { getIntegrationConfig } from "./integrations";
 import { sendMails, type SmtpConfig } from "../integrations/smtp";
@@ -29,7 +30,7 @@ export async function newsletterAvailable(): Promise<boolean> {
   if (availability && availability.expires > Date.now()) return availability.value;
   let value = false;
   try {
-    value = !!(await smtp()) && !(await db().from("newsletter_subscribers").select("id", { head: true, count: "exact" }).limit(1)).error;
+    value = hasMasterKey() && !!(await smtp()) && !(await db().from("newsletter_subscribers").select("id").limit(1)).error;
   } catch {
     value = false;
   }

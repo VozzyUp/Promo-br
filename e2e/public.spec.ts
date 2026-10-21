@@ -76,3 +76,22 @@ test("F-BF hub da Black Friday mostra a contagem regressiva", async ({ page }) =
   await page.goto("/black-friday");
   await expect(page.getByText(/Faltam \d+ dias para a Black Friday|começa amanhã|É hoje|passou/)).toBeVisible();
 });
+
+test("N-1 boletim: o formulário só aparece com SMTP ligado e os links de confirmar e cancelar exigem clique", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByLabel("Seu e-mail", { exact: true })).toHaveCount(0); // sem SMTP configurado, não promete o que não entrega
+  await page.goto("/boletim/confirmar?t=" + "0".repeat(32));
+  await expect(page.getByRole("button", { name: "Confirmar inscrição" })).toBeVisible();
+  await page.getByRole("button", { name: "Confirmar inscrição" }).click();
+  await expect(page.locator("p[role=alert]")).toContainText(/não vale mais/);
+  await page.goto("/boletim/sair?t=invalido");
+  await page.getByRole("button", { name: "Cancelar inscrição" }).click();
+  await expect(page.locator("p[role=alert]")).toContainText(/não vale mais/);
+});
+
+test("G-1 login com Google: desligado por padrão, sem botão e sem erro", async ({ page }) => {
+  await page.goto("/entrar");
+  await expect(page.getByRole("button", { name: "Continuar com Google" })).toHaveCount(0);
+  await page.goto("/cadastrar");
+  await expect(page.getByRole("button", { name: "Continuar com Google" })).toHaveCount(0);
+});

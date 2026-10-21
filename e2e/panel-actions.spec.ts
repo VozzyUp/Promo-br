@@ -24,10 +24,21 @@ test.describe("ações do painel", () => {
     await page.goto(`/painel/ofertas?q=${encodeURIComponent(title)}&status=published`);
     const row = page.locator("main li").filter({ hasText: title }).first();
     await expect(row).toBeVisible();
-    await row.getByRole("button", { name: "Destacar 24h" }).click();
+    await row.getByLabel("Horas de destaque").selectOption("12");
+    await row.getByRole("button", { name: "Destacar", exact: true }).click();
     await expect(row.getByText("em destaque")).toBeVisible();
     await row.getByRole("button", { name: "Tirar destaque" }).click();
     await expect(row.getByText("em destaque")).toHaveCount(0);
+
+    // selo "Patrocinada": aparece na página pública e some ao tirar
+    const dealHref = await row.getByRole("link").first().getAttribute("href");
+    await row.getByRole("button", { name: "Marcar patrocinada" }).click();
+    await expect(row.getByText(/· patrocinada/)).toBeVisible();
+    await page.goto(dealHref!);
+    await expect(page.getByText("Patrocinada", { exact: true })).toBeVisible();
+    await page.goto(`/painel/ofertas?q=${encodeURIComponent(title)}&status=published`);
+    await page.locator("main li").filter({ hasText: title }).first().getByRole("button", { name: "Tirar patrocínio" }).click();
+    await expect(page.locator("main li").filter({ hasText: title }).first().getByText(/· patrocinada/)).toHaveCount(0);
 
     await row.getByText("Editar", { exact: true }).click();
     const newTitle = `${title} (editado ${stamp})`.slice(0, 140);
@@ -214,5 +225,20 @@ test.describe("ações do painel", () => {
     await page.getByLabel("Token do bot").fill("123:abc");
     await page.getByRole("button", { name: "Salvar", exact: true }).first().click();
     await expect(page.getByText(/MASTER_KEY não configurada/)).toBeVisible();
+  });
+  test("M-13 ranking: valor fora do limite é recusado; peso salvo volta na tela e o padrão é restaurado", async ({ page }) => {
+    await page.goto("/painel/ranking");
+    await page.getByLabel("Votos (quente menos frio)").fill("99");
+    await page.getByRole("button", { name: "Salvar pesos" }).click();
+    await expect(page.getByText(/fica entre 0 e 10/)).toBeVisible();
+    await page.getByLabel("Votos (quente menos frio)").fill("2,5");
+    await page.getByRole("button", { name: "Salvar pesos" }).click();
+    await expect(page.getByText("Salvo.")).toBeVisible();
+    await page.reload();
+    await expect(page.getByLabel("Votos (quente menos frio)")).toHaveValue("2,5");
+    await page.getByRole("button", { name: "Voltar ao padrão" }).click();
+    await expect(page.getByText("Salvo.")).toBeVisible();
+    await page.reload();
+    await expect(page.getByLabel("Votos (quente menos frio)")).toHaveValue("1,5");
   });
 });

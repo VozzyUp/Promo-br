@@ -23,7 +23,8 @@ import { RelatedDeals } from "@/components/related-deals";
 import { StickyDealCta } from "@/components/sticky-deal-cta";
 import { listDeals } from "@/lib/data/browse";
 import { getProfile } from "@/lib/data";
-import { getPriceHistory } from "@/lib/data/verification";
+import { getPriceHistory, listSameProductDeals } from "@/lib/data/verification";
+import { SameProductDeals } from "@/components/same-product-deals";
 
 export async function generateMetadata({ params }: PageProps<"/oferta/[slug]">) {
   const { slug } = await params;
@@ -41,12 +42,13 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
 
   const history = supabaseEnabled() ? await getPriceHistory(deal.id).catch(() => []) : [];
   // Ofertas parecidas (mesma categoria, as mais quentes) e dados do autor: só com o banco de verdade.
-  const [related, author] = supabaseEnabled()
+  const [related, author, sameProduct] = supabaseEnabled()
     ? await Promise.all([
         listDeals({ viewerId: null, tab: "quentes", page: 1, categoryId: deal.category?.id }).then((r) => r.items.filter((d) => d.id !== deal.id).slice(0, 4)).catch(() => []),
         deal.authorId ? getProfile(deal.authorId).catch(() => null) : Promise.resolve(null),
+        listSameProductDeals(deal.id).catch(() => []),
       ])
-    : [[], null];
+    : [[], null, []];
   const jsonLd = dealJsonLd(deal, process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000");
   const expired = deal.status === "expired";
   const live = deal.status === "published" || expired;
@@ -159,6 +161,8 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
           Alguns links nos pagam comissão, ou pagam ao autor da oferta, quando você compra. Isso não muda o que aparece aqui.
         </p>
       </section>
+
+      <SameProductDeals current={deal} others={sameProduct} />
 
       <RelatedDeals deals={related} />
 

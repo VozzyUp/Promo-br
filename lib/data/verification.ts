@@ -1,8 +1,10 @@
 // Histórico de preço, selos de verificação e revalidação periódica das ofertas no ar. Só Supabase.
 import "server-only";
-import { fetchPreview } from "../link-preview";
+import { fetchLinkInfo, fetchPreview } from "../link-preview";
 import { checkPrice, priceRoseTwice, type PricePoint } from "../price-check";
 import { db } from "../supabase/db";
+import type { DealView } from "../types";
+import { JOIN, toViews, type DealJoinRow } from "./supabase";
 
 type SnapshotSource = "robot" | "recheck" | "post" | "feed";
 
@@ -146,4 +148,64 @@ export async function expireDueDeals(): Promise<number> {
     .eq("status", "published").lt("expires_at", new Date().toISOString()).select("id");
   if (error) throw error;
   return (data ?? []).length;
+}
+// ---------- Mesmo produto em outras lojas (por código de barras) ----------
+
+/** Liga o anúncio da oferta a um produto pelo GTIN (cria o produto se for novo). Devolve false se a oferta não tem anúncio. */
+export async function linkDealToProduct(dealId: string, ean: string, title: string): Promise<boolean> {
+  const d = await db().from("deals").select("listing_id").eq("id", dealId).maybeSingle();
+  const listingId = (d.data as { listing_id: string | null } | null)?.listing_id;
+  if (!listingId) return false;
+  let productId: string | null = null;
+  const found = await db().from("products").select("id").eq("ean", ean).maybeSingle();
+  if (found.error) throw found.error;
+  productId = (found.data as { id: string } | null)?.id ?? null;
+  if (!productId) {
+    const ins = await db().from("products").insert({ ean, normalized_title: title.toLowerCase().slice(0, 200) }).select("id").single();
+    if (ins.error?.code === "23505") {
+      productId = ((await db().from("products").select("id").eq("ean", ean).single()).data as { id: string }).id;
+    } else if (ins.error) throw ins.error;
+    else productId = (ins.data as { id: string }).id;
+  }
+  const up = await db().from("listings").update({ product_id: productId }).eq("id", listingId);
+  if (up.error) throw up.error;
+  return true;
+}
+
+export async function unlinkDealProduct(dealId: string): Promise<void> {
+  const d = await db().from("deals").select("listing_id").eq("id", dealId).maybeSingle();
+  const listingId = (d.data as { listing_id: string | null } | null)?.listing_id;
+  if (listingId) await db().from("listings").update({ product_id: null }).eq("id", listingId);
+}
+
+/** Pesquisa e liga o produto pelo código de barras da página da loja. Roda depois da resposta, e nunca derruba a publicação. */
+export async function linkProductFromPage(dealId: string, url: string, title: string): Promise<void> {
+  try {
+    const { preview } = await fetchLinkInfo(url);
+    if (preview?.gtin) await linkDealToProduct(dealId, preview.gtin, title);
+  } catch (e) {
+    console.error("[produto] não foi possível ler o código de barras", e instanceof Error ? e.message : e);
+  }
+}
+
+/** EAN do produto ligado à oferta (para o painel). */
+export async function getDealEan(dealId: string): Promise<string | null> {
+  const { data } = await db().from("deals").select("listing:listings!deals_listing_id_fkey(product:products(ean))").eq("id", dealId).maybeSingle();
+  const row = data as unknown as { listing: { product: { ean: string | null } | null } | null } | null;
+  return row?.listing?.product?.ean ?? null;
+}
+
+/** Outras ofertas no ar do mesmo produto, da mais barata para a mais cara. */
+export async function listSameProductDeals(dealId: string, limit = 5): Promise<DealView[]> {
+  const d = await db().from("deals").select("listing:listings!deals_listing_id_fkey(product_id)").eq("id", dealId).maybeSingle();
+  const productId = (d.data as unknown as { listing: { product_id: string | null } | null } | null)?.listing?.product_id;
+  if (!productId) return [];
+  const ls = await db().from("listings").select("id").eq("product_id", productId);
+  const ids = ((ls.data ?? []) as { id: string }[]).map((l) => l.id);
+  if (ids.length === 0) return [];
+  const nowIso = new Date().toISOString();
+  const { data, error } = await db().from("deals_ranked").select(JOIN).in("listing_id", ids).neq("id", dealId).eq("status", "published")
+    .or(`expires_at.is.null,expires_at.gt.${nowIso}`).not("price_cents", "is", null).order("price_cents", { ascending: true }).limit(limit);
+  if (error) throw error;
+  return toViews(data as unknown as DealJoinRow[], null);
 }

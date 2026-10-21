@@ -23,3 +23,6 @@ delete from blocked_domains where domain in ('golpe-teste.com') or domain like '
 delete from integrations;
 -- Execuções antigas do agendador
 delete from job_runs;
+-- produto criado pelo teste de comparação por código de barras (e2e/product-compare.spec.ts)
+delete from products where ean = '4006381333931';
+

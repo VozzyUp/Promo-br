@@ -4,6 +4,7 @@ import { decryptJson, encryptJson, hasMasterKey } from "../crypto";
 import { INTEGRATIONS, integrationDef, type IntegrationKey } from "../integrations-def";
 import { getMe } from "../integrations/telegram";
 import { searchOffers } from "../integrations/shopee";
+import { complete } from "../integrations/anthropic";
 import { verifySmtp } from "../integrations/smtp";
 import { instanceStatus } from "../integrations/uazapi";
 import { db } from "../supabase/db";
@@ -48,6 +49,21 @@ export async function listIntegrationViews(): Promise<IntegrationView[]> {
       secretsSet: Object.fromEntries(def.fields.filter((f) => f.secret).map((f) => [f.name, !!secrets[f.name]])),
     };
   });
+}
+
+let aiCache: { value: boolean; expires: number } | null = null;
+
+/** O botão de IA só aparece com a integração ligada e completa. Cache de 60 s. */
+export async function aiAvailable(): Promise<boolean> {
+  if (aiCache && aiCache.expires > Date.now()) return aiCache.value;
+  let value = false;
+  try {
+    value = hasMasterKey() && !!(await getIntegrationConfig("anthropic"));
+  } catch {
+    value = false;
+  }
+  aiCache = { value, expires: Date.now() + 60_000 };
+  return value;
 }
 
 /** Configuração completa (pública + secreta) de uma integração ligada; null se desligada ou incompleta. */
@@ -95,6 +111,9 @@ export async function testIntegration(key: IntegrationKey): Promise<{ ok: boolea
     else if (key === "smtp") {
       await verifySmtp({ host: cfg.host, port: cfg.port, user: cfg.user, password: cfg.password, from: cfg.from });
       result = { ok: true, message: `Conectado a ${cfg.host}:${cfg.port} e autenticado.` };
+    } else if (key === "anthropic") {
+      await complete({ apiKey: cfg.apiKey, model: cfg.model }, { system: "Responda só com a palavra ok.", user: "ok?", maxTokens: 8 });
+      result = { ok: true, message: `Conectado. O modelo ${cfg.model} respondeu.` };
     } else if (key === "shopee") {
       const offers = await searchOffers({ appId: cfg.appId, secret: cfg.secret }, { keyword: "fone", limit: 1 });
       result = { ok: true, message: `Conectado. A busca de teste devolveu ${offers.length} produto(s).` };
