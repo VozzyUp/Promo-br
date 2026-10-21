@@ -4,6 +4,7 @@ import { AccountMenu } from "@/components/account-menu";
 import { NotificationsMenu, type MenuNotification } from "@/components/notifications-menu";
 import { buttonClasses } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
+import { MenuDrawer, type MenuCategory } from "@/components/menu-drawer";
 import type { Session } from "@/lib/types";
 
 const nav = [
@@ -15,22 +16,22 @@ const nav = [
 ];
 
 export function AppHeader({
-  session, unread = 0, notifications = [],
-}: { session: Session | null; unread?: number; notifications?: MenuNotification[] }) {
+  session, unread = 0, notifications = [], categories = [],
+}: { session: Session | null; unread?: number; notifications?: MenuNotification[]; categories?: MenuCategory[] }) {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-bg/95 backdrop-blur">
       <a href="#conteudo" className="skip-link">Pular para o conteúdo</a>
       <div className="mx-auto flex h-14 max-w-(--layout-max) items-center gap-3 px-4">
         <Logo />
-        <button type="button" className="hidden items-center gap-1.5 rounded-pill border border-border px-3 py-1.5 text-sm md:flex" aria-label="Abrir menu">
+        <MenuDrawer categories={categories} loggedIn={!!session} unread={unread} className="hidden items-center gap-1.5 rounded-pill border border-border px-3 py-1.5 text-sm md:flex">
           <Menu className="size-4" aria-hidden /> Menu
-        </button>
-        <form action="/busca" role="search" className="relative hidden flex-1 sm:block md:max-w-56">
+        </MenuDrawer>
+        <form action="/busca" role="search" className="relative flex-1 md:max-w-56">
           <label htmlFor="q" className="sr-only">Buscar ofertas</label>
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" aria-hidden />
           <input id="q" name="q" type="search" placeholder="Buscar ofertas" className="h-9 w-full rounded-pill border border-border bg-bg pl-9 pr-3 text-sm" />
         </form>
-        <div className="ml-auto flex items-center gap-1 sm:gap-3">
+        <div className="ml-auto hidden items-center gap-1 sm:gap-3 md:flex">
           <Link href="/alertas" className="hidden items-center gap-1.5 text-sm font-bold lg:flex">
             <BellPlus className="size-4" aria-hidden /> Criar alerta
           </Link>

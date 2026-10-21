@@ -1,5 +1,5 @@
 feature,area,priority,original,clone,notes
-Feed com abas (Pra você / Mais quentes / Em alta / Novas),descoberta,must,yes,partial,S01: Mais quentes/Maiores descontos/Novas; falta Pra você e scroll infinito
+Feed com abas (Pra você / Mais quentes / Em alta / Novas),descoberta,must,yes,yes,"Pra você (logado), Mais quentes, Maiores descontos, Novas; rolagem infinita"
 Card de oferta com preço/antes/%off/loja,descoberta,must,yes,yes,DealCard + skeleton + expirada + cupom
 Página de detalhe da oferta,descoberta,must,yes,yes,"galeria, histórico de preço, dados estruturados, comentários"
 Redirect /ir/[codigo] com log de clique e subId,monetização,must,yes,yes,"1 clique por visitante/dia, sem robôs, canal e subId"
@@ -48,7 +48,7 @@ Envio WhatsApp (UAZAPI),distribuição,should,no,partial,envio implementado; fal
 Textos de oferta com IA,distribuição,could,no,no,chave configurada no painel
 Slots de anúncio sem CLS,monetização,should,yes,yes,"altura reservada, anúncio só após o aceite"
 Deploy ghcr + Portainer Swarm + Traefik,infra,must,no,partial,"Dockerfile, Actions e stack prontos; falta primeiro push e deploy"
-Cadastro com e-mail e senha (+ Google opcional) com verificação de e-mail,conta,must,yes,partial,Supabase Auth; falta SMTP próprio e Google login
+Cadastro com e-mail e senha (+ Google opcional) com verificação de e-mail,conta,must,yes,partial,Supabase Auth; falta SMTP próprio (você) e Google login
 Usuário publica oferta (link + preço + cupom + imagem),comunidade,must,yes,yes,assistente completo
 Link de afiliado do próprio usuário,afiliados,must,no,yes,política keep_author: o link do usuário nunca muda
 Votação quente/frio,comunidade,must,yes,yes,quente/frio otimista

@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import { Figtree } from "next/font/google";
 import { AppHeader } from "@/components/app-header";
 import { BfBanner } from "@/components/bf-banner";
+import { BottomNav } from "@/components/bottom-nav";
 import { AdScript } from "@/components/consent/ad-script";
 import { AdsProvider } from "@/components/consent/ads-context";
 import { ConsentBanner } from "@/components/consent/consent-banner";
 import { Footer } from "@/components/footer";
 import type { MenuNotification } from "@/components/notifications-menu";
 import { getSession } from "@/lib/auth";
+import { listCategories } from "@/lib/data";
 import { DEFAULT_BRAND, getAdsSettings, getSetting, type BrandSettings } from "@/lib/data/settings";
 import { countUnread, listNotifications } from "@/lib/data/social";
 import { timeAgo } from "@/lib/format";
@@ -38,6 +40,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       console.error("[layout] notificações indisponíveis", e);
     }
   }
+  const categories = (await listCategories().catch(() => [])).map((c) => ({ name: c.name, slug: c.slug }));
   const ads = await getAdsSettings();
   const brand = await getSetting<BrandSettings>("public.brand", DEFAULT_BRAND);
   return (
@@ -45,9 +48,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col font-sans">
         <AdsProvider config={ads}>
           <BfBanner />
-          <AppHeader session={session} unread={unread} notifications={notifications} />
+          <AppHeader session={session} unread={unread} notifications={notifications} categories={categories} />
           <main id="conteudo" className="flex-1">{children}</main>
           <Footer notice={brand.commissionNotice} />
+          <BottomNav categories={categories} loggedIn={!!session} unread={unread} />
           <ConsentBanner />
           <AdScript />
         </AdsProvider>

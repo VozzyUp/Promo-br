@@ -3,7 +3,7 @@ import { ConsentReset } from "@/components/consent/consent-banner";
 
 export function Footer({ notice }: { notice: string }) {
   return (
-    <footer className="mt-12 border-t border-border bg-bg">
+    <footer className="mt-12 border-t border-border bg-bg pb-16 md:pb-0">
       <div className="mx-auto flex max-w-(--layout-max) flex-col gap-4 px-4 py-8 text-sm text-muted md:flex-row md:justify-between">
         <p className="max-w-md">
           {notice}

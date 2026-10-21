@@ -1,0 +1,65 @@
+{
+  "mode": "layout",
+  "original": {
+    "width": 390,
+    "height": 844
+  },
+  "clone": {
+    "width": 390,
+    "height": 844
+  },
+  "compared_at": {
+    "width": 390,
+    "height": 844
+  },
+  "height_delta_pct": 0.0,
+  "score": 28.6,
+  "verdict": "different",
+  "regions": [
+    {
+      "x": 0,
+      "y": 96,
+      "w": 384,
+      "h": 736,
+      "cells": 148,
+      "where": "middle centre"
+    },
+    {
+      "x": 32,
+      "y": 0,
+      "w": 352,
+      "h": 96,
+      "cells": 21,
+      "where": "top centre"
+    },
+    {
+      "x": 160,
+      "y": 768,
+      "w": 64,
+      "h": 64,
+      "cells": 4,
+      "where": "bottom centre"
+    },
+    {
+      "x": 64,
+      "y": 768,
+      "w": 64,
+      "h": 64,
+      "cells": 3,
+      "where": "bottom left"
+    },
+    {
+      "x": 0,
+      "y": 768,
+      "w": 32,
+      "h": 32,
+      "cells": 1,
+      "where": "bottom left"
+    }
+  ],
+  "files": {
+    "original": "replica/screens/S02-cupom-mobile-top.png",
+    "clone": "replica/clone-screens/S02-cupom-mobile-top.png"
+  },
+  "diff_image": "replica/diffs/S02-cupom-mobile-top.png"
+}

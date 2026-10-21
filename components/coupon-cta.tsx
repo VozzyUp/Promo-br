@@ -23,7 +23,7 @@ export function CouponCTA({ code, couponCode, size = "md" }: { code: string; cou
       type="button"
       onClick={onClick}
       aria-label={`Copiar o código ${couponCode} e abrir a loja`}
-      className={`group relative flex items-center overflow-hidden rounded-pill bg-accent font-bold text-on-accent hover:bg-accent-hover ${size === "lg" ? "h-14 w-full text-base" : "h-10 min-w-56 text-sm"}`}
+      className={`group relative flex items-center overflow-hidden rounded-pill bg-accent font-bold text-on-accent hover:bg-accent-hover ${size === "lg" ? "h-14 w-full text-base" : "h-10 w-full text-sm sm:w-auto sm:min-w-56"}`}
     >
       <span className="flex-1 px-6 text-center">{copied ? "Código copiado!" : size === "lg" ? "Usar cupom" : "Pegar cupom e ir à loja"}</span>
       <span className="flex h-full items-center rounded-r-pill border-2 border-dashed border-accent bg-bg pl-3 pr-4 font-mono text-accent transition-[padding] duration-(--motion-base) group-hover:pl-5">

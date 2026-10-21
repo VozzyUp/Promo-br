@@ -6,13 +6,15 @@ import { discountPercent, endsWithinHours, formatPrice, fullDate, timeAgo } from
 import type { DealView, Verdict } from "@/lib/types";
 
 export function DealImage({ deal, size = "card" }: { deal: Pick<DealView, "imageUrl" | "title" | "store">; size?: "card" | "page" | "mini" }) {
-  const dims = size === "page" ? "size-full min-h-64" : size === "mini" ? "size-[100px]" : "size-24 sm:size-(--card-image)";
+  const dims = size === "page" ? "mx-auto size-72 max-w-full md:size-full md:min-h-64" : size === "mini" ? "size-[100px]" : "size-24 sm:size-(--card-image)";
   if (deal.imageUrl) {
     // eslint-disable-next-line @next/next/no-img-element -- trocar por next/image quando o storage existir
     return <img src={deal.imageUrl} alt={deal.title} className={`${dims} rounded-xs object-contain`} />;
   }
+  // Sem imagem: no celular a página mostra só um cartão pequeno com o nome da loja, não um quadrado enorme.
+  const blank = size === "page" ? "mx-auto size-40 max-w-full md:size-full md:min-h-64" : dims;
   return (
-    <div className={`${dims} grid place-items-center rounded-xs bg-surface text-center`} role="img" aria-label={`Sem imagem: ${deal.title}`}>
+    <div className={`${blank} grid place-items-center rounded-xs bg-surface text-center`} role="img" aria-label={`Sem imagem: ${deal.title}`}>
       <span className="px-2 text-sm font-bold text-muted">{deal.store.name}</span>
     </div>
   );
@@ -71,11 +73,11 @@ export function StoreAndAuthor({ deal }: { deal: DealView }) {
   return (
     <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
       <span>Disponível em <strong className="text-text">{deal.store.name}</strong></span>
-      <span className="flex items-center gap-1.5">
-        <span className="grid size-5 place-items-center rounded-pill bg-surface text-xs font-bold" aria-hidden>
+      <span className="flex min-w-0 items-center gap-1.5">
+        <span className="grid size-5 shrink-0 place-items-center rounded-pill bg-surface text-xs font-bold" aria-hidden>
           {deal.author.displayName.slice(0, 1).toUpperCase()}
         </span>
-        Postado por {deal.author.username}
+        <span className="truncate">Postado por {deal.author.username}</span>
       </span>
     </p>
   );
@@ -109,7 +111,7 @@ export function GoToDealLink({ code, size = "md" }: { code: string; size?: "md" 
       href={`/ir/${code}`}
       target="_blank"
       rel="sponsored noopener"
-      className={`inline-flex items-center justify-center gap-2 rounded-pill bg-accent px-6 font-bold text-on-accent hover:bg-accent-hover ${size === "lg" ? "h-14 w-full text-base" : "h-10 text-sm"}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-pill bg-accent px-6 font-bold text-on-accent hover:bg-accent-hover ${size === "lg" ? "h-14 w-full text-base" : "h-10 w-full text-sm sm:w-auto"}`}
     >
       Ir para a oferta <ExternalLink className="size-4" aria-hidden />
       <span className="sr-only">(abre em nova aba)</span>

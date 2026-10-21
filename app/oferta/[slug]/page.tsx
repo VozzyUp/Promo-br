@@ -19,6 +19,10 @@ import { supabaseEnabled } from "@/lib/supabase/server";
 import { RichText } from "@/lib/rich-text";
 import { PriceHistory } from "@/components/price-history";
 import { dealJsonLd, jsonLdScript } from "@/lib/structured-data";
+import { RelatedDeals } from "@/components/related-deals";
+import { StickyDealCta } from "@/components/sticky-deal-cta";
+import { listDeals } from "@/lib/data/browse";
+import { getProfile } from "@/lib/data";
 import { getPriceHistory } from "@/lib/data/verification";
 
 export async function generateMetadata({ params }: PageProps<"/oferta/[slug]">) {
@@ -36,6 +40,13 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
   if (!deal) notFound();
 
   const history = supabaseEnabled() ? await getPriceHistory(deal.id).catch(() => []) : [];
+  // Ofertas parecidas (mesma categoria, as mais quentes) e dados do autor: só com o banco de verdade.
+  const [related, author] = supabaseEnabled()
+    ? await Promise.all([
+        listDeals({ viewerId: null, tab: "quentes", page: 1, categoryId: deal.category?.id }).then((r) => r.items.filter((d) => d.id !== deal.id).slice(0, 4)).catch(() => []),
+        deal.authorId ? getProfile(deal.authorId).catch(() => null) : Promise.resolve(null),
+      ])
+    : [[], null];
   const jsonLd = dealJsonLd(deal, process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000");
   const expired = deal.status === "expired";
   const live = deal.status === "published" || expired;
@@ -70,7 +81,7 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
       {sp.enviada && deal.status === "published" ? <FormMessage tone="success">Sua oferta está no ar.</FormMessage> : null}
       {deal.status === "rejected" ? <FormMessage>Esta oferta não foi aprovada{deal.rejectReason ? `: ${deal.rejectReason}` : "."}</FormMessage> : null}
 
-      <article aria-labelledby="deal-title" className="flex flex-col gap-4 rounded-card bg-bg p-4 shadow-card md:p-6">
+      <article aria-labelledby="deal-title" className="-mx-4 flex flex-col gap-4 border-y border-border bg-bg p-4 sm:mx-0 sm:rounded-card sm:border-0 sm:shadow-card md:p-6">
         {deal.expiresAt ? <ExpiryBanner iso={deal.expiresAt} /> : null}
         <div className="flex flex-col gap-6 md:flex-row">
           <div className="md:w-80 md:shrink-0">
@@ -105,7 +116,7 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
                 <code className="w-fit rounded-sm border-2 border-dashed border-border-input px-3 py-2 font-mono text-base">{deal.couponCode}</code>
               </div>
             ) : null}
-            <div className="mt-2">
+            <div className="mt-2" id="deal-cta">
               {expired || deal.status !== "published" ? null : deal.couponCode ? (
                 <CouponCTA code={deal.code} couponCode={deal.couponCode} size="lg" />
               ) : (
@@ -117,7 +128,7 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
       </article>
 
       {deal.status === "published" ? (
-        <section className="flex flex-col gap-3 rounded-card bg-bg p-4 shadow-card sm:flex-row sm:items-center sm:justify-between md:p-6">
+        <section className="-mx-4 flex flex-col gap-3 border-y border-border bg-bg p-4 sm:mx-0 sm:flex-row sm:items-center sm:justify-between sm:rounded-card sm:border-0 sm:shadow-card md:p-6">
           <p className="text-title font-bold">Vale a pena? Seu voto ajuda outros caçadores a decidir.</p>
           <TemperatureVote dealId={deal.id} initial={{ temperature: deal.temperature, myVote: deal.myVote }} loggedIn={!!session} />
         </section>
@@ -127,15 +138,21 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
 
       <AdSlot minHeight={120} />
 
-      <section aria-labelledby="sobre-title" className="flex flex-col gap-4 rounded-card bg-bg p-4 shadow-card md:p-6">
+      <section aria-labelledby="sobre-title" className="-mx-4 flex flex-col gap-4 border-y border-border bg-bg p-4 sm:mx-0 sm:rounded-card sm:border-0 sm:shadow-card md:p-6">
         <h2 id="sobre-title" className="text-title font-bold">{deal.couponCode && deal.priceCents == null ? "Sobre este cupom" : "Sobre esta oferta"}</h2>
         <div className="flex items-center gap-3">
           <span className="grid size-10 place-items-center rounded-pill bg-surface font-bold" aria-hidden>
             {deal.author.displayName.slice(0, 1).toUpperCase()}
           </span>
-          <p className="text-sm">
-            Postado por <Link href={`/u/${deal.author.username}`} className="font-bold hover:text-accent">{deal.author.username}</Link>
-          </p>
+          <div className="flex flex-col text-sm">
+            <span>Postado por <Link href={`/u/${deal.author.username}`} className="font-bold hover:text-accent">{deal.author.username}</Link></span>
+            {author ? (
+              <span className="text-muted">
+                Membro desde {new Date(author.createdAt).getFullYear()}
+                {author.approvedPosts > 0 ? ` · ${author.approvedPosts} ofertas aprovadas` : ""}
+              </span>
+            ) : null}
+          </div>
         </div>
         {deal.description ? <RichText text={deal.description} className="text-base" /> : <p className="text-sm text-muted">O autor não deixou detalhes.</p>}
         {deal.status === "published" ? (
@@ -150,6 +167,14 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
         </p>
       </section>
 
+      <RelatedDeals deals={related} />
+
+      {deal.status === "published" && !expired ? (
+        <StickyDealCta>
+          {deal.couponCode ? <CouponCTA code={deal.code} couponCode={deal.couponCode} /> : <GoToDealLink code={deal.code} />}
+        </StickyDealCta>
+      ) : null}
+
       {thread ? (
         <CommentSection
           dealId={deal.id}
@@ -163,6 +188,7 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
           subscribed={subscribed}
         />
       ) : null}
+      <div id="page-end" className="h-px" aria-hidden />
     </div>
   );
 }
