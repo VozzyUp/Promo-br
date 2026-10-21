@@ -14,13 +14,14 @@ const smallBtn = "inline-flex h-8 items-center gap-1 rounded-pill px-2 text-sm t
 type Props = {
   c: CommentView;
   topId: string;
-  dealId: string;
+  dealId?: string;
+  threadId?: string;
   loggedIn: boolean;
   viewerId: string | null;
   viewerRole: Role | null;
 };
 
-export function CommentItem({ c, topId, dealId, loggedIn, viewerId, viewerRole }: Props) {
+export function CommentItem({ c, topId, dealId, threadId, loggedIn, viewerId, viewerRole }: Props) {
   const own = !!viewerId && c.author?.id === viewerId;
   const staff = viewerRole === "admin" || viewerRole === "moderator";
   const isReply = topId !== c.id;
@@ -56,7 +57,7 @@ export function CommentItem({ c, topId, dealId, loggedIn, viewerId, viewerRole }
                 loggedIn={loggedIn}
                 own={own}
               />
-              <ReplyToggle dealId={dealId} parentId={topId} mention={isReply ? (c.author?.username ?? null) : null} loggedIn={loggedIn} />
+              <ReplyToggle dealId={dealId} threadId={threadId} parentId={topId} mention={isReply ? (c.author?.username ?? null) : null} loggedIn={loggedIn} />
               {!own ? (
                 <ReportDialog
                   target="comment"
@@ -89,14 +90,14 @@ export function CommentItem({ c, topId, dealId, loggedIn, viewerId, viewerRole }
         {!isReply && c.replies.length > 0 ? (
           <div className="mt-3 flex flex-col gap-3 border-l-2 border-border pl-3">
             {shownReplies.map((r) => (
-              <CommentItem key={r.id} c={r} topId={c.id} dealId={dealId} loggedIn={loggedIn} viewerId={viewerId} viewerRole={viewerRole} />
+              <CommentItem key={r.id} c={r} topId={c.id} dealId={dealId} threadId={threadId} loggedIn={loggedIn} viewerId={viewerId} viewerRole={viewerRole} />
             ))}
             {moreReplies.length > 0 ? (
               <details>
                 <summary className="cursor-pointer text-sm font-bold text-accent">Ver mais respostas ({moreReplies.length})</summary>
                 <div className="mt-3 flex flex-col gap-3">
                   {moreReplies.map((r) => (
-                    <CommentItem key={r.id} c={r} topId={c.id} dealId={dealId} loggedIn={loggedIn} viewerId={viewerId} viewerRole={viewerRole} />
+                    <CommentItem key={r.id} c={r} topId={c.id} dealId={dealId} threadId={threadId} loggedIn={loggedIn} viewerId={viewerId} viewerRole={viewerRole} />
                   ))}
                 </div>
               </details>

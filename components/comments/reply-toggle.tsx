@@ -7,7 +7,9 @@ import { useState } from "react";
 import { CommentForm } from "@/components/comments/comment-form";
 
 /** Botão "Responder" que abre o formulário logo abaixo do comentário. */
-export function ReplyToggle({ dealId, parentId, mention, loggedIn }: { dealId: string; parentId: string; mention: string | null; loggedIn: boolean }) {
+export function ReplyToggle({
+  dealId, threadId, parentId, mention, loggedIn,
+}: { dealId?: string; threadId?: string; parentId: string; mention: string | null; loggedIn: boolean }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -32,6 +34,7 @@ export function ReplyToggle({ dealId, parentId, mention, loggedIn }: { dealId: s
         <div className="order-last mt-2 w-full basis-full">
           <CommentForm
             dealId={dealId}
+            threadId={threadId}
             parentId={parentId}
             initialText={mention ? `@${mention} ` : ""}
             autoFocus

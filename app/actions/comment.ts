@@ -6,7 +6,7 @@ import { getSession } from "@/lib/auth";
 import { getProfile } from "@/lib/data";
 import { syncBadges } from "@/lib/data/gamification";
 import {
-  countCommentsSince, createComment, getCommentDealId, getDealSlugById, hasSameRecentComment, markDealExpired,
+  countCommentsSince, createComment, getCommentTarget, getDealSlugById, hasSameRecentComment, markDealExpired, pathForTarget,
   reactToComment, removeComment, reportComment, reportDeal, setSubscription,
 } from "@/lib/data/comments";
 import { extractMentions } from "@/lib/mentions";
@@ -16,7 +16,8 @@ export type CommentState = { error?: string; ok?: boolean } | undefined;
 
 const uuid = z.string().uuid();
 const commentSchema = z.object({
-  dealId: uuid,
+  dealId: z.union([uuid, z.literal("")]).optional(),
+  threadId: z.union([uuid, z.literal("")]).optional(),
   parentId: z.union([uuid, z.literal("")]).optional(),
   body: z.string().trim().min(1, "Escreva alguma coisa.").max(2000, "Máximo de 2.000 caracteres."),
 });
@@ -29,7 +30,10 @@ export async function postCommentAction(_prev: CommentState, form: FormData): Pr
   if (!session) return { error: "Entre na sua conta para comentar." };
   const parsed = commentSchema.safeParse(Object.fromEntries(form));
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Comentário inválido." };
-  const { dealId, body } = parsed.data;
+  const { body } = parsed.data;
+  const dealId = parsed.data.dealId || null;
+  const threadId = parsed.data.threadId || null;
+  if ((dealId === null) === (threadId === null)) return { error: "Comentário inválido." };
   const parentId = parsed.data.parentId || null;
 
   const profile = await getProfile(session.userId);
@@ -50,7 +54,7 @@ export async function postCommentAction(_prev: CommentState, form: FormData): Pr
   }
 
   try {
-    await createComment({ dealId, userId: session.userId, parentId, body, mentions: extractMentions(body) });
+    await createComment({ dealId, threadId, userId: session.userId, parentId, body, mentions: extractMentions(body) });
   } catch (e) {
     console.error("[comment]", e);
     return { error: "Não foi possível enviar o comentário. Tente de novo." };
@@ -60,8 +64,8 @@ export async function postCommentAction(_prev: CommentState, form: FormData): Pr
   } catch (e) {
     console.error("[badges]", e);
   }
-  const slug = await getDealSlugById(dealId);
-  if (slug) revalidatePath(`/oferta/${slug}`);
+  const path = await pathForTarget({ dealId, threadId });
+  if (path) revalidatePath(path);
   return { ok: true };
 }
 
@@ -102,9 +106,8 @@ export async function reportAction(input: unknown): Promise<{ message: string } 
     }
     const result = await reportComment(r.id, session.userId, r.kind, r.note || null);
     if (result === "not_found") return { error: "Esse comentário não está mais disponível." };
-    const dealId = await getCommentDealId(r.id);
-    const slug = dealId ? await getDealSlugById(dealId) : null;
-    if (slug) revalidatePath(`/oferta/${slug}`);
+    const path = await pathForTarget(await getCommentTarget(r.id));
+    if (path) revalidatePath(path);
     return { message: "Obrigado! A equipe vai revisar esse comentário." };
   } catch (e) {
     console.error("[report]", e);
@@ -144,7 +147,7 @@ export async function removeCommentFormAction(form: FormData): Promise<void> {
   const session = await getSession();
   const id = String(form.get("id") ?? "");
   if (!session || !uuid.safeParse(id).success) return;
-  const dealId = await removeComment(id, { id: session.userId, role: session.role });
-  const slug = dealId ? await getDealSlugById(dealId) : null;
-  if (slug) revalidatePath(`/oferta/${slug}`);
+  const target = await removeComment(id, { id: session.userId, role: session.role });
+  const path = await pathForTarget(target);
+  if (path) revalidatePath(path);
 }

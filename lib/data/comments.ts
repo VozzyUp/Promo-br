@@ -5,18 +5,18 @@ import type { CommentReaction, CommentView, Role } from "../types";
 
 type AuthorRow = { id: string; username: string; display_name: string; avatar_url: string | null; role: Role };
 type Row = {
-  id: string; deal_id: string; parent_id: string | null; user_id: string | null; body: string;
+  id: string; deal_id: string | null; thread_id: string | null; parent_id: string | null; user_id: string | null; body: string;
   status: "visible" | "removed"; created_at: string; likes_count: number; helpful_count: number; haha_count: number;
   author: AuthorRow | null;
 };
 
 const COLS =
-  "id, deal_id, parent_id, user_id, body, status, created_at, likes_count, helpful_count, haha_count, " +
+  "id, deal_id, thread_id, parent_id, user_id, body, status, created_at, likes_count, helpful_count, haha_count, " +
   "author:profiles!comments_user_id_fkey(id, username, display_name, avatar_url, role)";
 
 function toView(r: Row, mine: CommentReaction | null): CommentView {
   return {
-    id: r.id, dealId: r.deal_id, parentId: r.parent_id, body: r.body, removed: r.status === "removed", createdAt: r.created_at,
+    id: r.id, dealId: r.deal_id, threadId: r.thread_id, parentId: r.parent_id, body: r.body, removed: r.status === "removed", createdAt: r.created_at,
     author: r.author
       ? { id: r.author.id, username: r.author.username, displayName: r.author.display_name, avatarUrl: r.author.avatar_url, role: r.author.role }
       : null,
@@ -25,10 +25,12 @@ function toView(r: Row, mine: CommentReaction | null): CommentView {
 }
 
 /** Comentários da oferta em árvore de 2 níveis. Escondidos por denúncia não aparecem; removidos só se tiverem respostas. */
-export async function listComments(dealId: string, viewerId: string | null, order: "asc" | "desc" = "asc") {
-  const { data, error } = await db()
-    .from("comments").select(COLS).eq("deal_id", dealId).in("status", ["visible", "removed"])
-    .order("created_at", { ascending: true }).limit(400);
+export type CommentTarget = { dealId: string } | { threadId: string };
+
+export async function listComments(target: CommentTarget, viewerId: string | null, order: "asc" | "desc" = "asc") {
+  const base = db().from("comments").select(COLS);
+  const scoped = "dealId" in target ? base.eq("deal_id", target.dealId) : base.eq("thread_id", target.threadId);
+  const { data, error } = await scoped.in("status", ["visible", "removed"]).order("created_at", { ascending: true }).limit(400);
   if (error) throw error;
   const rows = data as unknown as Row[];
 
@@ -78,9 +80,9 @@ export async function reactToComment(commentId: string, userId: string, kind: Co
 
 /** Autor ou equipe tira o comentário do ar (fica um marcador se houver respostas). */
 export async function removeComment(commentId: string, actor: { id: string; role: Role }) {
-  const { data, error } = await db().from("comments").select("id, user_id, deal_id").eq("id", commentId).maybeSingle();
+  const { data, error } = await db().from("comments").select("id, user_id, deal_id, thread_id").eq("id", commentId).maybeSingle();
   if (error) throw error;
-  const c = data as { id: string; user_id: string | null; deal_id: string } | null;
+  const c = data as { id: string; user_id: string | null; deal_id: string | null; thread_id: string | null } | null;
   if (!c) return null;
   const staff = actor.role === "admin" || actor.role === "moderator";
   if (c.user_id !== actor.id && !staff) return null;
@@ -89,7 +91,7 @@ export async function removeComment(commentId: string, actor: { id: string; role
   if (staff && c.user_id !== actor.id) {
     await db().from("moderation_actions").insert({ moderator_id: actor.id, target_type: "comment", target_id: commentId, action: "remove", reason: null });
   }
-  return c.deal_id;
+  return { dealId: c.deal_id, threadId: c.thread_id };
 }
 
 export async function reportComment(commentId: string, userId: string, kind: string, note: string | null) {
@@ -125,10 +127,31 @@ export async function getDealSlugById(dealId: string) {
   return (data as { slug: string } | null)?.slug ?? null;
 }
 
-export async function getCommentDealId(commentId: string) {
-  const { data, error } = await db().from("comments").select("deal_id").eq("id", commentId).maybeSingle();
+export async function getCommentTarget(commentId: string) {
+  const { data, error } = await db().from("comments").select("deal_id, thread_id").eq("id", commentId).maybeSingle();
   if (error) throw error;
-  return (data as { deal_id: string } | null)?.deal_id ?? null;
+  const c = data as { deal_id: string | null; thread_id: string | null } | null;
+  return c ? { dealId: c.deal_id, threadId: c.thread_id } : null;
+}
+
+export async function getThreadSlugById(threadId: string) {
+  const { data, error } = await db().from("discussions").select("slug").eq("id", threadId).maybeSingle();
+  if (error) throw error;
+  return (data as { slug: string } | null)?.slug ?? null;
+}
+
+/** Caminho da página onde o comentário aparece (oferta ou discussão), para revalidar. */
+export async function pathForTarget(t: { dealId: string | null; threadId: string | null } | null) {
+  if (!t) return null;
+  if (t.dealId) {
+    const slug = await getDealSlugById(t.dealId);
+    return slug ? `/oferta/${slug}` : null;
+  }
+  if (t.threadId) {
+    const slug = await getThreadSlugById(t.threadId);
+    return slug ? `/discussoes/${slug}` : null;
+  }
+  return null;
 }
 
 export async function countCommentsSince(userId: string, sinceIso: string) {

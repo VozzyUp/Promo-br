@@ -74,7 +74,8 @@ export type CommentReaction = "like" | "helpful" | "haha";
 
 export type CommentView = {
   id: string;
-  dealId: string;
+  dealId: string | null;
+  threadId: string | null;
   parentId: string | null;
   body: string;
   removed: boolean;

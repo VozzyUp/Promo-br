@@ -19,7 +19,8 @@ const TOOLS = [
 ] as const;
 
 type Props = {
-  dealId: string;
+  dealId?: string;
+  threadId?: string;
   parentId?: string;
   initialText?: string;
   autoFocus?: boolean;
@@ -27,7 +28,7 @@ type Props = {
   label?: string;
 };
 
-export function CommentForm({ dealId, parentId, initialText = "", autoFocus = false, onDone, label = "Escreva seu comentário" }: Props) {
+export function CommentForm({ dealId, threadId, parentId, initialText = "", autoFocus = false, onDone, label = "Escreva seu comentário" }: Props) {
   const textRef = useRef<HTMLTextAreaElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const [len, setLen] = useState(initialText.length);
@@ -72,10 +73,11 @@ export function CommentForm({ dealId, parentId, initialText = "", autoFocus = fa
     else wrap("\n---\n", "", "");
   }
 
-  const id = `c-${parentId ?? "novo"}-${dealId}`;
+  const id = `c-${parentId ?? "novo"}-${dealId ?? threadId}`;
   return (
     <form ref={formRef} action={action} className="flex flex-col gap-2" onReset={() => setLen(0)}>
-      <input type="hidden" name="dealId" value={dealId} />
+      {dealId ? <input type="hidden" name="dealId" value={dealId} /> : null}
+      {threadId ? <input type="hidden" name="threadId" value={threadId} /> : null}
       {parentId ? <input type="hidden" name="parentId" value={parentId} /> : null}
       <label htmlFor={id} className="sr-only">{label}</label>
       <div className="rounded-sm border border-border-input bg-bg focus-within:border-accent">

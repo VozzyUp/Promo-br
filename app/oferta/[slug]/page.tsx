@@ -32,7 +32,7 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
   const live = deal.status === "published" || expired;
   const [thread, subscribed] = live
     ? await Promise.all([
-        listComments(deal.id, session?.userId ?? null, sp.ordem === "novos" ? "desc" : "asc"),
+        listComments({ dealId: deal.id }, session?.userId ?? null, sp.ordem === "novos" ? "desc" : "asc"),
         session ? isSubscribed(deal.id, session.userId) : Promise.resolve(false),
       ])
     : [null, false];
@@ -132,7 +132,7 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
       {thread ? (
         <CommentSection
           dealId={deal.id}
-          slug={deal.slug}
+          basePath={`/oferta/${deal.slug}`}
           comments={thread.comments}
           total={thread.total}
           order={sp.ordem === "novos" ? "desc" : "asc"}

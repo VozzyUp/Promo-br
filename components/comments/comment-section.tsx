@@ -5,21 +5,24 @@ import { SubscribeButton } from "@/components/comments/subscribe-button";
 import type { CommentView, Role } from "@/lib/types";
 
 type Props = {
-  dealId: string;
-  slug: string;
+  /** Oferta ou discussão onde os comentários aparecem (um dos dois). */
+  dealId?: string;
+  threadId?: string;
+  /** Caminho da página, ex.: /oferta/meu-slug. Usado nos links de ordem e de login. */
+  basePath: string;
   comments: CommentView[];
   total: number;
   order: "asc" | "desc";
   loggedIn: boolean;
   viewerId: string | null;
   viewerRole: Role | null;
-  subscribed: boolean;
+  subscribed?: boolean;
 };
 
-export function CommentSection({ dealId, slug, comments, total, order, loggedIn, viewerId, viewerRole, subscribed }: Props) {
+export function CommentSection({ dealId, threadId, basePath, comments, total, order, loggedIn, viewerId, viewerRole, subscribed = false }: Props) {
   const orderLink = (value: "asc" | "desc", label: string) => (
     <Link
-      href={value === "asc" ? `/oferta/${slug}#comentarios` : `/oferta/${slug}?ordem=novos#comentarios`}
+      href={value === "asc" ? `${basePath}#comentarios` : `${basePath}?ordem=novos#comentarios`}
       aria-current={order === value ? "true" : undefined}
       className={`rounded-pill px-3 py-1 text-sm ${order === value ? "bg-surface font-bold" : "text-muted hover:bg-surface"}`}
     >
@@ -36,16 +39,16 @@ export function CommentSection({ dealId, slug, comments, total, order, loggedIn,
             {orderLink("asc", "Mais antigos")}
             {orderLink("desc", "Mais novos")}
           </nav>
-          <SubscribeButton dealId={dealId} initial={subscribed} loggedIn={loggedIn} />
+          {dealId ? <SubscribeButton dealId={dealId} initial={subscribed} loggedIn={loggedIn} /> : null}
         </div>
       </div>
 
       {loggedIn ? (
-        <CommentForm dealId={dealId} label="Compartilhe sua opinião, uma dúvida ou uma dica..." />
+        <CommentForm dealId={dealId} threadId={threadId} label="Compartilhe sua opinião, uma dúvida ou uma dica..." />
       ) : (
         <p className="rounded-sm bg-surface px-4 py-3 text-sm">
-          <Link href={`/entrar?next=${encodeURIComponent(`/oferta/${slug}`)}`} className="font-bold text-accent">Entre</Link> ou{" "}
-          <Link href={`/cadastrar?next=${encodeURIComponent(`/oferta/${slug}`)}`} className="font-bold text-accent">crie uma conta</Link> para comentar.
+          <Link href={`/entrar?next=${encodeURIComponent(basePath)}`} className="font-bold text-accent">Entre</Link> ou{" "}
+          <Link href={`/cadastrar?next=${encodeURIComponent(basePath)}`} className="font-bold text-accent">crie uma conta</Link> para comentar.
         </p>
       )}
 
@@ -55,7 +58,7 @@ export function CommentSection({ dealId, slug, comments, total, order, loggedIn,
         <ul className="flex flex-col gap-5">
           {comments.map((c) => (
             <li key={c.id}>
-              <CommentItem c={c} topId={c.id} dealId={dealId} loggedIn={loggedIn} viewerId={viewerId} viewerRole={viewerRole} />
+              <CommentItem c={c} topId={c.id} dealId={dealId} threadId={threadId} loggedIn={loggedIn} viewerId={viewerId} viewerRole={viewerRole} />
             </li>
           ))}
         </ul>
