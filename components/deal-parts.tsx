@@ -1,5 +1,6 @@
 // Peças pequenas do card e da página de oferta.
-import { BadgeCheck, CircleHelp, Clock, ExternalLink, MessageSquare, Tag } from "lucide-react";
+import { BadgeCheck, CircleHelp, Clock, ExternalLink, MessageSquare, MessageSquarePlus, ShieldCheck, Tag } from "lucide-react";
+import Link from "next/link";
 import { SaveButton } from "@/components/save-button";
 import { ShareButton } from "@/components/share-button";
 import { discountPercent, endsWithinHours, formatPrice, fullDate, timeAgo } from "@/lib/format";
@@ -13,9 +14,15 @@ export function DealImage({ deal, size = "card" }: { deal: Pick<DealView, "image
   }
   // Sem imagem: no celular a página mostra só um cartão pequeno com o nome da loja, não um quadrado enorme.
   const blank = size === "page" ? "mx-auto size-40 max-w-full md:size-full md:min-h-64" : dims;
+  const logo = deal.store.logoUrl;
   return (
-    <div className={`${blank} grid place-items-center rounded-xs bg-surface text-center`} role="img" aria-label={`Sem imagem: ${deal.title}`}>
-      <span className="px-2 text-sm font-bold text-muted">{deal.store.name}</span>
+    <div className={`${blank} grid place-items-center overflow-hidden rounded-xs bg-surface text-center`} role="img" aria-label={`Sem imagem: ${deal.title}`}>
+      {logo ? (
+        // eslint-disable-next-line @next/next/no-img-element -- logo pequeno vindo do cadastro da loja
+        <img src={logo} alt="" className="max-h-[60%] max-w-[70%] object-contain" />
+      ) : (
+        <span className="px-2 text-sm font-bold text-muted">{deal.store.name}</span>
+      )}
     </div>
   );
 }
@@ -116,5 +123,54 @@ export function GoToDealLink({ code, size = "md" }: { code: string; size?: "md" 
       Ir para a oferta <ExternalLink className="size-4" aria-hidden />
       <span className="sr-only">(abre em nova aba)</span>
     </a>
+  );
+}
+
+const ROLE_BADGE: Record<string, string> = { admin: "Equipe", moderator: "Moderação" };
+
+/** Quem postou: avatar, insígnia (equipe, moderação ou autor de confiança) e contadores. */
+export function AuthorCard({ author, profile }: {
+  author: DealView["author"];
+  profile: { createdAt: string; approvedPosts: number; reputation: number; trusted: boolean } | null;
+}) {
+  const badge = ROLE_BADGE[author.role] ?? (profile?.trusted ? "Autor de confiança" : null);
+  return (
+    <div className="flex items-center gap-3">
+      {author.avatarUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element -- avatar pequeno vindo do perfil
+        <img src={author.avatarUrl} alt="" className="size-12 rounded-pill object-cover" />
+      ) : (
+        <span className="grid size-12 shrink-0 place-items-center rounded-pill bg-accent-soft text-title font-bold text-accent" aria-hidden>
+          {author.displayName.slice(0, 1).toUpperCase()}
+        </span>
+      )}
+      <div className="flex min-w-0 flex-col gap-0.5 text-sm">
+        <span className="flex flex-wrap items-center gap-2">
+          <Link href={`/u/${author.username}`} className="truncate font-bold hover:text-accent">{author.username}</Link>
+          {badge ? (
+            <span className="inline-flex items-center gap-1 rounded-pill bg-accent-soft px-2 py-0.5 text-xs font-bold text-accent">
+              <ShieldCheck className="size-3" aria-hidden /> {badge}
+            </span>
+          ) : null}
+        </span>
+        {profile ? (
+          <span className="text-muted">
+            Membro desde {new Date(profile.createdAt).getFullYear()} · {profile.approvedPosts} {profile.approvedPosts === 1 ? "oferta aprovada" : "ofertas aprovadas"} · reputação {profile.reputation}
+          </span>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+/** Barra no fim do bloco da oferta: ir comentar ou guardar. */
+export function CommentSaveBar({ dealId, saved, loggedIn }: { dealId: string; saved: boolean; loggedIn: boolean }) {
+  return (
+    <div className="flex divide-x divide-border rounded-card border border-border">
+      <a href="#comentarios" className="flex h-10 flex-1 items-center justify-center gap-2 rounded-sm text-sm font-bold text-muted hover:bg-surface">
+        <MessageSquarePlus className="size-4" aria-hidden /> Novo comentário
+      </a>
+      <SaveButton dealId={dealId} saved={saved} loggedIn={loggedIn} labeled />
+    </div>
   );
 }

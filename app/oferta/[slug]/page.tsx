@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronRight, ExternalLink, Info } from "lucide-react";
 import { CouponCTA } from "@/components/coupon-cta";
-import { ActionBar, DealImage, ExpiryBanner, GoToDealLink, PriceBlock, TimeChip } from "@/components/deal-parts";
+import { ActionBar, AuthorCard, CommentSaveBar, DealImage, ExpiryBanner, GoToDealLink, PriceBlock, TimeChip } from "@/components/deal-parts";
 import { TemperatureVote } from "@/components/temperature-vote";
 import { AdSlot } from "@/components/sidebar";
 import { FormMessage } from "@/components/ui/field";
@@ -140,24 +140,12 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
 
       <section aria-labelledby="sobre-title" className="-mx-4 flex flex-col gap-4 border-y border-border bg-bg p-4 sm:mx-0 sm:rounded-card sm:border-0 sm:shadow-card md:p-6">
         <h2 id="sobre-title" className="text-title font-bold">{deal.couponCode && deal.priceCents == null ? "Sobre este cupom" : "Sobre esta oferta"}</h2>
-        <div className="flex items-center gap-3">
-          <span className="grid size-10 place-items-center rounded-pill bg-surface font-bold" aria-hidden>
-            {deal.author.displayName.slice(0, 1).toUpperCase()}
-          </span>
-          <div className="flex flex-col text-sm">
-            <span>Postado por <Link href={`/u/${deal.author.username}`} className="font-bold hover:text-accent">{deal.author.username}</Link></span>
-            {author ? (
-              <span className="text-muted">
-                Membro desde {new Date(author.createdAt).getFullYear()}
-                {author.approvedPosts > 0 ? ` · ${author.approvedPosts} ofertas aprovadas` : ""}
-              </span>
-            ) : null}
-          </div>
-        </div>
+        <AuthorCard author={deal.author} profile={author} />
         {deal.description ? <RichText text={deal.description} className="text-base" /> : <p className="text-sm text-muted">O autor não deixou detalhes.</p>}
         {deal.status === "published" ? (
           <DealToolbar dealId={deal.id} hasCoupon={!!deal.couponCode} canClose={canClose} loggedIn={!!session} />
         ) : null}
+        {deal.status === "published" ? <CommentSaveBar dealId={deal.id} saved={saved} loggedIn={!!session} /> : null}
         <a href={`/ir/${deal.code}`} target="_blank" rel="sponsored noopener" className="flex w-fit items-center gap-1.5 text-sm font-bold text-accent">
           Ver na {deal.store.name} <ExternalLink className="size-4" aria-hidden /><span className="sr-only">(abre em nova aba)</span>
         </a>

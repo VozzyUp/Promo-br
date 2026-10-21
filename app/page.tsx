@@ -20,6 +20,13 @@ const ALL_TABS: { id: FeedTab; label: string; loggedOnly?: boolean }[] = [
 
 const AD_EVERY = 4;
 
+const SECTION_TITLE: Record<FeedTab, string> = {
+  paravoce: "Ofertas para você",
+  quentes: "Ofertas mais quentes",
+  descontos: "Maiores descontos verificados",
+  novas: "Ofertas novas",
+};
+
 export default async function Home({ searchParams }: PageProps<"/">) {
   const sp = await searchParams;
   const session = await getSession();
@@ -38,14 +45,14 @@ export default async function Home({ searchParams }: PageProps<"/">) {
 
   return (
     <div className="mx-auto max-w-(--layout-max) px-4">
-      <section className="pb-2 pt-6 md:pt-10">
+      <section className="sr-only md:not-sr-only md:pb-2 md:pt-10">
         <h1 className="text-xl font-bold md:text-display">Promoção de verdade, aprovada por quem compra</h1>
         <p className="mt-2 text-base text-muted md:text-title md:font-normal">
           Ofertas e cupons publicados pela comunidade, com o desconto real conferido.
         </p>
       </section>
 
-      <nav aria-label="Ordenar ofertas" className="sticky top-[calc(var(--header-top)+var(--header-nav))] z-30 -mx-4 mb-4 flex gap-6 overflow-x-auto border-b border-border bg-bg px-4 md:static md:mx-0 md:rounded-card">
+      <nav aria-label="Ordenar ofertas" className="sticky top-[calc(var(--header-top)+var(--header-nav))] z-30 -mx-4 mb-3 flex gap-6 overflow-x-auto border-b border-border bg-bg px-4 md:mt-4">
         {tabs.map((t) => (
           <Link
             key={t.id}
@@ -60,6 +67,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
         <div className="flex min-w-0 flex-1 flex-col gap-4 lg:max-w-(--layout-main)">
+          <h2 className="px-1 text-sm font-bold uppercase tracking-wide text-muted">{SECTION_TITLE[tab]}</h2>
           <AdSlot minHeight={120} />
           {items.length === 0 ? (
             <EmptyState

@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toggleSaveAction } from "@/app/actions/social";
 
-export function SaveButton({ dealId, saved: initial, loggedIn }: { dealId: string; saved: boolean; loggedIn: boolean }) {
+export function SaveButton({ dealId, saved: initial, loggedIn, labeled = false }: { dealId: string; saved: boolean; loggedIn: boolean; labeled?: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
   const [saved, setSaved] = useState(initial);
@@ -33,9 +33,10 @@ export function SaveButton({ dealId, saved: initial, loggedIn }: { dealId: strin
       aria-label={saved ? "Remover dos salvos" : "Salvar oferta"}
       title={saved ? "Remover dos salvos" : "Salvar oferta"}
       disabled={pending}
-      className={`grid size-9 place-items-center rounded-sm hover:bg-surface ${saved ? "text-accent" : "text-muted"}`}
+      className={`${labeled ? "flex h-10 flex-1 items-center justify-center gap-2 text-sm font-bold" : "grid size-9 place-items-center"} rounded-sm hover:bg-surface ${saved ? "text-accent" : "text-muted"}`}
     >
       <Bookmark className="size-4" fill={saved ? "currentColor" : "none"} aria-hidden />
+      {labeled ? (saved ? "Guardado" : "Guardar") : null}
     </button>
   );
 }

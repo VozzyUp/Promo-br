@@ -16,13 +16,13 @@ const nav = [
 ];
 
 export function AppHeader({
-  session, unread = 0, notifications = [], categories = [],
-}: { session: Session | null; unread?: number; notifications?: MenuNotification[]; categories?: MenuCategory[] }) {
+  siteName = "promo-br", session, unread = 0, notifications = [], categories = [],
+}: { siteName?: string; session: Session | null; unread?: number; notifications?: MenuNotification[]; categories?: MenuCategory[] }) {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-bg/95 backdrop-blur">
       <a href="#conteudo" className="skip-link">Pular para o conteúdo</a>
       <div className="mx-auto flex h-14 max-w-(--layout-max) items-center gap-3 px-4">
-        <Logo />
+        <Logo name={siteName} />
         <MenuDrawer categories={categories} loggedIn={!!session} isStaff={session?.role === "admin" || session?.role === "moderator"} unread={unread} className="hidden items-center gap-1.5 rounded-pill border border-border px-3 py-1.5 text-sm md:flex">
           <Menu className="size-4" aria-hidden /> Menu
         </MenuDrawer>

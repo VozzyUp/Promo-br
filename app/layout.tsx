@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/bottom-nav";
 import { AdScript } from "@/components/consent/ad-script";
 import { AdsProvider } from "@/components/consent/ads-context";
 import { ConsentBanner } from "@/components/consent/consent-banner";
+import { SideRails } from "@/components/consent/side-rails";
 import { Footer } from "@/components/footer";
 import type { MenuNotification } from "@/components/notifications-menu";
 import { getSession } from "@/lib/auth";
@@ -48,8 +49,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col font-sans">
         <AdsProvider config={ads}>
           <BfBanner />
-          <AppHeader session={session} unread={unread} notifications={notifications} categories={categories} />
-          <main id="conteudo" className="flex-1">{children}</main>
+          <AppHeader siteName={brand.siteName} session={session} unread={unread} notifications={notifications} categories={categories} />
+          <div className="relative flex-1">
+            <SideRails />
+            <main id="conteudo">{children}</main>
+          </div>
           <Footer notice={brand.commissionNotice} />
           <BottomNav categories={categories} loggedIn={!!session} isStaff={session?.role === "admin" || session?.role === "moderator"} unread={unread} />
           <ConsentBanner />

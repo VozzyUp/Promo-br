@@ -1,0 +1,5 @@
+{
+  "avoid": ["promodescuentos", "Promodescuentos", "Pepper", "Chollometro", "Dealabs", "mydealz"],
+  "domains": ["promodescuentos.com", "pepper.com"],
+  "colors": []
+}

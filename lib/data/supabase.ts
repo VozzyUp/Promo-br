@@ -19,7 +19,8 @@ type DealRow = {
   published_at: string | null; expires_at: string | null; votes_up: number; votes_down: number;
   clicks_total: number; comments_count: number; created_at: string;
 };
-type StoreRow = { id: string; name: string; slug: string; domains: string[]; status: Store["status"] };
+type StoreRow = { id: string; name: string; slug: string; domains: string[]; logo_url?: string | null; status: Store["status"] };
+const toStore = ({ logo_url, ...s }: StoreRow): Store => ({ ...s, logoUrl: logo_url ?? null });
 type CategoryRow = { id: string; name: string; slug: string };
 type AuthorRow = { id: string; username: string; display_name: string; avatar_url: string | null; role: Role };
 type ProfileRow = AuthorRow & {
@@ -33,7 +34,7 @@ const DEAL_COLS =
   "published_at, expires_at, votes_up, votes_down, clicks_total, comments_count, created_at, " +
   "starts_at, availability, shipping_cents, ships_from, coupon_kind, coupon_amount_cents";
 export const JOIN =
-  `${DEAL_COLS}, store:stores!inner(id, name, slug, domains, status), category:categories(id, name, slug), ` +
+  `${DEAL_COLS}, store:stores!inner(id, name, slug, domains, logo_url, status), category:categories(id, name, slug), ` +
   "author:profiles!deals_author_id_fkey(id, username, display_name, avatar_url, role)";
 
 function imageUrl(path: string | null) {
@@ -84,7 +85,7 @@ export async function toViews(rows: DealJoinRow[], viewerId: string | null): Pro
     const d = toDeal(r);
     return {
       ...d,
-      store: r.store,
+      store: toStore(r.store),
       category: r.category,
       author: r.author
         ? { id: r.author.id, username: r.author.username, displayName: r.author.display_name, avatarUrl: r.author.avatar_url, role: r.author.role }
@@ -149,9 +150,9 @@ export async function listCategories(): Promise<Category[]> {
 }
 
 export async function listStores(): Promise<Store[]> {
-  const { data, error } = await supabaseAdmin().from("stores").select("id, name, slug, domains, status").order("name");
+  const { data, error } = await supabaseAdmin().from("stores").select("id, name, slug, domains, logo_url, status").order("name");
   if (error) throw error;
-  return data as StoreRow[];
+  return (data as StoreRow[]).map(toStore);
 }
 
 export async function getProfile(id: string) {

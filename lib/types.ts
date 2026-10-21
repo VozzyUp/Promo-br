@@ -20,6 +20,7 @@ export type Store = {
   name: string;
   slug: string;
   domains: string[];
+  logoUrl?: string | null;
   status: "active" | "pending_review" | "blocked";
 };
 
