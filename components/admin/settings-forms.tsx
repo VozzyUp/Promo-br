@@ -1,5 +1,6 @@
 "use client";
 import { useActionState } from "react";
+import { useKeepForm } from "./use-keep-form";
 import { saveAdsAction, saveBrandAction, saveLegalAction, type SettingState } from "@/app/actions/settings-admin";
 import type { AdsSettings, BfSettings, BrandSettings } from "@/lib/data/settings";
 
@@ -12,8 +13,9 @@ function Status({ s }: { s: SettingState }) {
 
 export function BrandForm({ brand, bf }: { brand: BrandSettings; bf: BfSettings }) {
   const [state, action, pending] = useActionState<SettingState, FormData>(saveBrandAction, undefined);
+  const onSubmit = useKeepForm(action);
   return (
-    <form action={action} className="flex flex-col gap-3 rounded-card bg-bg p-4 shadow-card">
+    <form onSubmit={onSubmit} className="flex flex-col gap-3 rounded-card bg-bg p-4 shadow-card">
       <h2 className="text-title font-bold">Nome e descrição</h2>
       <div><label htmlFor="b-name" className="mb-1 block text-sm font-bold">Nome do site</label><input id="b-name" name="siteName" defaultValue={brand.siteName} className={input} /></div>
       <div><label htmlFor="b-desc" className="mb-1 block text-sm font-bold">Descrição padrão (aparece no Google)</label><input id="b-desc" name="description" defaultValue={brand.description} className={input} /></div>
@@ -29,8 +31,9 @@ export function BrandForm({ brand, bf }: { brand: BrandSettings; bf: BfSettings 
 
 export function AdsForm({ ads, fromEnv }: { ads: AdsSettings; fromEnv: boolean }) {
   const [state, action, pending] = useActionState<SettingState, FormData>(saveAdsAction, undefined);
+  const onSubmit = useKeepForm(action);
   return (
-    <form action={action} className="flex flex-col gap-3 rounded-card bg-bg p-4 shadow-card">
+    <form onSubmit={onSubmit} className="flex flex-col gap-3 rounded-card bg-bg p-4 shadow-card">
       <h2 className="text-title font-bold">Google AdSense</h2>
       <p className="text-sm text-muted">
         Os anúncios só aparecem para quem aceitou os cookies. Deixe vazio para não exibir anúncios. {fromEnv ? "Hoje os valores abaixo vêm das variáveis do servidor; ao salvar aqui, o painel passa a mandar." : ""}
@@ -44,8 +47,9 @@ export function AdsForm({ ads, fromEnv }: { ads: AdsSettings; fromEnv: boolean }
 
 export function LegalForm({ slug, title, body, custom }: { slug: string; title: string; body: string; custom: boolean }) {
   const [state, action, pending] = useActionState<SettingState, FormData>(saveLegalAction, undefined);
+  const onSubmit = useKeepForm(action);
   return (
-    <form action={action} className="flex flex-col gap-3">
+    <form onSubmit={onSubmit} className="flex flex-col gap-3">
       <input type="hidden" name="slug" value={slug} />
       <label htmlFor={`l-${slug}`} className="text-sm font-bold">Texto de “{title}”</label>
       <textarea id={`l-${slug}`} name="body" defaultValue={body} rows={16} className="w-full rounded-sm border border-border-input bg-bg p-2 font-mono text-sm" />

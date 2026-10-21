@@ -33,6 +33,11 @@ describe("checkPrice", () => {
     expect(r.verdict).toBe("inflated");
   });
 
+  it("histórico curto não acusa desconto inflado (oferta nova com preço anterior alto)", () => {
+    const r = checkPrice({ priceCents: 9990, listPriceCents: 16650, history: hist([2, 9990], [1, 9990]), now });
+    expect(r.verdict).toBe("no_comparison");
+  });
+
   it("ignora preços com mais de 30 dias", () => {
     const r = checkPrice({ priceCents: 8000, listPriceCents: null, history: hist([60, 20000]), now });
     expect(r.verdict).toBe("no_comparison");

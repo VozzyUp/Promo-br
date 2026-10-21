@@ -1,5 +1,6 @@
 "use client";
 import { useActionState } from "react";
+import { useKeepForm } from "./use-keep-form";
 import { integrationAction, type IntegrationState } from "@/app/actions/integrations";
 import type { IntegrationDef } from "@/lib/integrations-def";
 import type { IntegrationView } from "@/lib/data/integrations";
@@ -9,8 +10,9 @@ const STATUS = { ok: "Conectado", error: "Com erro", untested: "Não testado" } 
 
 export function IntegrationForm({ def, view }: { def: IntegrationDef; view: IntegrationView }) {
   const [state, action, pending] = useActionState<IntegrationState, FormData>(integrationAction, undefined);
+  const submit = useKeepForm(action);
   return (
-    <form action={action} className="rounded-card bg-bg p-4 shadow-card">
+    <form onSubmit={submit} className="rounded-card bg-bg p-4 shadow-card">
       <input type="hidden" name="key" value={def.key} />
       <div className="mb-1 flex flex-wrap items-center gap-3">
         <h2 className="text-title font-bold">{def.title}</h2>

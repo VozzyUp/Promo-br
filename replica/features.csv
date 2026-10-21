@@ -1,94 +1,94 @@
 feature,area,priority,original,clone,notes
-Feed com abas (Pra você / Mais quentes / Em alta / Novas),descoberta,must,yes,partial,"S01: Mais quentes/Maiores descontos/Novas; falta Pra você e scroll infinito"
-Card de oferta com preço/antes/%off/loja,descoberta,must,yes,yes,"DealCard + skeleton + expirada + cupom"
-Página de detalhe da oferta,descoberta,must,yes,partial,"S02 sem comentários e sem histórico de preço"
-Redirect /ir/[codigo] com log de clique e subId,monetização,must,yes,partial,"1 clique/visitante/dia, ignora bots; subId por canal ainda não"
-Histórico de preço diário por anúncio,verificação,must,no,no,PriceSnapshot; ligar o quanto antes
+Feed com abas (Pra você / Mais quentes / Em alta / Novas),descoberta,must,yes,partial,S01: Mais quentes/Maiores descontos/Novas; falta Pra você e scroll infinito
+Card de oferta com preço/antes/%off/loja,descoberta,must,yes,yes,DealCard + skeleton + expirada + cupom
+Página de detalhe da oferta,descoberta,must,yes,yes,"galeria, histórico de preço, dados estruturados, comentários"
+Redirect /ir/[codigo] com log de clique e subId,monetização,must,yes,yes,"1 clique por visitante/dia, sem robôs, canal e subId"
+Histórico de preço diário por anúncio,verificação,must,no,yes,"por anúncio da loja, 90 dias, gráfico na oferta"
 Identificação do produto (EAN + marca/modelo + IA),verificação,must,no,no,Product/Listing com match_confidence
 Comparação do mesmo produto em outras lojas,verificação,must,no,no,via APIs/feeds conectados; sem scraping
-Desconto real contra preço de referência,verificação,must,no,no,ignora o "de" da loja
-Selos Verificado / Bom preço / Sem comparação / Inflado,verificação,must,no,no,inflado não publica
-Prova de preço na página da oferta,verificação,must,no,no,preço em outras lojas + menor de 30 dias
-Revalidação antes do envio e periódica + expiração automática,verificação,must,no,no,
-Botões funcionou / preço mudou / cupom falhou,verificação,should,no,no,3 denúncias voltam para a fila
-Ranking Maiores descontos (desconto real),ranking,must,no,partial,"ordena por realDiscountBp; verificação ainda é seed"
-Ranking Mais quentes (desconto + cliques + vendas + votos com decaimento),ranking,must,yes,partial,"fórmula do recon com pesos fixos; painel depois"
+Desconto real contra preço de referência,verificação,must,no,yes,compara com o histórico do próprio anúncio (mediana de 30 dias)
+Selos Verificado / Bom preço / Sem comparação / Inflado,verificação,must,no,yes,"verificado, bom preço, sem comparação e inflado (só com 7+ dias de histórico)"
+Prova de preço na página da oferta,verificação,must,no,partial,gráfico do histórico; sem comparação com outras lojas (sem API)
+Revalidação antes do envio e periódica + expiração automática,verificação,must,no,yes,recheck a cada 30 min por anúncio de 6 em 6 h; expira se o preço subir 2 vezes; expira pelo fim da validade
+Botões funcionou / preço mudou / cupom falhou,verificação,should,no,yes,reportAction: funcionou / preço mudou / cupom falhou; 3 denúncias encerram
+Ranking Maiores descontos (desconto real),ranking,must,no,yes,aba Maiores descontos usa o desconto real
+Ranking Mais quentes (desconto + cliques + vendas + votos com decaimento),ranking,must,yes,partial,fórmula do recon com pesos fixos; painel depois
 Antifraude de cliques (IP/aparelho/bot),ranking,should,no,no,
-Cupons copiáveis,descoberta,must,yes,partial,"CouponCTA copia e abre a loja; S05 é stub"
-Páginas de loja,SEO,must,yes,no,S04
-Páginas de categoria,SEO,should,yes,no,S03
-Busca,descoberta,should,yes,no,S10
-Hub Black Friday,campanha,must,no,no,S11
-Páginas legais + aviso de comissão + cookies,legal,must,yes,no,S13 editáveis no painel
-Sitemap + dados estruturados Product/Offer,SEO,should,yes,no,
-Painel: fila de ofertas com ações em lote,painel,must,yes,partial,"A02 aprovar/recusar com motivo; sem lote"
-Painel: oferta manual colando link,painel,must,yes,no,A03
-Painel: cupons,painel,must,yes,no,A04
-Painel: lojas e modelo de link de afiliado,painel,must,no,no,A05
-Modo de link por loja (programa / rede / monetizador / direto),afiliados,must,no,no,oferta entra mesmo sem afiliado
-Preservar link de afiliado do autor (sem alterar),afiliados,must,no,yes,"/ir/ redireciona para url_submitted sem alterar"
+Cupons copiáveis,descoberta,must,yes,yes,CouponCTA copia e abre a loja; página /cupons
+Páginas de loja,SEO,must,yes,yes,/loja/[slug]
+Páginas de categoria,SEO,should,yes,yes,/c/[slug]
+Busca,descoberta,should,yes,yes,/busca sem acento
+Hub Black Friday,campanha,must,no,partial,/black-friday com contagem regressiva e faixa no topo; falta curadoria própria
+Páginas legais + aviso de comissão + cookies,legal,must,yes,partial,páginas editáveis no painel e aviso de cookies; falta revisão jurídica
+Sitemap + dados estruturados Product/Offer,SEO,should,yes,yes,"sitemap.xml, robots.txt e JSON-LD Product/Offer"
+Painel: fila de ofertas com ações em lote,painel,must,yes,yes,"aprovar e recusar em lote, remover"
+Painel: oferta manual colando link,painel,must,yes,yes,Nova oferta manual abre o assistente de publicar como equipe
+Painel: cupons,painel,must,yes,yes,cupons entram em Ofertas e cupons (filtro por tipo)
+Painel: lojas e modelo de link de afiliado,painel,must,no,yes,/painel/lojas
+Modo de link por loja (programa / rede / monetizador / direto),afiliados,must,no,partial,modo e modelo guardados; nada os aplica ainda (depende das integrações das lojas)
+Preservar link de afiliado do autor (sem alterar),afiliados,must,no,yes,/ir/ redireciona para url_submitted sem alterar
 Impulsionar oferta (usuário paga destaque),monetização,should,no,no,receita nova vinda dos caçadores
-Cadastro automático de loja desconhecida em modo direto,afiliados,should,no,yes,"loja criada como pending_review"
-Relatório cliques sem comissão por loja,afiliados,should,no,no,prioriza cadastros
-Painel: integrações com credenciais criptografadas e testar conexão,painel,must,no,no,A06
-Painel: robô de captação configurável,painel,must,no,no,A07
-Painel: canais de envio e modelos de mensagem,painel,must,no,no,A08
-Painel: anúncios (AdSense + slots + ads.txt),painel,should,no,no,A09
-Painel: aparência e SEO,painel,must,no,no,A10
-Painel: páginas e textos,painel,must,no,no,A11
-Painel: log de execuções + rodar agora,painel,must,no,no,A12
-Painel: métricas cliques/conversões/comissão,painel,should,no,no,A01
-Worker interno com agendador e travas,infra,must,no,no,substitui o n8n
-Captação Shopee Affiliate Open API,captação,must,no,no,única fonte 100% automática no dia 1
-Sync de conversões Shopee,métricas,should,no,no,casa venda com clique por subId
+Cadastro automático de loja desconhecida em modo direto,afiliados,should,no,yes,loja criada como pending_review
+Relatório cliques sem comissão por loja,afiliados,should,no,yes,Métricas > Por loja marca em vermelho lojas com clique e sem venda
+Painel: integrações com credenciais criptografadas e testar conexão,painel,must,no,yes,AES-256-GCM com MASTER_KEY; testar conexão
+Painel: robô de captação configurável,painel,must,no,yes,"regras por cron, filtros, publicar direto ou fila"
+Painel: canais de envio e modelos de mensagem,painel,must,no,yes,"Telegram e WhatsApp, horário, limite por hora, modelo, teste"
+Painel: anúncios (AdSense + slots + ads.txt),painel,should,no,yes,"ID do editor e bloco no painel, ads.txt automático, só depois do aceite de cookies"
+Painel: aparência e SEO,painel,must,no,yes,"nome, descrição, aviso de comissão, faixa de campanha"
+Painel: páginas e textos,painel,must,no,yes,5 textos editáveis com texto simples
+Painel: log de execuções + rodar agora,painel,must,no,yes,log e rodar agora
+Painel: métricas cliques/conversões/comissão,painel,should,no,yes,"cliques, canais, melhores ofertas, vendas e comissão"
+Worker interno com agendador e travas,infra,must,no,yes,instrumentation.ts com WORKER_ENABLED=1; trava por job_runs
+Captação Shopee Affiliate Open API,captação,must,no,partial,testado contra servidor de mentira que confere a assinatura; falta testar com credenciais reais
+Sync de conversões Shopee,métricas,should,no,partial,idem: testado contra o servidor de mentira
 Captação por feed de redes (Awin/Lomadee/etc),captação,could,no,no,dezembro
 Amazon Creators API,captação,could,no,no,após vendas qualificadas
-Envio Telegram,distribuição,must,no,no,Bot API
-Envio WhatsApp (UAZAPI),distribuição,should,no,no,opt-in e limite por hora
+Envio Telegram,distribuição,must,no,partial,testado contra servidor de mentira; falta bot real
+Envio WhatsApp (UAZAPI),distribuição,should,no,partial,envio implementado; falta instância UAZAPI real
 Textos de oferta com IA,distribuição,could,no,no,chave configurada no painel
-Slots de anúncio sem CLS,monetização,should,yes,partial,"AdSlot com altura reservada; sem AdSense"
-Deploy ghcr + Portainer Swarm + Traefik,infra,must,no,no,padrão Big Assessoria
-Cadastro com e-mail e senha (+ Google opcional) com verificação de e-mail,conta,must,yes,partial,"Supabase Auth com confirmação por e-mail e recuperação de senha; falta Google e Turnstile"
-Usuário publica oferta (link + preço + cupom + imagem),comunidade,must,yes,partial,"link+título+preço+cupom+categoria; sem imagem"
-Link de afiliado do próprio usuário,afiliados,must,no,no,política configurável: manter / trocar / dividir
-Votação quente/frio,comunidade,must,yes,partial,"otimista, desfaz no 2º clique; contagem em memória"
-Comentários,comunidade,must,yes,no,com denúncia
-Perfil e reputação,comunidade,must,yes,no,reputação libera publicação sem moderação
+Slots de anúncio sem CLS,monetização,should,yes,yes,"altura reservada, anúncio só após o aceite"
+Deploy ghcr + Portainer Swarm + Traefik,infra,must,no,partial,"Dockerfile, Actions e stack prontos; falta primeiro push e deploy"
+Cadastro com e-mail e senha (+ Google opcional) com verificação de e-mail,conta,must,yes,partial,Supabase Auth; falta SMTP próprio e Google login
+Usuário publica oferta (link + preço + cupom + imagem),comunidade,must,yes,yes,assistente completo
+Link de afiliado do próprio usuário,afiliados,must,no,yes,política keep_author: o link do usuário nunca muda
+Votação quente/frio,comunidade,must,yes,yes,quente/frio otimista
+Comentários,comunidade,must,yes,yes,"aninhados, reações, denúncia"
+Perfil e reputação,comunidade,must,yes,yes,perfil público e pontos
 Moderação: fila para novos usuários + limites por dia,comunidade,must,no,yes,"não confiável vai para a fila; 5/dia novo, 30/dia confiável; 3 aprovadas = confiável"
-Validação do link postado (domínio de loja + expandir encurtador + bloqueio de malware),comunidade,must,no,partial,"http(s), bloqueia IP/localhost; sem expandir encurtador nem malware"
-Banimento e lista de domínios bloqueados,comunidade,must,no,no,
-Alertas,retenção,could,yes,no,pós-BF
-Placar de caçadores (ranking de usuários),comunidade,should,yes,no,incentivo a postar
+Validação do link postado (domínio de loja + expandir encurtador + bloqueio de malware),comunidade,must,no,partial,"expande encurtador, confere loja bloqueada e lista negra; sem varredura de malware"
+Banimento e lista de domínios bloqueados,comunidade,must,no,yes,suspender usuário e domínios bloqueados
+Alertas,retenção,could,yes,yes,alertas
+Placar de caçadores (ranking de usuários),comunidade,should,yes,yes,placar
 Ofertas patrocinadas,monetização,could,yes,no,marcar Patrocinado
 Marca/layout/textos do Promodescuentos,skip,skip,yes,skip,propriedade de terceiros
 Comunidade e audiência existentes,skip,skip,yes,skip,construir do zero
-Publicar em assistente de passos (link > essenciais > imagens > descrição > detalhes > revisão),comunidade,must,yes,no,"hoje é formulário único em /publicar"
-Checagem de duplicata pelo link ao colar,comunidade,must,yes,no,"mesmo link/anúncio com oferta ativa = aviso"
-Preenchimento automático pelo link (título/imagem/preço),comunidade,should,yes,no,"og:/JSON-LD públicos ou API oficial; nunca scraping pesado"
-Tipo de desconto do cupom (% / R$ / frete grátis / outro),comunidade,must,yes,no,
-Disponibilidade online x loja física (frete e origem),comunidade,could,yes,no,
-Galeria de até 8 imagens com principal e reordenação,comunidade,should,yes,no,"6 MB, 150-6000 px"
-Logo da loja como imagem padrão do cupom,comunidade,should,yes,no,
-Rascunho automático da publicação,comunidade,should,yes,no,
-Editor rico na descrição (link/lista/negrito/@menção),comunidade,could,yes,no,
-Datas de início e fim da oferta,comunidade,must,yes,no,"alimenta a expiração automática"
-Níveis de reputação que liberam recursos,comunidade,could,yes,no,"ex.: nível prata libera indicação"
-Discussão (post sem oferta),comunidade,could,yes,no,
-Painel de notificações (buzón) no cabeçalho,conta,must,yes,no,"lista + abas; vazio amigável"
-Preferências de notificação por evento (site + e-mail),conta,should,yes,no,"voto/comentário/hot/expirar/menção/medalha; por grupo 'também por e-mail'"
-Pontos e níveis (Prata/Ouro/Platina) com benefícios,comunidade,should,yes,no,"pontos por oferta 100°, comentário útil, votos semanais e sequência"
-Medalhas com progresso e cadeias de níveis,comunidade,should,yes,no,"~40; selo ao lado do nome em ofertas e comentários"
-Estatísticas privadas do usuário,conta,could,yes,no,"ofertas, temperatura média/máx, votos, pessoas ajudadas"
-Conteúdo salvo (favoritos),conta,should,yes,no,
-Seguir / ignorar membros,comunidade,could,yes,no,
-Mensagens privadas entre membros,comunidade,could,yes,no,"com opção de bloquear nas preferências"
-Preferências do feed (página inicial padrão / scroll infinito / widgets),conta,could,yes,no,
-Exportar dados da conta e apagar conta (LGPD),conta,must,yes,no,"obrigatório pela LGPD"
-Trocar nome de usuário 1x por ano / trocar e-mail / definir senha,conta,should,yes,no,
-Comentários com respostas aninhadas e reações (curtir/útil/haha),comunidade,must,yes,no,"útil alimenta pontos"
-Inscrever-se em uma oferta (notifica novos comentários),comunidade,should,yes,no,"autoinscrição ao comentar"
-Marcar oferta como expirada (pelo usuário),comunidade,must,yes,no,"diálogo não exercido no recon"
-Denunciar anúncio (Publicidade > Denunciar),monetização,could,yes,partial,"botão existe no AdSlot; sem fluxo"
+Publicar em assistente de passos (link > essenciais > imagens > descrição > detalhes > revisão),comunidade,must,yes,yes,hoje é formulário único em /publicar
+Checagem de duplicata pelo link ao colar,comunidade,must,yes,yes,mesmo link/anúncio com oferta ativa = aviso
+Preenchimento automático pelo link (título/imagem/preço),comunidade,should,yes,yes,og:/JSON-LD públicos ou API oficial; nunca scraping pesado
+Tipo de desconto do cupom (% / R$ / frete grátis / outro),comunidade,must,yes,yes,
+Disponibilidade online x loja física (frete e origem),comunidade,could,yes,yes,
+Galeria de até 8 imagens com principal e reordenação,comunidade,should,yes,yes,"6 MB, 150-6000 px"
+Logo da loja como imagem padrão do cupom,comunidade,should,yes,yes,
+Rascunho automático da publicação,comunidade,should,yes,yes,
+Editor rico na descrição (link/lista/negrito/@menção),comunidade,could,yes,yes,
+Datas de início e fim da oferta,comunidade,must,yes,yes,alimenta a expiração automática
+Níveis de reputação que liberam recursos,comunidade,could,yes,yes,ex.: nível prata libera indicação
+Discussão (post sem oferta),comunidade,could,yes,yes,
+Painel de notificações (buzón) no cabeçalho,conta,must,yes,yes,lista + abas; vazio amigável
+Preferências de notificação por evento (site + e-mail),conta,should,yes,yes,voto/comentário/hot/expirar/menção/medalha; por grupo 'também por e-mail'
+Pontos e níveis (Prata/Ouro/Platina) com benefícios,comunidade,should,yes,yes,"pontos por oferta 100°, comentário útil, votos semanais e sequência"
+Medalhas com progresso e cadeias de níveis,comunidade,should,yes,yes,~40; selo ao lado do nome em ofertas e comentários
+Estatísticas privadas do usuário,conta,could,yes,yes,"ofertas, temperatura média/máx, votos, pessoas ajudadas"
+Conteúdo salvo (favoritos),conta,should,yes,yes,
+Seguir / ignorar membros,comunidade,could,yes,yes,
+Mensagens privadas entre membros,comunidade,could,yes,yes,com opção de bloquear nas preferências
+Preferências do feed (página inicial padrão / scroll infinito / widgets),conta,could,yes,yes,
+Exportar dados da conta e apagar conta (LGPD),conta,must,yes,yes,obrigatório pela LGPD
+Trocar nome de usuário 1x por ano / trocar e-mail / definir senha,conta,should,yes,yes,
+Comentários com respostas aninhadas e reações (curtir/útil/haha),comunidade,must,yes,yes,útil alimenta pontos
+Inscrever-se em uma oferta (notifica novos comentários),comunidade,should,yes,yes,autoinscrição ao comentar
+Marcar oferta como expirada (pelo usuário),comunidade,must,yes,yes,diálogo não exercido no recon
+Denunciar anúncio (Publicidade > Denunciar),monetização,could,yes,yes,botão existe no AdSlot; sem fluxo
 Onboarding de alertas com sugestões populares,conta,should,yes,no,
 Boletim diário por e-mail,distribuição,should,yes,no,
-Feed Para você / Tendências / Todas,descoberta,should,yes,partial,"temos Quentes/Descontos/Novas"
+Feed Para você / Tendências / Todas,descoberta,should,yes,yes,temos Quentes/Descontos/Novas

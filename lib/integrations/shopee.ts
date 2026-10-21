@@ -7,7 +7,8 @@ import { parseConversion, parseOffer, type RawConversion, type RawOffer, type Sh
 export { parseConversion, parseOffer };
 export type { ShopeeConversion, ShopeeOffer };
 
-const ENDPOINT = "https://open-api.affiliate.shopee.com.br/graphql";
+// SHOPEE_API_URL só existe para os testes apontarem para um servidor de mentira.
+const ENDPOINT = process.env.SHOPEE_API_URL ?? "https://open-api.affiliate.shopee.com.br/graphql";
 
 export type ShopeeConfig = { appId: string; secret: string };
 

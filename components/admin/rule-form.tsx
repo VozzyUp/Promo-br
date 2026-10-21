@@ -1,5 +1,6 @@
 "use client";
 import { useActionState } from "react";
+import { useKeepForm } from "./use-keep-form";
 import { saveRuleAction, type RuleState } from "@/app/actions/robot";
 
 const input = "h-10 w-full rounded-sm border border-border-input bg-bg px-2 text-sm";
@@ -16,9 +17,10 @@ export const NEW_RULE: RuleValues = {
 
 export function RuleForm({ rule, categories }: { rule: RuleValues; categories: { id: string; name: string }[] }) {
   const [state, action, pending] = useActionState<RuleState, FormData>(saveRuleAction, undefined);
+  const submit = useKeepForm(action);
   const k = rule.id ?? "new";
   return (
-    <form action={action} className="grid gap-3 md:grid-cols-2">
+    <form onSubmit={submit} className="grid gap-3 md:grid-cols-2">
       {rule.id ? <input type="hidden" name="id" value={rule.id} /> : null}
       <div><label htmlFor={`n-${k}`} className="mb-1 block text-sm font-bold">Nome</label><input id={`n-${k}`} name="name" defaultValue={rule.name} required className={input} /></div>
       <div><label htmlFor={`c-${k}`} className="mb-1 block text-sm font-bold">Horários (cron, horário de Brasília)</label><input id={`c-${k}`} name="cron" defaultValue={rule.cron} required className={input} /></div>

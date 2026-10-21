@@ -1,5 +1,6 @@
 "use client";
 import { useActionState } from "react";
+import { useKeepForm } from "./use-keep-form";
 import { saveChannelAction, testChannelAction, type ChannelState } from "@/app/actions/channels";
 import { DEFAULT_TEMPLATE } from "@/lib/dispatch/format";
 
@@ -17,11 +18,13 @@ export const NEW_CHANNEL: ChannelValues = {
 
 export function ChannelForm({ ch }: { ch: ChannelValues }) {
   const [state, action, pending] = useActionState<ChannelState, FormData>(saveChannelAction, undefined);
+  const submit = useKeepForm(action);
   const [tState, tAction, tPending] = useActionState<ChannelState, FormData>(testChannelAction, undefined);
+  const submitTest = useKeepForm(tAction);
   const k = ch.id ?? "new";
   return (
     <div className="flex flex-col gap-3">
-      <form action={action} className="grid gap-3 md:grid-cols-2">
+      <form onSubmit={submit} className="grid gap-3 md:grid-cols-2">
         {ch.id ? <input type="hidden" name="id" value={ch.id} /> : null}
         <div><label htmlFor={`n-${k}`} className="mb-1 block text-sm font-bold">Nome</label><input id={`n-${k}`} name="name" defaultValue={ch.name} required className={input} /></div>
         <div>
@@ -55,7 +58,7 @@ export function ChannelForm({ ch }: { ch: ChannelValues }) {
         </div>
       </form>
       {ch.id ? (
-        <form action={tAction} className="flex flex-wrap items-center gap-3">
+        <form onSubmit={submitTest} className="flex flex-wrap items-center gap-3">
           <input type="hidden" name="id" value={ch.id} />
           <button type="submit" disabled={tPending} className="h-9 rounded-pill border border-accent px-4 text-sm font-bold text-accent disabled:opacity-50">{tPending ? "Enviando…" : "Enviar mensagem de teste"}</button>
           <p role="status" className={`text-sm ${tState?.error ? "text-danger" : "text-muted"}`}>{tState?.error ?? tState?.message ?? ""}</p>

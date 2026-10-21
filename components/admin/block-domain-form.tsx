@@ -1,13 +1,15 @@
 "use client";
 import { useActionState } from "react";
+import { useKeepForm } from "./use-keep-form";
 import { blockDomainAction, type AdminState } from "@/app/actions/admin";
 
 const input = "h-10 rounded-sm border border-border-input bg-bg px-2 text-sm";
 
 export function BlockDomainForm() {
   const [state, action, pending] = useActionState<AdminState, FormData>(blockDomainAction, undefined);
+  const submit = useKeepForm(action);
   return (
-    <form action={action} className="flex flex-col gap-2 md:flex-row md:items-end">
+    <form onSubmit={submit} className="flex flex-col gap-2 md:flex-row md:items-end">
       <div className="flex-1">
         <label htmlFor="bd-domain" className="mb-1 block text-sm font-bold">Domínio</label>
         <input id="bd-domain" name="domain" required placeholder="golpe.com" className={`${input} w-full`} />

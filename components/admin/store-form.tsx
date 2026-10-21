@@ -1,5 +1,6 @@
 "use client";
 import { useActionState } from "react";
+import { useKeepForm } from "./use-keep-form";
 import { updateStoreAction, type AdminState } from "@/app/actions/admin";
 import type { AdminStore } from "@/lib/data/admin";
 
@@ -28,9 +29,10 @@ const STATUSES = [
 /** Edição de uma loja. O modelo de link só vale para ofertas do dono e do robô; o link do usuário segue a política escolhida. */
 export function StoreForm({ store }: { store: AdminStore }) {
   const [state, action, pending] = useActionState<AdminState, FormData>(updateStoreAction, undefined);
+  const submit = useKeepForm(action);
   const id = `s-${store.id}`;
   return (
-    <form action={action} className="grid gap-3 border-t border-border pt-4 md:grid-cols-2">
+    <form onSubmit={submit} className="grid gap-3 border-t border-border pt-4 md:grid-cols-2">
       <input type="hidden" name="id" value={store.id} />
       <div>
         <label htmlFor={`${id}-name`} className="mb-1 block text-sm font-bold">Nome</label>

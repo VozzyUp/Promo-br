@@ -4,7 +4,9 @@ import "server-only";
 type TgResponse<T> = { ok: boolean; result?: T; description?: string };
 
 async function call<T>(token: string, method: string, body?: Record<string, unknown>): Promise<T> {
-  const res = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
+  // TELEGRAM_API_BASE só existe para os testes apontarem para um servidor de mentira.
+  const base = process.env.TELEGRAM_API_BASE ?? "https://api.telegram.org";
+  const res = await fetch(`${base}/bot${token}/${method}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body ?? {}),

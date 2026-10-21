@@ -27,7 +27,7 @@ function median(values: number[]): number {
  * - referência = mediana dos últimos 30 dias
  * - verified: desconto real >= 10%, histórico >= 7 dias e preço no menor valor dos 30 dias
  * - good_price: desconto real >= 5%
- * - inflated: o "de" da loja é >= 20% acima da referência e o desconto real fica abaixo de 5%
+ * - inflated: com pelo menos 7 dias de histórico, o "de" da loja é >= 20% acima da referência e o desconto real fica abaixo de 5%
  * - no_comparison: histórico curto ou sem diferença
  */
 export function checkPrice(o: { priceCents: number; listPriceCents: number | null; history: PricePoint[]; now?: Date }): PriceCheck {
@@ -43,8 +43,9 @@ export function checkPrice(o: { priceCents: number; listPriceCents: number | nul
   const realBp = Math.round(((med - o.priceCents) / med) * 10000);
   const base = { referenceCents: med, realDiscountBp: realBp > 0 ? realBp : null, historyDays, min30Cents: min30, medianCents: med };
 
-  if (o.listPriceCents && o.listPriceCents >= med * 1.2 && realBp < 500) return { verdict: "inflated", ...base };
+  // Sem histórico suficiente não dá para acusar ninguém: só "sem comparação".
   if (historyDays < MIN_HISTORY_DAYS) return { verdict: "no_comparison", ...base };
+  if (o.listPriceCents && o.listPriceCents >= med * 1.2 && realBp < 500) return { verdict: "inflated", ...base };
   if (realBp >= 1000 && o.priceCents <= min30 * 1.01) return { verdict: "verified", ...base };
   if (realBp >= 500) return { verdict: "good_price", ...base };
   return { verdict: "no_comparison", ...base };

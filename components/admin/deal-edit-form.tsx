@@ -1,13 +1,15 @@
 "use client";
 import { useActionState } from "react";
+import { useKeepForm } from "./use-keep-form";
 import { editDealAction, type DealEditState } from "@/app/actions/staff";
 
 const input = "h-10 w-full rounded-sm border border-border-input bg-bg px-2 text-sm";
 
 export function DealEditForm({ id, title, categoryId, categories }: { id: string; title: string; categoryId: string | null; categories: { id: string; name: string }[] }) {
   const [state, action, pending] = useActionState<DealEditState, FormData>(editDealAction, undefined);
+  const submit = useKeepForm(action);
   return (
-    <form action={action} className="grid gap-3 md:grid-cols-[1fr_14rem_auto] md:items-end">
+    <form onSubmit={submit} className="grid gap-3 md:grid-cols-[1fr_14rem_auto] md:items-end">
       <input type="hidden" name="id" value={id} />
       <div>
         <label htmlFor={`t-${id}`} className="mb-1 block text-sm font-bold">Título</label>

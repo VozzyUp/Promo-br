@@ -46,7 +46,8 @@ export async function verifyDeal(dealId: string): Promise<string | null> {
   if (snaps.error) throw snaps.error;
   const postedAt = new Date(d.created_at).getTime() - 60_000;
   const history: PricePoint[] = (snaps.data as { price_cents: number; captured_at: string; source: string }[])
-    .filter((s) => !(s.source === "post" && new Date(s.captured_at).getTime() >= postedAt))
+    // o primeiro preço registrado junto com a oferta (do usuário ou do robô) não é histórico dela mesma
+    .filter((s) => !((s.source === "post" || s.source === "robot") && new Date(s.captured_at).getTime() >= postedAt))
     .map((s) => ({ priceCents: s.price_cents, at: new Date(s.captured_at) }));
 
   const r = checkPrice({ priceCents: d.price_cents, listPriceCents: d.list_price_cents, history });
