@@ -29,3 +29,15 @@ Capturas: `replica/clone-screens/` (desktop 1440 e celular 390).
 
 | backend | 2026-10-20 | partial | chave secreta + seed + teste com 2 contas; SMTP; templates de e-mail | limite de 2 projetos gratuitos no Supabase (Big pausado a pedido) |
 | S08b Recuperar/nova senha | 2026-10-20 | done (código) | testar com e-mail real | — |
+
+## 2026-10-21: painel, verificação, robô, envio, testes e segurança
+
+| Bloco | Estado | Observação |
+| --- | --- | --- |
+| Painel A02-A13 | done | fila em lote, ofertas e cupons, usuários, lojas, domínios bloqueados, integrações, robô, canais, execuções, métricas, anúncios, aparência, páginas |
+| Verificação de preço | done | histórico por anúncio, selos, reconferência, expiração; sem comparação com outras lojas (sem API) |
+| Robô Shopee, canais Telegram/WhatsApp, vendas | partial | testado contra servidor de mentira; falta credencial real |
+| Cookies e AdSense | done | aviso, script só após aceite, ads.txt, ID pelo painel |
+| Deploy | partial | Dockerfile, Actions, stack; falta primeiro push |
+| Testes | done | 99 unitários e 80 ponta a ponta (Playwright) |
+| Segurança | done | CSP e cabeçalhos, hierarquia da equipe, limites de tentativa, senha para ações sensíveis, link expandido e conferido |

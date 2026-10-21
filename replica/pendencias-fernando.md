@@ -29,5 +29,12 @@ Atualizado em 21/10/2026. Lançamento: Black Friday, 27/11/2026.
 - [ ] Revisão jurídica de privacidade, termos, conduta e sobre (editáveis em Painel > Páginas). Falta canal de contato e lista de cookies e parceiros de anúncio.
 - [ ] Revisar a política de link de afiliado de cada loja em Painel > Lojas.
 
+## Segurança e dados
+- [ ] Rodar `supabase/cleanup-testes.sql` no SQL Editor (primeiro os selects de conferência) para apagar ofertas, vendas, regras, canais, integrações e domínios criados pelos testes.
+- [ ] Guardar uma cópia da `MASTER_KEY` fora do servidor. Se ela se perder, as credenciais salvas no painel ficam ilegíveis.
+- [ ] Ligar a proteção contra senha vazada no Supabase Auth (exige plano Pro).
+- [ ] Considerar Turnstile (Cloudflare) no login e no cadastro, se aparecer abuso.
+- [ ] Depois que o AdSense for aprovado, conferir se os anúncios aparecem com a política de segurança (CSP). Se algo for bloqueado, definir `CSP_REPORT_ONLY=1` e me avisar.
+
 ## Limpeza local
 - [ ] Fechar o servidor de teste da porta 3100 quando terminar.
