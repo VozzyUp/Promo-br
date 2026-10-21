@@ -5,6 +5,8 @@ const STUB = "http://127.0.0.1:4010";
 
 const form = (page: Page, innerSelector: string) => page.locator("form", { has: page.locator(innerSelector) });
 const mails = async (): Promise<{ to: string[]; data: string }[]> => (await fetch(`${STUB}/_mails`)).json();
+/** Corpo do e-mail como o leitor vê: desfaz as quebras e os códigos do quoted-printable ("=3D" vira "="). */
+const decoded = (data: string) => data.replace(/=\r?\n/g, "").replace(/=([0-9A-F]{2})/g, (_, h: string) => String.fromCharCode(parseInt(h, 16)));
 
 async function setIntegration(page: Page, key: string, fields: Record<string, string>, enabled: boolean) {
   await page.goto("/painel/integracoes");
@@ -82,7 +84,7 @@ test("I-3 SMTP: a conexão é testada (senha errada e certa) e o e-mail do bolet
     await expect(visitor.getByText(/Enviamos um e-mail para você confirmar/)).toBeVisible();
     await expect.poll(async () => (await mails()).some((m) => m.to.includes(email))).toBe(true);
     const confirm = (await mails()).find((m) => m.to.includes(email))!;
-    const link = /http:\/\/[^\s"<]+\/boletim\/confirmar\?t=[0-9a-f]{32}/.exec(confirm.data.replace(/=\r\n/g, ""))![0];
+    const link = /http:\/\/[^\s"<]+\/boletim\/confirmar\?t=[0-9a-f]{32}/.exec(decoded(confirm.data))![0];
     // abrir o link não confirma sozinho: só o clique
     await visitor.goto(new URL(link).pathname + new URL(link).search);
     await expect(visitor.getByRole("button", { name: "Confirmar inscrição" })).toBeVisible();
@@ -93,10 +95,12 @@ test("I-3 SMTP: a conexão é testada (senha errada e certa) e o e-mail do bolet
     await page.goto("/painel/execucoes");
     await page.getByRole("button", { name: /Enviar o boletim agora/ }).click();
     await expect(page.getByText(/Terminou:.*"sent":\d+/)).toBeVisible({ timeout: 60_000 });
-    await expect.poll(async () => (await mails()).some((m) => m.to.includes(email) && /ofertas mais quentes da semana|oferta mais quente/.test(m.data))).toBe(true);
-    const digest = (await mails()).find((m) => m.to.includes(email) && /quentes? da semana/.test(m.data))!;
+    // o boletim se distingue da confirmação pelo assunto (o texto da confirmação também fala em "ofertas da semana")
+    const isDigest = (m: { to: string[]; data: string }) => m.to.includes(email) && /^Subject: (As \d+ ofertas mais quentes|A oferta mais quente) da semana/m.test(m.data);
+    await expect.poll(async () => (await mails()).some(isDigest)).toBe(true);
+    const digest = (await mails()).find(isDigest)!;
     expect(digest.data).toContain("List-Unsubscribe:");
-    const out = /http:\/\/[^\s"<]+\/boletim\/sair\?t=[0-9a-f]{32}/.exec(digest.data.replace(/=\r\n/g, ""))![0];
+    const out = /http:\/\/[^\s"<]+\/boletim\/sair\?t=[0-9a-f]{32}/.exec(decoded(digest.data))![0];
     await visitor.goto(new URL(out).pathname + new URL(out).search);
     await visitor.getByRole("button", { name: "Cancelar inscrição" }).click();
     await expect(visitor.getByText(/não recebe mais o boletim/)).toBeVisible();

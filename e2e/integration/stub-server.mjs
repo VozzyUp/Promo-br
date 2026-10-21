@@ -72,6 +72,28 @@ const json = (res, status, data) => {
   res.end(JSON.stringify(data));
 };
 
+// Página pública de canal do Telegram (t.me/s/canalteste), no mesmo formato da real. Textos inventados.
+let tgBase = Date.now();
+const tgIds = () => {
+  const s = tgBase.toString(36).toUpperCase();
+  return { first: Math.floor(tgBase / 1000) % 1_000_000_000, asin: `B0${s.slice(-8).padStart(8, "0")}`, coupon: `STUB${s.slice(-4)}` };
+};
+function channelPage() {
+  const { first, asin, coupon } = tgIds();
+  const now = new Date().toISOString();
+  const emoji = (e) => `<i class="emoji" style="background-image:url('//telegram.org/img/emoji/40/X.png')"><b>${e}</b></i>`;
+  const msg = (n, body) => `<div class="tgme_widget_message_wrap js-widget_message_wrap"><div class="tgme_widget_message text_not_supported_wrap js-widget_message" data-post="canalteste/${first + n}">
+<div class="tgme_widget_message_text js-message_text" dir="auto">${body}</div>
+<div class="tgme_widget_message_footer"><a class="tgme_widget_message_date" href="https://t.me/canalteste/${first + n}"><time datetime="${now}" class="time">12:00</time></a></div></div></div>`;
+  return `<html><body><div class="tgme_channel_info">Canal teste</div><section class="tgme_channel_history">
+${msg(1, `<b>Fone Bluetooth Stub Teste XYZ-123 Preto</b><br/>${emoji("🔥")} De R&#036; 199,90 por R&#036; 99,90<br/>${emoji("🛒")} <a href="https://www.amazon.com.br/Fone-Stub/dp/${asin}?tag=outrocanal-20&amp;linkCode=ll1">https://www.amazon.com.br/dp/${asin}</a>`)}
+${msg(2, `${emoji("☑")} Cupom Shopee&#33;&#33;&#33;<br/>${emoji("▪")} R&#036;20 OFF nas compras acima de R&#036;99<br/>${emoji("🎯")} Usem o Cupom: ${coupon}<br/><a href="https://shopee.com.br/user/voucher-wallet?mmp_pid=an_183&amp;utm_source=an_183">https://s.shopee.com.br/x</a>`)}
+${msg(3, `Deixe as notificações do canal ligadas para não perder nada&#33;`)}
+${msg(4, `SORTEIO de um Fone Stub Sorteio Edition 2026<br/>Por R&#036; 10,00<br/><a href="https://www.amazon.com.br/dp/B0SORTEIO1">link</a>`)}
+${msg(5, `Panela Stub Antiaderente 24cm Sem Loja<br/>Por R&#036; 59,90<br/><a href="https://promos.exemplo/ofertas/panela">https://promos.exemplo/ofertas/panela</a>`)}
+</section></body></html>`;
+}
+
 createServer(async (req, res) => {
   const url = new URL(req.url, "http://x");
   if (url.pathname === "/health") return json(res, 200, { ok: true });
@@ -85,6 +107,13 @@ createServer(async (req, res) => {
     calls.push({ kind: "anthropic.messages", model: payload.model, user });
     const text = user.includes("Reescreva o título") ? "Cupom E2E de 10% de desconto em loja de exemplo" : user.includes("Escreva uma descrição") ? "Cupom de teste da IA. Vale para a primeira compra e não acumula com outras promoções." : "ok";
     return json(res, 200, { content: [{ type: "text", text }] });
+  }
+  if (url.pathname === "/_tg_reset") { tgBase = Date.now(); return json(res, 200, tgIds()); }
+  const tgPage = url.pathname.match(/^\/s\/(\w+)$/);
+  if (tgPage && req.method === "GET") {
+    if (tgPage[1] !== "canalteste") { res.writeHead(302, { location: `https://t.me/${tgPage[1]}` }); return res.end(); }
+    res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+    return res.end(channelPage());
   }
   if (url.pathname === "/_reset") { calls.length = 0; conversionSubId = null; idBase = Date.now(); return json(res, 200, { ok: true }); }
   if (url.pathname === "/_conversion" && req.method === "POST") { conversionSubId = JSON.parse(await body(req)).subId; return json(res, 200, { ok: true }); }

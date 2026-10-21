@@ -37,6 +37,8 @@ export default defineConfig({
         SHOPEE_API_URL: `http://127.0.0.1:${STUB_PORT}/graphql`,
         TELEGRAM_API_BASE: `http://127.0.0.1:${STUB_PORT}`,
         ANTHROPIC_API_BASE: `http://127.0.0.1:${STUB_PORT}`,
+        TELEGRAM_WEB_BASE: `http://127.0.0.1:${STUB_PORT}`, // página pública de canal de mentira
+        SOURCES_OFFLINE: "1", // o robô das fontes não abre lojas de verdade nos testes
         NEXT_PUBLIC_SITE_URL: `http://127.0.0.1:${INT_PORT}`,
       },
     },

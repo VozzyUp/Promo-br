@@ -20,7 +20,8 @@ export type RobotRule = {
 
 export type RobotStats = { found: number; created: number; published: number; duplicates: number; filtered: number; inflated: number; errors: number };
 
-async function systemAuthorId(): Promise<string> {
+/** Autor das ofertas criadas por robô (o perfil com papel system). */
+export async function systemAuthorId(): Promise<string> {
   const { data, error } = await db().from("profiles").select("id").eq("role", "system").limit(1).maybeSingle();
   if (error) throw error;
   if (!data) throw new Error("Falta o usuário do sistema (perfil com papel system).");

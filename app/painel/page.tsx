@@ -4,14 +4,30 @@ import { moderateDealAction } from "@/app/actions/moderate";
 import { formatPrice, timeAgo } from "@/lib/format";
 import { listPendingDeals } from "@/lib/data";
 import { requireModerator } from "@/lib/auth";
+import { db } from "@/lib/supabase/db";
+import { supabaseEnabled } from "@/lib/supabase/server";
 
 export const metadata = { title: "Painel: fila de ofertas" };
 
 const small = "h-10 rounded-sm border border-border-input bg-bg px-2 text-sm";
 
+type Origin = { name: string; postUrl: string | null };
+
+/** De qual fonte do Telegram veio cada oferta da fila (vazio se a tabela de fontes ainda não existir). */
+async function pendingOrigins(ids: string[]): Promise<Map<string, Origin>> {
+  const out = new Map<string, Origin>();
+  if (ids.length === 0 || !supabaseEnabled()) return out;
+  const { data } = await db().from("source_items").select("deal_id, post_url, sources(name)").in("deal_id", ids);
+  for (const r of (data ?? []) as unknown as { deal_id: string; post_url: string | null; sources: { name: string } | null }[]) {
+    out.set(r.deal_id, { name: r.sources?.name ?? "fonte apagada", postUrl: r.post_url });
+  }
+  return out;
+}
+
 export default async function PanelPage() {
   await requireModerator();
   const pending = await listPendingDeals();
+  const origin = await pendingOrigins(pending.map((d) => d.id));
   return (
     <div className="mx-auto max-w-(--layout-max) px-4 py-8">
       <h1 className="text-xl font-bold">Fila de ofertas</h1>
@@ -39,6 +55,12 @@ export default async function PanelPage() {
                   {d.priceCents != null ? formatPrice(d.priceCents) : `cupom ${d.couponCode}`} · por {d.author.username} · {timeAgo(d.createdAt)}
                 </p>
                 <p className="truncate text-xs text-muted" title={d.urlSubmitted ?? undefined}>{d.urlSubmitted ?? "Sem link (loja física ou sem endereço)"}</p>
+                {origin.has(d.id) ? (
+                  <p className="text-xs text-muted">
+                    Do Telegram: {origin.get(d.id)!.name}
+                    {origin.get(d.id)!.postUrl ? <> · <a href={origin.get(d.id)!.postUrl!} target="_blank" rel="noopener noreferrer" className="font-bold text-accent hover:underline">ver publicação</a></> : null}
+                  </p>
+                ) : null}
               </div>
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2">

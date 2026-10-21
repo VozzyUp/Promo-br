@@ -41,10 +41,21 @@ Atualizado em 21/10/2026. Lançamento: Black Friday, 27/11/2026.
 
 ## Funcionalidades novas (21/10/2026): o que falta de você para ligar
 
-- [ ] **Rodar a migração 7** no SQL Editor do Supabase: `supabase/migrations/20261021000007_ranking_newsletter_oauth.sql`. Ela liga os pesos do ranking (Painel > Ranking), cria a lista do boletim e deixa o login com Google criar o perfil sozinho. É segura para rodar mais de uma vez.
+- [x] **Rodar a migração 7** (feito em 21/10/2026) no SQL Editor do Supabase: `supabase/migrations/20261021000007_ranking_newsletter_oauth.sql`. Ela liga os pesos do ranking (Painel > Ranking), cria a lista do boletim e deixa o login com Google criar o perfil sozinho. É segura para rodar mais de uma vez.
 - [ ] **Boletim por e-mail**: em Painel > Integrações > "E-mail (SMTP)", preencha servidor, porta, usuário, senha e remetente e clique em salvar e testar. O formulário no rodapé só aparece quando isso e a migração estiverem prontos. Envio toda segunda às 9h (Brasília).
 - [ ] **Depois da migração e do SMTP**, rodar `npx playwright test e2e/integration/ai-smtp.spec.ts --project=integration`: o teste I-3 hoje pula a parte da inscrição porque a tabela ainda não existe.
 - [ ] **IA para textos**: em Painel > Integrações > "IA para textos (Claude)", cole a chave da API da Anthropic e o modelo (ex.: claude-haiku-5-5). O botão aparece no assistente de publicar.
 - [ ] **Login com Google**: criar o cliente OAuth no Google Cloud, ativar o provedor Google no Supabase (Authentication > Sign In / Providers), colocar o endereço do site em Redirect URLs e trocar `GOOGLE_LOGIN` para `"1"` na stack.
 - [ ] **Impulsionar pelo usuário (Pix)**: hoje só a equipe destaca (6 a 72 h). Vender destaque precisa de um provedor de pagamento (Pix) e do contrato; é decisão de negócio.
-- [ ] Rodar `supabase/cleanup-testes.sql` de novo: ganhou a linha que apaga o produto do teste de comparação por código de barras.
+- [ ] Rodar `supabase/cleanup-testes.sql` de novo: ganhou a linha que apaga o produto do teste de comparação por código de barras. Rode **depois da migração 8** (a última linha apaga as fontes de teste) e **antes** de preencher SMTP e IA de verdade (ele zera as integrações; a conta do Telegram fica).
+
+## Fontes do Telegram (21/10/2026): ofertas de canais e grupos, sem afiliado
+
+O robô lê canais e grupos, segue o link de cada oferta até a loja, tira o código de afiliado de quem publicou e manda para a fila de aprovação.
+
+- [ ] **Rodar a migração 8** no SQL Editor: `supabase/migrations/20261021000008_sources.sql` (cria as fontes e o registro do que foi lido; libera a conta do Telegram na tabela de integrações). Pode rodar de novo sem problema.
+- [ ] Depois da migração, rodar (ou pedir ao Claude) `npx playwright test e2e/integration/sources.spec.ts --project=integration`: o teste F-1 pula enquanto a tabela não existe.
+- [ ] **Canais públicos** (têm @nome e abrem em t.me/s/nome): em Painel > Fontes > Nova fonte, tipo "Canal público", cole o @nome. Começa a cada 10 min, indo para a fila. Aprove em Painel > Fila de ofertas.
+- [ ] **Grupos privados ou canais sem página pública** (opcional): crie o api_id e o api_hash em my.telegram.org > API development tools; em Painel > Fontes > Conta do Telegram, informe os dois e o telefone, digite o código que chega no app do Telegram (e a senha de duas etapas, se tiver). Prefira um número separado do pessoal. A conta só lê.
+- [ ] Decidir com o tempo: publicar direto (sem fila) nos canais que se mostrarem confiáveis; ajustar desconto mínimo, preço máximo e palavras bloqueadas por fonte.
+- Riscos a ter em mente: as ofertas foram garimpadas por outros canais (use como reforço, não como única fonte); oferta relâmpago pode já ter acabado; Magalu e Casas Bahia bloqueiam a leitura da página (o robô usa o texto da publicação nesses casos); um canal pode mudar o formato e o robô passar a marcar "sem link da loja" (aparece em Painel > Fontes > Últimas publicações lidas).

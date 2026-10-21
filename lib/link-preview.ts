@@ -71,10 +71,10 @@ function getOnce(url: URL, target: Target, opts: { maxBytes: number; accept: str
   });
 }
 
-/** GET seguro com até 3 redirecionamentos, cada um revalidado. */
-export async function safeGet(rawUrl: string, opts: { maxBytes: number; accept: string }): Promise<Got> {
+/** GET seguro com até 3 redirecionamentos (ou maxRedirects), cada um revalidado. */
+export async function safeGet(rawUrl: string, opts: { maxBytes: number; accept: string; maxRedirects?: number }): Promise<Got> {
   let url = new URL(rawUrl);
-  for (let i = 0; i <= MAX_REDIRECTS; i++) {
+  for (let i = 0; i <= (opts.maxRedirects ?? MAX_REDIRECTS); i++) {
     const got = await getOnce(url, await validatedAddress(url), opts);
     if (got.status >= 300 && got.status < 400 && got.location) {
       url = new URL(got.location, url);

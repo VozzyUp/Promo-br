@@ -9,8 +9,9 @@ export type RunNowState = { message?: string } | undefined;
 export async function runNowAction(_prev: RunNowState, form: FormData): Promise<RunNowState> {
   await requireAdmin();
   const job = String(form.get("job") ?? "");
-  if (!/^(expire|recheck|dispatch|newsletter|sync:shopee|robot:[0-9a-f-]{36})$/.test(job)) return { message: "Job inválido." };
+  if (!/^(expire|recheck|dispatch|newsletter|sync:shopee|robot:[0-9a-f-]{36}|source:[0-9a-f-]{36})$/.test(job)) return { message: "Job inválido." };
   const r = await runJob(job, "manual");
   revalidatePath("/painel/execucoes");
+  if (job.startsWith("source:")) revalidatePath("/painel/fontes");
   return { message: r.status === "ok" || r.status === "partial" ? `Terminou: ${JSON.stringify(r.stats)}` : `${r.status}: ${r.error ?? ""}` };
 }

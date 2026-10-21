@@ -40,6 +40,7 @@ Painel: log de execuções + rodar agora,painel,must,no,yes,log e rodar agora
 Painel: métricas cliques/conversões/comissão,painel,should,no,yes,"cliques, canais, melhores ofertas, vendas e comissão"
 Worker interno com agendador e travas,infra,must,no,yes,instrumentation.ts com WORKER_ENABLED=1; trava por job_runs
 Captação Shopee Affiliate Open API,captação,must,no,partial,testado contra servidor de mentira que confere a assinatura; falta testar com credenciais reais
+Captação de canais e grupos do Telegram (sem afiliado),captação,should,no,partial,"canal público pela página t.me/s e grupo privado pela conta logada; segue encurtadores, sites intermediários e a vitrine do Mercado Livre até o produto, tira o afiliado de terceiros, cria oferta ou cupom na fila; testado com unitários, contra canal real (leitura) e e2e F-1 pronto, esperando a migração 8"
 Sync de conversões Shopee,métricas,should,no,partial,idem: testado contra o servidor de mentira
 Captação por feed de redes (Awin/Lomadee/etc),captação,could,no,no,dezembro
 Amazon Creators API,captação,could,no,no,após vendas qualificadas

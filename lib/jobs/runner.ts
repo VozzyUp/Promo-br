@@ -2,7 +2,7 @@
 import "server-only";
 import { db } from "../supabase/db";
 import { cronMatches } from "./cron";
-import { JOBS, robotRuleJobs, type JobResult } from "./registry";
+import { JOBS, robotRuleJobs, sourceJob, type JobResult } from "./registry";
 
 const STALE_MINUTES = 20; // um job "running" há mais tempo que isso é tratado como travado
 
@@ -10,7 +10,7 @@ export type RunOutcome = { status: "ok" | "partial" | "error" | "skipped"; stats
 
 /** Roda um job se não houver outro igual em andamento. Nunca lança. */
 export async function runJob(job: string, trigger: "schedule" | "manual"): Promise<RunOutcome> {
-  const fn = job.startsWith("robot:") ? (await robotRuleJobs())[job] : JOBS[job];
+  const fn = job.startsWith("robot:") ? (await robotRuleJobs())[job] : job.startsWith("source:") ? sourceJob(job.slice(7)) : JOBS[job];
   if (!fn) return { status: "error", stats: {}, error: "Job desconhecido." };
 
   const since = new Date(Date.now() - STALE_MINUTES * 60_000).toISOString();
@@ -54,6 +54,10 @@ export async function tick(now = new Date()): Promise<string[]> {
 
   const rules = await db().from("robot_rules").select("id, cron, active").eq("active", true);
   for (const r of (rules.data ?? []) as { id: string; cron: string }[]) if (cronMatches(r.cron, now)) due.push(`robot:${r.id}`);
+
+  // Fontes do Telegram (a tabela só existe depois da migração 8; sem ela, nada a fazer).
+  const sources = await db().from("sources").select("id, cron").eq("active", true);
+  for (const s of (sources.data ?? []) as { id: string; cron: string }[]) if (cronMatches(s.cron, now)) due.push(`source:${s.id}`);
 
   // Evita repetir na mesma janela de minuto (mais de uma réplica ou tick atrasado).
   const minuteStart = new Date(Math.floor(now.getTime() / 60_000) * 60_000).toISOString();

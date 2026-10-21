@@ -32,7 +32,7 @@ export const userLogin = {
 
 export async function login(page: Page, who: { email: string; password: string }) {
   await page.goto("/entrar");
-  await page.getByLabel("E-mail").fill(who.email);
+  await page.getByLabel("E-mail", { exact: true }).fill(who.email);
   await page.getByLabel("Senha").fill(who.password);
   await page.getByRole("button", { name: "Entrar" }).click();
   await page.waitForURL((u) => !u.pathname.startsWith("/entrar"));

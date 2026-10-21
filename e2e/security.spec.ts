@@ -59,7 +59,7 @@ test("S-PUB arquivos públicos", async ({ request }) => {
 
 test("S-LOGIN senha errada mostra mensagem genérica e não revela se a conta existe", async ({ page }) => {
   await page.goto("/entrar");
-  await page.getByLabel("E-mail").fill("ninguem-existe@promo-br.test");
+  await page.getByLabel("E-mail", { exact: true }).fill("ninguem-existe@promo-br.test");
   await page.getByLabel("Senha").fill("senha-errada-123");
   await page.getByRole("button", { name: "Entrar" }).click();
   await expect(page.getByText(/e-mail ou senha incorretos/i)).toBeVisible();
@@ -69,7 +69,7 @@ test("S-RECUPERAR mesma resposta para e-mail que existe e que não existe", asyn
   const msgs: string[] = [];
   for (const email of ["admin@promo-br.test", "ninguem-existe@promo-br.test"]) {
     await page.goto("/recuperar-senha");
-    await page.getByLabel("E-mail").fill(email);
+    await page.getByLabel("E-mail da conta", { exact: true }).fill(email);
     await page.getByRole("button", { name: /enviar|recuperar/i }).click();
     await expect(page.getByText(/se existir uma conta/i)).toBeVisible();
     msgs.push(await page.getByText(/se existir uma conta/i).innerText());

@@ -4,6 +4,7 @@ import { expireDueDeals, recheckPublishedDeals } from "../data/verification";
 import { runNewsletter } from "../data/newsletter";
 import { runDispatch } from "../dispatch/run";
 import { runShopeeRule } from "../robot/shopee";
+import { runSource } from "../sources/run";
 import { syncShopeeConversions } from "./shopee-sync";
 import { db } from "../supabase/db";
 
@@ -32,6 +33,14 @@ export const JOBS: Record<string, JobFn> = {
     return { stats: { ...s }, partial: s.failed > 0 && s.updated > 0 };
   },
 };
+
+/** Um job por fonte do Telegram: source:<id>. */
+export function sourceJob(id: string): JobFn {
+  return async () => {
+    const s = await runSource(id);
+    return { stats: { ...s }, partial: s.errors > 0 && s.created > 0 };
+  };
+}
 
 /** Um job por regra do robô: robot:<id>. Preenchido pelo módulo do robô. */
 export async function robotRuleJobs(): Promise<Record<string, JobFn>> {

@@ -18,12 +18,14 @@
     "@radix-ui/react-tooltip": "^1.4.1",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.118.0",
+    "big-integer": "1.6.52",
     "lucide-react": "^1.60.0",
     "next": "16.4.1",
     "nodemailer": "^10.1.7",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "server-only": "^0.0.1",
+    "telegram": "2.26.22",
     "zod": "^4.6.7"
   },
   "devDependencies": {
