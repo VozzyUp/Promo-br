@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ConsentReset } from "@/components/consent/consent-banner";
 
 export function Footer() {
   return (
@@ -14,6 +15,7 @@ export function Footer() {
           <Link href="/privacidade" className="hover:text-text">Privacidade</Link>
           <Link href="/termos" className="hover:text-text">Termos</Link>
           <Link href="/conduta" className="hover:text-text">Conduta</Link>
+          <ConsentReset />
         </nav>
       </div>
     </footer>

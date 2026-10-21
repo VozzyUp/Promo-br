@@ -1,3 +1,4 @@
+import { AdUnit } from "@/components/consent/ad-unit";
 import Link from "next/link";
 import { ArrowRight, Flag } from "lucide-react";
 import { DealImage, DiscountChip } from "@/components/deal-parts";
@@ -33,7 +34,7 @@ export function HotSidebar({ deals }: { deals: DealView[] }) {
   );
 }
 
-/** Espaço de anúncio com altura reservada (sem CLS). O AdSense entra aqui depois do consentimento. */
+/** Espaço de anúncio com altura reservada (sem CLS). O AdSense só carrega depois do aceite de cookies. */
 export function AdSlot({ minHeight = 250, className = "" }: { minHeight?: number; className?: string }) {
   return (
     <aside aria-label="Publicidade" className={`rounded-card bg-bg p-3 shadow-card ${className}`}>
@@ -41,7 +42,9 @@ export function AdSlot({ minHeight = 250, className = "" }: { minHeight?: number
         <span>Publicidade</span>
         <button type="button" className="flex items-center gap-1 hover:text-text">Denunciar <Flag className="size-3" aria-hidden /></button>
       </div>
-      <div className="rounded-sm bg-surface" style={{ minHeight }} />
+      <div className="rounded-sm bg-surface" style={{ minHeight }}>
+        <AdUnit minHeight={minHeight} />
+      </div>
     </aside>
   );
 }

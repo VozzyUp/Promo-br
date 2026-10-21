@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Figtree } from "next/font/google";
 import { AppHeader } from "@/components/app-header";
+import { AdScript } from "@/components/consent/ad-script";
+import { ConsentBanner } from "@/components/consent/consent-banner";
 import { Footer } from "@/components/footer";
 import type { MenuNotification } from "@/components/notifications-menu";
 import { getSession } from "@/lib/auth";
@@ -36,6 +38,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <AppHeader session={session} unread={unread} notifications={notifications} />
         <main id="conteudo" className="flex-1">{children}</main>
         <Footer />
+        <ConsentBanner />
+        <AdScript />
       </body>
     </html>
   );
