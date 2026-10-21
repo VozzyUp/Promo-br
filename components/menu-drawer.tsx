@@ -1,7 +1,8 @@
 "use client";
 import * as Dialog from "@radix-ui/react-dialog";
-import { BellPlus, Gift, LayoutGrid, MessagesSquare, Tag, Ticket, X } from "lucide-react";
+import { BellPlus, Gift, LayoutGrid, LogOut, MessagesSquare, Tag, Ticket, X } from "lucide-react";
 import Link from "next/link";
+import { logoutAction } from "@/app/actions/auth";
 import { useState, type ReactNode } from "react";
 
 export type MenuCategory = { name: string; slug: string };
@@ -46,8 +47,11 @@ export function MenuDrawer({
             ))}
             {loggedIn ? (
               <>
-                <Link href="/conta/notificacoes" onClick={close} className={row}><LayoutGrid className="size-5 text-muted" aria-hidden /> Buzón{unread > 0 ? ` (${unread})` : ""}</Link>
+                <Link href="/conta/notificacoes" onClick={close} className={row}><LayoutGrid className="size-5 text-muted" aria-hidden /> Notificações{unread > 0 ? ` (${unread})` : ""}</Link>
                 <Link href="/conta" onClick={close} className={row}><LayoutGrid className="size-5 text-muted" aria-hidden /> Minha conta</Link>
+                <form action={logoutAction}>
+                  <button type="submit" className={`${row} w-full text-left text-danger`}><LogOut className="size-5" aria-hidden /> Sair</button>
+                </form>
               </>
             ) : (
               <Link href="/entrar" onClick={close} className={row}><LayoutGrid className="size-5 text-muted" aria-hidden /> Entrar ou cadastrar</Link>
