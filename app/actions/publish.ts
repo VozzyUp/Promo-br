@@ -196,6 +196,7 @@ export async function publishAction(_prev: PublishState, form: FormData): Promis
     shippingCents,
     shipsFrom: d.shipsFrom || null,
     publish: isStaff || profile.trusted,
+    source: isStaff ? "admin" : "user",
   });
 
   if (supabaseEnabled()) {

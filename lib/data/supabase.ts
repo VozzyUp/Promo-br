@@ -215,6 +215,7 @@ export type NewDeal = {
   listPriceCents: number | null;
   couponCode: string | null;
   publish: boolean;
+  source?: "user" | "admin" | "robot";
   // Passo a passo de publicar (opcionais: o formulário simples não usa).
   urlKey?: string | null;
   startsAt?: string | null;
@@ -240,7 +241,7 @@ export async function createDeal(input: NewDeal) {
         title: input.title,
         description: input.description,
         author_id: input.authorId,
-        source: "user",
+        source: input.source ?? "user",
         store_id: input.storeId,
         category_id: input.categoryId,
         url_submitted: input.urlSubmitted,
