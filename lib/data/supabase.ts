@@ -23,13 +23,13 @@ type AuthorRow = { id: string; username: string; display_name: string; avatar_ur
 type ProfileRow = AuthorRow & {
   reputation: number; trusted: boolean; approved_posts: number; banned_at: string | null; created_at: string;
 };
-type DealJoinRow = DealRow & { store: StoreRow; category: CategoryRow | null; author: AuthorRow };
+export type DealJoinRow = DealRow & { store: StoreRow; category: CategoryRow | null; author: AuthorRow };
 
 const DEAL_COLS =
   "id, slug, code, title, description, author_id, source, store_id, category_id, url_submitted, price_cents, " +
   "list_price_cents, coupon_code, coupon_percent, image_path, verdict, real_discount_bp, status, reject_reason, " +
   "published_at, expires_at, votes_up, votes_down, clicks_total, comments_count, created_at";
-const JOIN =
+export const JOIN =
   `${DEAL_COLS}, store:stores!inner(id, name, slug, domains, status), category:categories(id, name, slug), ` +
   "author:profiles!deals_author_id_fkey(id, username, display_name, avatar_url, role)";
 
@@ -73,7 +73,7 @@ async function myVotes(dealIds: string[], viewerId: string | null) {
   return map;
 }
 
-async function toViews(rows: DealJoinRow[], viewerId: string | null): Promise<DealView[]> {
+export async function toViews(rows: DealJoinRow[], viewerId: string | null): Promise<DealView[]> {
   const votes = await myVotes(rows.map((r) => r.id), viewerId);
   return rows.map((r) => {
     const d = toDeal(r);

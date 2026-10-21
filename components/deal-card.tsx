@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CouponCTA } from "@/components/coupon-cta";
 import { ActionBar, DealImage, GoToDealLink, PriceBlock, StoreAndAuthor, TimeChip } from "@/components/deal-parts";
 import { TemperatureVote } from "@/components/temperature-vote";
+import { stripRichText } from "@/lib/rich-text";
 import type { DealView } from "@/lib/types";
 
 export function DealCard({ deal, loggedIn }: { deal: DealView; loggedIn: boolean }) {
@@ -27,7 +28,7 @@ export function DealCard({ deal, loggedIn }: { deal: DealView; loggedIn: boolean
         </h2>
         <PriceBlock deal={deal} />
         <StoreAndAuthor deal={deal} />
-        {deal.description ? <p className="line-clamp-3 text-sm text-muted">{deal.description}</p> : null}
+        {deal.description ? <p className="line-clamp-3 text-sm text-muted">{stripRichText(deal.description, 240)}</p> : null}
         <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-1">
           <ActionBar deal={deal} />
           {expired ? (

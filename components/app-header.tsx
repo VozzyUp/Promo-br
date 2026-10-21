@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BellPlus, Gift, LayoutGrid, Menu, MessagesSquare, Plus, Search, Tag, Ticket, User } from "lucide-react";
-import { logoutAction } from "@/app/actions/auth";
+import { AccountMenu } from "@/components/account-menu";
+import { NotificationsMenu, type MenuNotification } from "@/components/notifications-menu";
 import { buttonClasses } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import type { Session } from "@/lib/types";
@@ -13,7 +14,9 @@ const nav = [
   { href: "/discussoes", label: "Discussões", icon: MessagesSquare },
 ];
 
-export function AppHeader({ session }: { session: Session | null }) {
+export function AppHeader({
+  session, unread = 0, notifications = [],
+}: { session: Session | null; unread?: number; notifications?: MenuNotification[] }) {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-bg/95 backdrop-blur">
       <a href="#conteudo" className="skip-link">Pular para o conteúdo</a>
@@ -32,16 +35,13 @@ export function AppHeader({ session }: { session: Session | null }) {
             <BellPlus className="size-4" aria-hidden /> Criar alerta
           </Link>
           {session ? (
-            <div className="flex items-center gap-2">
-              {session.role === "admin" || session.role === "moderator" ? (
-                <Link href="/painel" className="hidden text-sm font-bold sm:inline">Painel</Link>
-              ) : null}
-              <Link href={`/u/${session.username}`} className="flex items-center gap-1.5 text-sm font-bold">
-                <User className="size-4" aria-hidden /> <span className="hidden sm:inline">@{session.username}</span>
-              </Link>
-              <form action={logoutAction}>
-                <button type="submit" className="text-sm text-muted hover:text-text">Sair</button>
-              </form>
+            <div className="flex items-center gap-1">
+              <NotificationsMenu unread={unread} items={notifications} />
+              <AccountMenu
+                username={session.username}
+                displayName={session.username}
+                isStaff={session.role === "admin" || session.role === "moderator"}
+              />
             </div>
           ) : (
             <Link href="/entrar" className="flex items-center gap-1.5 text-sm font-bold">
