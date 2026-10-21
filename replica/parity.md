@@ -59,3 +59,9 @@ Desktop (só pela captura feita no navegador do usuário, sem medição)
 3. Autor completo na página da oferta (insígnia e contadores) e barra "Novo comentário / Guardar".
 4. Faixas de anúncio laterais no desktop (só depois do AdSense aprovado).
 5. Rodar a skill replica-brand para trocar de vez cores, logo e tipografia: o layout agora está parecido o bastante para a identidade própria fazer diferença.
+## Atualização 21/10/2026 (itens 1 a 5 do "o que ainda difere")
+- Título de seção cinza acima da lista e abas coladas sob o cabeçalho; no celular o h1 fica só para leitor de tela.
+- Sem foto, a oferta mostra o logo da loja (campo Logo em Painel > Lojas); sem logo cadastrado, o nome.
+- Autor completo (avatar, insígnia, membro desde, ofertas aprovadas, reputação) e barra "Novo comentário / Guardar".
+- Faixas de anúncio laterais (160px, telas de 1400px+), só com AdSense configurado e cookies aceitos.
+- Identidade própria: violeta, logo e ícone novos (`replica/brand.md`). Nome segue "promo-br" até a decisão do Fernando.
