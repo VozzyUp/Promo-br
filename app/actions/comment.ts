@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
 import { getProfile } from "@/lib/data";
+import { syncBadges } from "@/lib/data/gamification";
 import {
   countCommentsSince, createComment, getCommentDealId, getDealSlugById, hasSameRecentComment, markDealExpired,
   reactToComment, removeComment, reportComment, reportDeal, setSubscription,
@@ -53,6 +54,11 @@ export async function postCommentAction(_prev: CommentState, form: FormData): Pr
   } catch (e) {
     console.error("[comment]", e);
     return { error: "Não foi possível enviar o comentário. Tente de novo." };
+  }
+  try {
+    await syncBadges(session.userId); // medalhas de comentários; nunca atrapalha o comentário
+  } catch (e) {
+    console.error("[badges]", e);
   }
   const slug = await getDealSlugById(dealId);
   if (slug) revalidatePath(`/oferta/${slug}`);

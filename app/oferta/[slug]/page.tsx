@@ -11,6 +11,7 @@ import { getSession } from "@/lib/auth";
 import { CommentSection } from "@/components/comments/comment-section";
 import { DealToolbar } from "@/components/deal-toolbar";
 import { isSubscribed, listComments } from "@/lib/data/comments";
+import { savedSet } from "@/lib/data/relations";
 import { RichText } from "@/lib/rich-text";
 
 export async function generateMetadata({ params }: PageProps<"/oferta/[slug]">) {
@@ -35,6 +36,7 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
         session ? isSubscribed(deal.id, session.userId) : Promise.resolve(false),
       ])
     : [null, false];
+  const saved = session ? (await savedSet(session.userId, [deal.id])).has(deal.id) : false;
   const canClose = !!session && (session.userId === deal.authorId || session.role === "admin" || session.role === "moderator");
   return (
     <div className="mx-auto flex max-w-(--layout-max) flex-col gap-4 px-4 py-4">
@@ -72,7 +74,7 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
                   {deal.status === "pending" ? "Aguardando moderação" : expired ? "Acabou" : "Fora do ar"}
                 </span>
               )}
-              <ActionBar deal={deal} />
+              <ActionBar deal={deal} saved={saved} loggedIn={!!session} />
             </div>
             {deal.publishedAt ? <div><TimeChip iso={deal.publishedAt} /></div> : null}
             <h1 id="deal-title" className="text-xl font-bold">{deal.title}</h1>

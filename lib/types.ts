@@ -66,7 +66,7 @@ export type DealView = Deal & {
   myVote: -1 | 0 | 1;
 };
 
-export type FeedTab = "quentes" | "descontos" | "novas";
+export type FeedTab = "paravoce" | "quentes" | "descontos" | "novas";
 
 export type Session = { userId: string; role: Role; username: string };
 

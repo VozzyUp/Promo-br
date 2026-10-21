@@ -8,6 +8,7 @@ export type PublicProfile = {
   username: string;
   displayName: string;
   avatarUrl: string | null;
+  bio: string | null;
   role: Role;
   reputation: number;
   trusted: boolean;
@@ -17,13 +18,13 @@ export type PublicProfile = {
 };
 
 type Row = {
-  id: string; username: string; display_name: string; avatar_url: string | null; role: Role;
+  id: string; username: string; display_name: string; avatar_url: string | null; bio: string | null; role: Role;
   reputation: number; trusted: boolean; created_at: string;
 };
 
 export async function getPublicProfile(username: string): Promise<PublicProfile | null> {
   const { data, error } = await db()
-    .from("profiles").select("id, username, display_name, avatar_url, role, reputation, trusted, created_at")
+    .from("profiles").select("id, username, display_name, avatar_url, bio, role, reputation, trusted, created_at")
     .eq("username", username.toLowerCase()).is("banned_at", null).maybeSingle();
   if (error) throw error;
   const p = data as Row | null;
@@ -33,7 +34,7 @@ export async function getPublicProfile(username: string): Promise<PublicProfile 
     db().from("comments").select("id", { count: "exact", head: true }).eq("user_id", p.id).eq("status", "visible"),
   ]);
   return {
-    id: p.id, username: p.username, displayName: p.display_name, avatarUrl: p.avatar_url, role: p.role,
+    id: p.id, username: p.username, displayName: p.display_name, avatarUrl: p.avatar_url, bio: p.bio, role: p.role,
     reputation: p.reputation, trusted: p.trusted, createdAt: p.created_at,
     dealsCount: deals.count ?? 0, commentsCount: comments.count ?? 0,
   };

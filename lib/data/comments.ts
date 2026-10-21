@@ -52,7 +52,9 @@ export async function listComments(dealId: string, viewerId: string | null, orde
   return { comments: visibleTops, total: rows.filter((r) => r.status === "visible").length };
 }
 
-export async function createComment(input: { dealId: string; userId: string; parentId: string | null; body: string; mentions: string[] }) {
+export async function createComment(input: {
+  dealId?: string | null; threadId?: string | null; userId: string; parentId: string | null; body: string; mentions: string[];
+}) {
   let mentionIds: string[] = [];
   if (input.mentions.length) {
     const { data, error } = await db().from("profiles").select("id").in("username", input.mentions).is("banned_at", null);
@@ -60,7 +62,8 @@ export async function createComment(input: { dealId: string; userId: string; par
     mentionIds = (data as { id: string }[]).map((p) => p.id);
   }
   const { data, error } = await db().rpc("create_comment", {
-    p_deal: input.dealId, p_user: input.userId, p_parent: input.parentId, p_body: input.body, p_mentions: mentionIds,
+    p_deal: input.dealId ?? null, p_thread: input.threadId ?? null, p_user: input.userId, p_parent: input.parentId,
+    p_body: input.body, p_mentions: mentionIds,
   });
   if (error) throw error;
   return data as string;

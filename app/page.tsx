@@ -1,12 +1,18 @@
 import Link from "next/link";
 import { DealCard } from "@/components/deal-card";
-import { AdSlot, EmptyState, HotSidebar } from "@/components/sidebar";
+import { FeedMore } from "@/components/feed-more";
+import { AdSlot, CategoriesWidget, CouponsWidget, EmptyState, HotSidebar } from "@/components/sidebar";
 import { ButtonLink } from "@/components/ui/button";
-import { listFeed, listHot } from "@/lib/data";
 import { getSession } from "@/lib/auth";
+import { listHot } from "@/lib/data";
+import { listCouponDeals, listFeedPage, listPopularCategories } from "@/lib/data/feed";
+import { savedSet } from "@/lib/data/relations";
+import { getPrefs } from "@/lib/data/social";
+import { DEFAULT_PREFS } from "@/lib/prefs";
 import type { FeedTab } from "@/lib/types";
 
-const tabs: { id: FeedTab; label: string }[] = [
+const ALL_TABS: { id: FeedTab; label: string; loggedOnly?: boolean }[] = [
+  { id: "paravoce", label: "Pra você", loggedOnly: true },
   { id: "quentes", label: "Mais quentes" },
   { id: "descontos", label: "Maiores descontos" },
   { id: "novas", label: "Novas" },
@@ -16,12 +22,19 @@ const AD_EVERY = 4;
 
 export default async function Home({ searchParams }: PageProps<"/">) {
   const sp = await searchParams;
-  const tab = (tabs.find((t) => t.id === sp.aba)?.id ?? "quentes") as FeedTab;
   const session = await getSession();
-  const [{ items }, hot] = await Promise.all([
-    listFeed({ tab, viewerId: session?.userId ?? null }),
-    listHot(4, session?.userId ?? null),
+  const prefs = session ? await getPrefs(session.userId) : DEFAULT_PREFS;
+  const tabs = ALL_TABS.filter((t) => !t.loggedOnly || session);
+  const tab = (tabs.find((t) => t.id === sp.aba)?.id ?? tabs.find((t) => t.id === prefs.home_tab)?.id ?? "quentes") as FeedTab;
+  const viewerId = session?.userId ?? null;
+
+  const [{ items, nextOffset }, hot, categories, coupons] = await Promise.all([
+    listFeedPage({ tab, viewerId, limit: 20 }),
+    prefs.widgets.hot ? listHot(4, viewerId) : Promise.resolve([]),
+    prefs.widgets.categories ? listPopularCategories(8) : Promise.resolve([]),
+    prefs.widgets.coupons ? listCouponDeals(4) : Promise.resolve([]),
   ]);
+  const saved = session ? await savedSet(session.userId, items.map((d) => d.id)) : new Set<string>();
 
   return (
     <div className="mx-auto max-w-(--layout-max) px-4">
@@ -36,7 +49,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         {tabs.map((t) => (
           <Link
             key={t.id}
-            href={t.id === "quentes" ? "/" : `/?aba=${t.id}`}
+            href={`/?aba=${t.id}`}
             aria-current={t.id === tab ? "page" : undefined}
             className={`shrink-0 border-b-2 py-3 text-sm font-bold ${t.id === tab ? "border-accent text-accent" : "border-transparent text-muted hover:text-text"}`}
           >
@@ -49,21 +62,30 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         <div className="flex min-w-0 flex-1 flex-col gap-4 lg:max-w-(--layout-main)">
           <AdSlot minHeight={120} />
           {items.length === 0 ? (
-            <EmptyState title={tab === "descontos" ? "Nenhuma oferta verificada ainda" : "Nada por aqui ainda"}>
-              <p className="text-sm text-muted">Achou uma promoção boa? Seja a primeira pessoa a publicar.</p>
+            <EmptyState
+              title={tab === "descontos" ? "Nenhuma oferta verificada ainda" : tab === "paravoce" ? "Ainda não temos o que sugerir" : "Nada por aqui ainda"}
+            >
+              <p className="text-sm text-muted">
+                {tab === "paravoce"
+                  ? "Vote em algumas ofertas e siga quem publica coisa boa. A gente aprende o que você curte."
+                  : "Achou uma promoção boa? Seja a primeira pessoa a publicar."}
+              </p>
               <ButtonLink href="/publicar">Publicar oferta</ButtonLink>
             </EmptyState>
           ) : (
             items.map((deal, i) => (
               <div key={deal.id} className="contents">
-                <DealCard deal={deal} loggedIn={!!session} />
+                <DealCard deal={deal} loggedIn={!!session} saved={saved.has(deal.id)} />
                 {(i + 1) % AD_EVERY === 0 ? <AdSlot /> : null}
               </div>
             ))
           )}
+          <FeedMore key={tab} tab={tab} startOffset={nextOffset} infinite={prefs.infinite_scroll} />
         </div>
         <div className="flex w-full flex-col gap-4 lg:sticky lg:top-[calc(var(--header-top)+var(--header-nav)+16px)] lg:w-(--layout-aside) lg:shrink-0">
           <HotSidebar deals={hot} />
+          <CouponsWidget deals={coupons} />
+          <CategoriesWidget categories={categories} />
           <AdSlot minHeight={600} className="hidden lg:block" />
         </div>
       </div>

@@ -46,6 +46,46 @@ export function AdSlot({ minHeight = 250, className = "" }: { minHeight?: number
   );
 }
 
+export function CategoriesWidget({ categories }: { categories: { id: string; name: string; slug: string; count: number }[] }) {
+  if (categories.length === 0) return null;
+  return (
+    <section aria-labelledby="cat-title" className="rounded-card bg-bg p-4 shadow-card">
+      <h2 id="cat-title" className="mb-3 text-title font-bold">Categorias populares</h2>
+      <ul className="flex flex-wrap gap-2">
+        {categories.map((c) => (
+          <li key={c.id}>
+            <Link href={`/c/${c.slug}`} className="inline-block rounded-pill border border-border px-3 py-1.5 text-sm hover:bg-surface">
+              {c.name} <span className="text-muted">{c.count}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+export function CouponsWidget({ deals }: { deals: DealView[] }) {
+  if (deals.length === 0) return null;
+  return (
+    <section aria-labelledby="coup-title" className="rounded-card bg-bg p-4 shadow-card">
+      <h2 id="coup-title" className="mb-3 text-title font-bold">Melhores cupons</h2>
+      <ul className="flex flex-col gap-3">
+        {deals.map((d) => (
+          <li key={d.id}>
+            <Link href={`/oferta/${d.slug}`} className="flex flex-col gap-0.5 hover:text-accent">
+              <span className="line-clamp-2 text-sm">{d.title}</span>
+              <span className="text-sm text-muted">{d.store.name} · <code className="font-bold text-text">{d.couponCode}</code></span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <Link href="/cupons" className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-accent">
+        Ver todos <ArrowRight className="size-4" aria-hidden />
+      </Link>
+    </section>
+  );
+}
+
 export function EmptyState({ title, children }: { title: string; children?: React.ReactNode }) {
   return (
     <div className="flex flex-col items-center gap-3 rounded-card bg-bg px-6 py-12 text-center shadow-card">

@@ -1,5 +1,7 @@
 // Peças pequenas do card e da página de oferta.
-import { BadgeCheck, CircleHelp, Clock, ExternalLink, MessageSquare, Share2, Bookmark, Tag } from "lucide-react";
+import { BadgeCheck, CircleHelp, Clock, ExternalLink, MessageSquare, Tag } from "lucide-react";
+import { SaveButton } from "@/components/save-button";
+import { ShareButton } from "@/components/share-button";
 import { discountPercent, endsWithinHours, formatPrice, fullDate, timeAgo } from "@/lib/format";
 import type { DealView, Verdict } from "@/lib/types";
 
@@ -78,19 +80,15 @@ export function StoreAndAuthor({ deal }: { deal: DealView }) {
   );
 }
 
-export function ActionBar({ deal }: { deal: DealView }) {
+export function ActionBar({ deal, saved = false, loggedIn = false }: { deal: DealView; saved?: boolean; loggedIn?: boolean }) {
   return (
     <div className="flex items-center gap-1 text-sm text-muted">
       <a href={`/oferta/${deal.slug}#comentarios`} className="flex h-9 items-center gap-1 rounded-sm px-2 hover:bg-surface">
         <MessageSquare className="size-4" aria-hidden /> {deal.commentsCount}
         <span className="sr-only">comentários</span>
       </a>
-      <button type="button" className="grid size-9 place-items-center rounded-sm hover:bg-surface" aria-label="Compartilhar">
-        <Share2 className="size-4" aria-hidden />
-      </button>
-      <button type="button" className="grid size-9 place-items-center rounded-sm hover:bg-surface" aria-label="Salvar">
-        <Bookmark className="size-4" aria-hidden />
-      </button>
+      <ShareButton path={`/oferta/${deal.slug}`} title={deal.title} />
+      <SaveButton dealId={deal.id} saved={saved} loggedIn={loggedIn} />
     </div>
   );
 }

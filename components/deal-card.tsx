@@ -5,7 +5,7 @@ import { TemperatureVote } from "@/components/temperature-vote";
 import { stripRichText } from "@/lib/rich-text";
 import type { DealView } from "@/lib/types";
 
-export function DealCard({ deal, loggedIn }: { deal: DealView; loggedIn: boolean }) {
+export function DealCard({ deal, loggedIn, saved = false }: { deal: DealView; loggedIn: boolean; saved?: boolean }) {
   const titleId = `t-${deal.id}`;
   const expired = deal.status === "expired";
   return (
@@ -30,7 +30,7 @@ export function DealCard({ deal, loggedIn }: { deal: DealView; loggedIn: boolean
         <StoreAndAuthor deal={deal} />
         {deal.description ? <p className="line-clamp-3 text-sm text-muted">{stripRichText(deal.description, 240)}</p> : null}
         <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-1">
-          <ActionBar deal={deal} />
+          <ActionBar deal={deal} saved={saved} loggedIn={loggedIn} />
           {expired ? (
             <span className="rounded-pill bg-surface px-4 py-2 text-sm font-bold text-muted">Acabou</span>
           ) : deal.couponCode ? (
