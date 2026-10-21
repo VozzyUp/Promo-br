@@ -15,6 +15,12 @@ type Values = {
   shipsFrom: string; categoryId: string; couponCode: string; couponKind: string; couponValue: string;
   startsAt: string; expiresAt: string; description: string; previewImageUrl: string;
 };
+/** Em qual passo fica cada campo que o servidor pode recusar. */
+const STEP_OF_FIELD: Record<string, number> = {
+  url: 0, title: 1, couponKind: 1, couponValue: 1, couponCode: 1, price: 1, listPrice: 1, shipping: 1, categoryId: 1,
+  images: 2, description: 3, startsAt: 4, expiresAt: 4,
+};
+
 type Picked = { id: number; file: File; src: string };
 
 const EMPTY: Values = {
@@ -69,6 +75,14 @@ export function PublishWizard({ kind, categories, trusted }: { kind: Kind; categ
     }
   }, [v, draftKey, draftReady]);
   useEffect(() => () => imgs.forEach((i) => URL.revokeObjectURL(i.src)), []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Quando o servidor recusa, leva a pessoa ao primeiro passo que tem campo marcado (o erro pode estar num passo que ela não está vendo).
+  useEffect(() => {
+    const keys = Object.keys(state?.fieldErrors ?? {});
+    if (keys.length === 0) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reação a uma resposta do servidor
+    setStep(Math.min(...keys.map((k) => STEP_OF_FIELD[k] ?? 5)));
+  }, [state]);
 
   const set = <K extends keyof Values>(k: K, val: Values[K]) => setV((p) => ({ ...p, [k]: val }));
 

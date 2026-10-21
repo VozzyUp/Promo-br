@@ -1,7 +1,7 @@
 // Sessão e contas. Com Supabase configurado: Supabase Auth (cookies http-only geridos pelo @supabase/ssr,
 // confirmação de e-mail obrigatória). Sem Supabase: cookie HMAC + camada em memória, só para desenvolvimento.
 import "server-only";
-import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { cache } from "react";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -185,13 +185,17 @@ async function devUserId() {
 
 /* ------------------------------------------------------------------ visitante */
 
+// Sem HASH_SALT no ambiente, usa um sal aleatório do processo (muda a cada reinício) em vez de um valor conhecido.
+const FALLBACK_SALT = randomBytes(16).toString("hex");
+
 /** Hash diário do visitante (sem guardar IP; LGPD). */
 export async function visitorHash() {
   const h = await headers();
-  const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? h.get("x-real-ip") ?? "0";
+  // O proxy (Traefik) acrescenta o IP real no FIM de x-forwarded-for; o começo pode ter sido escrito pelo próprio visitante.
+  const ip = h.get("x-forwarded-for")?.split(",").pop()?.trim() || h.get("x-real-ip") || "0";
   const ua = h.get("user-agent") ?? "";
   const day = new Date().toISOString().slice(0, 10);
-  return createHash("sha256").update(`${process.env.HASH_SALT ?? "dev-salt"}|${ip}|${ua}|${day}`).digest("hex").slice(0, 32);
+  return createHash("sha256").update(`${process.env.HASH_SALT ?? FALLBACK_SALT}|${ip}|${ua}|${day}`).digest("hex").slice(0, 32);
 }
 
 export async function isLikelyBot() {

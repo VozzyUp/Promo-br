@@ -35,8 +35,8 @@ export default async function PanelStoresPage() {
                     {STATUS_LABEL[s.status]}
                   </span>
                   <span className="text-sm text-muted">{s.domains.join(", ") || "sem domínio"} · {s.deals} oferta(s)</span>
-                  {s.status === "active" ? <Link href={`/loja/${s.slug}`} className="text-sm text-accent hover:underline">ver página</Link> : null}
                 </summary>
+                {s.status === "active" ? <p className="mt-3"><Link href={`/loja/${s.slug}`} className="text-sm font-bold text-accent hover:underline">Ver a página pública da loja</Link></p> : null}
                 <div className="mt-4"><StoreForm store={s} /></div>
               </details>
             </li>

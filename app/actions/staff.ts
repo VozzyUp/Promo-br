@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin, requireModerator } from "@/lib/auth";
 import { moderateDeal } from "@/lib/data";
-import { editDeal, logModeration, setDealBoost, setDealStatus, updateUser } from "@/lib/data/staff";
+import { editDeal, getUserRole, logModeration, setDealBoost, setDealStatus, updateUser } from "@/lib/data/staff";
+import { canActOn } from "@/lib/staff-rules";
 
 const UUID = /^[0-9a-f-]{36}$/i;
 const text = (f: FormData, k: string, max: number) => String(f.get(k) ?? "").trim().slice(0, max);
@@ -65,11 +66,15 @@ export async function userStaffAction(form: FormData) {
     const role = text(form, "role", 12);
     if (role !== "user" && role !== "moderator" && role !== "admin") return;
     if (id === s.userId) return; // ninguém muda o próprio papel
+    const target = await getUserRole(id);
+    if (!target || !canActOn("admin", target)) return;
     await updateUser(id, { role });
     await logModeration(s.userId, "user", id, `role:${role}`, null);
   } else {
     const s = await requireModerator();
     if (id === s.userId) return;
+    const target = await getUserRole(id);
+    if (!target || !canActOn(s.role, target)) return; // moderador não mexe em equipe
     if (act === "trust" || act === "untrust") {
       await updateUser(id, { trusted: act === "trust" });
       await logModeration(s.userId, "user", id, act, null);

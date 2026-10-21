@@ -87,6 +87,12 @@ export async function listStaffUsers(q: string, onlyBanned: boolean): Promise<St
   }));
 }
 
+export async function getUserRole(id: string): Promise<StaffUser["role"] | null> {
+  const { data, error } = await db().from("profiles").select("role").eq("id", id).maybeSingle();
+  if (error) throw error;
+  return (data as { role: StaffUser["role"] } | null)?.role ?? null;
+}
+
 export async function updateUser(id: string, patch: { trusted?: boolean; role?: "user" | "moderator" | "admin"; banned?: boolean; banReason?: string | null }) {
   const upd: Record<string, unknown> = {};
   if (patch.trusted !== undefined) upd.trusted = patch.trusted;

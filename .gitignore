@@ -43,3 +43,7 @@ next-env.d.ts
 
 # prints do site de referência: só consulta local, nunca vão para o repositório
 /replica/screens/
+
+# playwright
+/test-results/
+/playwright-report/
