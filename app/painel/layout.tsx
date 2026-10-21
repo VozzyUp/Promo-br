@@ -11,6 +11,8 @@ export default async function PanelLayout({ children }: LayoutProps<"/painel">) 
       <nav aria-label="Painel" className="mx-auto flex max-w-(--layout-max) gap-1 px-4 pt-6">
         <Link href="/painel" className={tab}>Fila de ofertas</Link>
         {session.role === "admin" ? <Link href="/painel/lojas" className={tab}>Lojas</Link> : null}
+        <Link href="/painel/ofertas" className={tab}>Ofertas e cupons</Link>
+        <Link href="/painel/usuarios" className={tab}>Usuários</Link>
         <Link href="/painel/denuncias" className={tab}>
           Denúncias
           {open > 0 ? <span className="ml-1.5 rounded-pill bg-accent px-1.5 py-0.5 text-xs text-on-accent">{open}</span> : null}

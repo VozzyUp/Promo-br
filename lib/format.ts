@@ -50,6 +50,7 @@ export function slugify(text: string): string {
 }
 
 /** true se a data ainda não chegou (fica fora do componente por causa da regra de pureza do React). */
-export function isFuture(iso: string): boolean {
+export function isFuture(iso: string | null | undefined): boolean {
+  if (!iso) return false;
   return new Date(iso).getTime() > Date.now();
 }
