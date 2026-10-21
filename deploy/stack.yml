@@ -9,6 +9,11 @@ services:
       NEXT_PUBLIC_SITE_URL: https://${DOMAIN}
       SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY}
       HASH_SALT: ${HASH_SALT}
+      # Chave que criptografa as credenciais das integrações (openssl rand -hex 32). Guarde uma cópia: sem ela as credenciais salvas ficam ilegíveis.
+      MASTER_KEY: ${MASTER_KEY}
+      # Liga o agendador interno (robô, envio, reconferência de preços). Mantenha 1 réplica.
+      WORKER_ENABLED: "1"
+      # CSP_REPORT_ONLY: "1"   # descomente se o AdSense for bloqueado: a política só avisa no console, sem bloquear
     networks:
       - traefik_public
     deploy:

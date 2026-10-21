@@ -12,6 +12,7 @@ import { fetchImageBytes, fetchLinkInfo, resolveFinalUrl } from "@/lib/link-prev
 import type { Preview } from "@/lib/link-preview-parse";
 import { isHostBlocked } from "@/lib/data/admin";
 import { checkSubmittedUrl, findStoreForHost } from "@/lib/links";
+import { createLimiter } from "@/lib/rate-limit";
 import { db } from "@/lib/supabase/db";
 import { supabaseEnabled } from "@/lib/supabase/server";
 import { urlKey } from "@/lib/url-key";
@@ -27,9 +28,14 @@ const MAX_PER_DAY_TRUSTED = 30;
 const SP_OFFSET = "-03:00"; // horário de Brasília (sem horário de verão desde 2019)
 
 /** Passo 1: confere o link, procura oferta repetida e tenta ler título, imagem e preço da página. */
+// Cada checagem faz o servidor buscar uma página de terceiros: limita por pessoa.
+const linkChecks = createLimiter({ max: 40, windowMs: 10 * 60_000 });
+
 export async function checkLinkAction(raw: string): Promise<LinkCheckResult> {
   const session = await getSession();
   if (!session) return { ok: false, error: "Entre na sua conta para publicar." };
+  const limited = linkChecks.hit(session.userId);
+  if (!limited.ok) return { ok: false, error: "Muitas verificações em pouco tempo. Espere alguns minutos." };
   const link = checkSubmittedUrl(String(raw ?? ""));
   if (!link.ok) return { ok: false, error: link.reason };
   const stores = await listStores();

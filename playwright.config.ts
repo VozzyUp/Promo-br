@@ -25,7 +25,7 @@ export default defineConfig({
   ],
   // Sobe o site de produção local se ainda não estiver no ar (rode `npm run build` antes). Os dois últimos só servem ao projeto "integration".
   webServer: [
-    { command: `npx next start -p ${PORT}`, url: `http://127.0.0.1:${PORT}/api/health`, reuseExistingServer: true, timeout: 60_000 },
+    { command: `npx next start -p ${PORT}`, url: `http://127.0.0.1:${PORT}/api/health`, reuseExistingServer: true, timeout: 60_000, env: { DISABLE_RATE_LIMITS: "1" } },
     { command: "node e2e/integration/stub-server.mjs", url: `http://127.0.0.1:${STUB_PORT}/health`, reuseExistingServer: true, timeout: 20_000 },
     {
       command: `npx next start -p ${INT_PORT}`,

@@ -119,6 +119,7 @@ test.describe("ações do painel", () => {
     await expect(rule).toContainText("Desligada");
     await rule.locator("summary").click();
     await rule.getByRole("button", { name: "Apagar regra" }).click();
+    await expect(page.getByText(`Regra e2e ${stamp}`)).toHaveCount(0); // espera a lista atualizar antes de conferir de novo
     await page.goto("/painel/robo");
     await expect(page.getByText(`Regra e2e ${stamp}`)).toHaveCount(0);
   });
@@ -140,6 +141,7 @@ test.describe("ações do painel", () => {
     await ch.getByRole("button", { name: "Enviar mensagem de teste" }).click();
     await expect(ch.getByText(/desligada ou incompleta|Falha|Unauthorized|inválid/i)).toBeVisible({ timeout: 20_000 });
     await ch.getByRole("button", { name: "Apagar canal" }).click();
+    await expect(page.getByText(`Canal e2e ${stamp}`)).toHaveCount(0);
     await page.goto("/painel/canais");
     await expect(page.getByText(`Canal e2e ${stamp}`)).toHaveCount(0);
   });

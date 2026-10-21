@@ -3,7 +3,16 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { requestPasswordReset, signIn, signOut, signUp, updatePassword } from "@/lib/auth";
+import { clientIp } from "@/lib/auth";
 import { safeNext } from "@/lib/links";
+import { createLimiter } from "@/lib/rate-limit";
+
+// Freio contra tentativa em massa: por IP e por e-mail. O limite do Supabase Auth continua valendo por baixo.
+const loginByIp = createLimiter({ max: 20, windowMs: 10 * 60_000 });
+const loginByEmail = createLimiter({ max: 8, windowMs: 10 * 60_000 });
+const signupByIp = createLimiter({ max: 10, windowMs: 60 * 60_000 });
+const resetByIp = createLimiter({ max: 6, windowMs: 60 * 60_000 });
+const WAIT = (s: number) => `Muitas tentativas. Espere ${Math.ceil(s / 60)} min e tente de novo.`;
 
 export type AuthState = { error?: string; notice?: string; fields?: Record<string, string> } | undefined;
 
@@ -20,6 +29,8 @@ export async function signupAction(_prev: AuthState, form: FormData): Promise<Au
   const parsed = signupSchema.safeParse(raw);
   const fields = { displayName: String(raw.displayName ?? ""), username: String(raw.username ?? ""), email: String(raw.email ?? "") };
   if (!parsed.success) return { error: parsed.error.issues[0]?.message, fields };
+  const limited = signupByIp.hit(await clientIp());
+  if (!limited.ok) return { error: WAIT(limited.retryAfterSec), fields };
   const next = safeNext(form.get("next"));
   const result = await signUp({ ...parsed.data, next });
   if ("error" in result) return { error: result.error, fields };
@@ -33,6 +44,9 @@ export async function loginAction(_prev: AuthState, form: FormData): Promise<Aut
   const email = String(form.get("email") ?? "").trim().toLowerCase();
   const password = String(form.get("password") ?? "");
   if (!email || !password) return { error: "Preencha e-mail e senha.", fields: { email } };
+  const byIp = loginByIp.hit(await clientIp());
+  const byEmail = loginByEmail.hit(email);
+  if (!byIp.ok || !byEmail.ok) return { error: WAIT(Math.max(!byIp.ok ? byIp.retryAfterSec : 0, !byEmail.ok ? byEmail.retryAfterSec : 0)), fields: { email } };
   const result = await signIn(email, password);
   if ("error" in result) return { error: result.error, fields: { email } };
   redirect(safeNext(form.get("next")));
@@ -46,6 +60,8 @@ export async function logoutAction() {
 export async function forgotPasswordAction(_prev: AuthState, form: FormData): Promise<AuthState> {
   const email = z.string().trim().toLowerCase().email().safeParse(form.get("email"));
   if (!email.success) return { error: "Esse e-mail não parece válido.", fields: { email: String(form.get("email") ?? "") } };
+  const limited = resetByIp.hit(await clientIp());
+  if (!limited.ok) return { error: WAIT(limited.retryAfterSec), fields: { email: email.data } };
   await requestPasswordReset(email.data);
   // Mesma resposta exista a conta ou não.
   return { notice: "Se existir uma conta com esse e-mail, você vai receber um link para criar uma nova senha." };

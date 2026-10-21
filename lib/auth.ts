@@ -188,11 +188,16 @@ async function devUserId() {
 // Sem HASH_SALT no ambiente, usa um sal aleatório do processo (muda a cada reinício) em vez de um valor conhecido.
 const FALLBACK_SALT = randomBytes(16).toString("hex");
 
+/** IP do visitante: o proxy (Traefik) acrescenta o real no fim de x-forwarded-for. */
+export async function clientIp(): Promise<string> {
+  const h = await headers();
+  return h.get("x-forwarded-for")?.split(",").pop()?.trim() || h.get("x-real-ip") || "0";
+}
+
 /** Hash diário do visitante (sem guardar IP; LGPD). */
 export async function visitorHash() {
   const h = await headers();
-  // O proxy (Traefik) acrescenta o IP real no FIM de x-forwarded-for; o começo pode ter sido escrito pelo próprio visitante.
-  const ip = h.get("x-forwarded-for")?.split(",").pop()?.trim() || h.get("x-real-ip") || "0";
+  const ip = await clientIp();
   const ua = h.get("user-agent") ?? "";
   const day = new Date().toISOString().slice(0, 10);
   return createHash("sha256").update(`${process.env.HASH_SALT ?? FALLBACK_SALT}|${ip}|${ua}|${day}`).digest("hex").slice(0, 32);
