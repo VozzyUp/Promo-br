@@ -1,0 +1,36 @@
+# Stack do Swarm (Portainer). Variáveis: IMAGE, DOMAIN e as chaves abaixo, definidas no próprio Portainer.
+# Pressupõe uma rede externa do Traefik (padrão: traefik_public) e um resolver de certificado (padrão: letsencrypt).
+services:
+  web:
+    image: ${IMAGE:-ghcr.io/SEU_USUARIO/promo-br:latest}
+    environment:
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
+      NEXT_PUBLIC_SITE_URL: https://${DOMAIN}
+      SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY}
+      HASH_SALT: ${HASH_SALT}
+    networks:
+      - traefik_public
+    deploy:
+      replicas: 1
+      update_config:
+        order: start-first
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          memory: 768M
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=${TRAEFIK_NETWORK:-traefik_public}
+        - traefik.http.routers.promo-br.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)
+        - traefik.http.routers.promo-br.entrypoints=websecure
+        - traefik.http.routers.promo-br.tls.certresolver=${TRAEFIK_RESOLVER:-letsencrypt}
+        - traefik.http.services.promo-br.loadbalancer.server.port=3000
+        - traefik.http.services.promo-br.loadbalancer.healthcheck.path=/api/health
+
+networks:
+  traefik_public:
+    external: true
+    name: ${TRAEFIK_NETWORK:-traefik_public}

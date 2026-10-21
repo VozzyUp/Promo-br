@@ -25,5 +25,5 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // Fora: arquivos estáticos, imagens e o redirecionamento /ir/ (não precisa de sessão e tem de ser rápido).
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|ir/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|ir/|api/health|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
 };
