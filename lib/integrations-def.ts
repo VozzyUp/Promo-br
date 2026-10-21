@@ -1,5 +1,5 @@
 // Quais integrações existem e quais campos cada uma pede. Campos "secret" ficam criptografados e nunca voltam para a tela.
-export type IntegrationKey = "shopee" | "telegram" | "uazapi";
+export type IntegrationKey = "shopee" | "telegram" | "uazapi" | "smtp";
 
 export type FieldDef = { name: string; label: string; secret: boolean; placeholder?: string };
 
@@ -28,6 +28,18 @@ export const INTEGRATIONS: IntegrationDef[] = [
     fields: [
       { name: "baseUrl", label: "Endereço do servidor", secret: false, placeholder: "https://seu-servidor.uazapi.com" },
       { name: "token", label: "Token da instância", secret: true },
+    ],
+  },
+  {
+    key: "smtp",
+    title: "E-mail (SMTP)",
+    help: "Servidor que envia o boletim e a confirmação de inscrição. Porta 465 usa conexão segura direta; 587 usa STARTTLS. O e-mail de cadastro e de recuperar senha é configurado à parte, no Supabase.",
+    fields: [
+      { name: "host", label: "Servidor", secret: false, placeholder: "smtp.seudominio.com.br" },
+      { name: "port", label: "Porta", secret: false, placeholder: "587" },
+      { name: "user", label: "Usuário", secret: false },
+      { name: "password", label: "Senha", secret: true },
+      { name: "from", label: "Remetente", secret: false, placeholder: "Nome do site <ofertas@seudominio.com.br>" },
     ],
   },
 ];

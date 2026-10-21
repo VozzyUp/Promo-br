@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CouponCTA } from "@/components/coupon-cta";
-import { ActionBar, DealImage, GoToDealLink, PriceBlock, StoreAndAuthor, TimeChip } from "@/components/deal-parts";
+import { ActionBar, DealImage, GoToDealLink, PriceBlock, SponsoredChip, StoreAndAuthor, TimeChip } from "@/components/deal-parts";
 import { TemperatureVote } from "@/components/temperature-vote";
 import { stripRichText } from "@/lib/rich-text";
 import type { DealView } from "@/lib/types";
@@ -29,7 +29,10 @@ export function DealCard({ deal, loggedIn, saved = false }: { deal: DealView; lo
         <TemperatureVote dealId={deal.id} initial={{ temperature: deal.temperature, myVote: deal.myVote }} loggedIn={loggedIn} />
       </div>
       <div className={`[grid-area:chip] flex items-center justify-end p-2 pr-3 pt-3 sm:p-0 sm:pr-4 sm:pt-4`}>
-        {deal.publishedAt ? <TimeChip iso={deal.publishedAt} /> : null}
+        <div className="flex flex-wrap items-center justify-end gap-1">
+          {deal.isSponsored ? <SponsoredChip /> : null}
+          {deal.publishedAt ? <TimeChip iso={deal.publishedAt} /> : null}
+        </div>
       </div>
       <div className={`[grid-area:image] flex items-center justify-center p-3 sm:p-4`}>
         <Link href={`/oferta/${deal.slug}`} tabIndex={-1} aria-hidden>

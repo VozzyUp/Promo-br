@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { DEFAULT_BF, DEFAULT_BRAND, deleteSetting, setSetting, type AdsSettings, type BfSettings, type BrandSettings } from "@/lib/data/settings";
+import { parseWeights } from "@/lib/ranking";
 import { LEGAL_SLUGS, type LegalSlug } from "@/lib/legal-defaults";
 
 export type SettingState = { ok?: boolean; error?: string } | undefined;
@@ -27,6 +28,20 @@ export async function saveBrandAction(_prev: SettingState, form: FormData): Prom
   };
   await setSetting("public.brand", brand, s.userId);
   await setSetting("public.bf", bf, s.userId);
+  refreshAll();
+  return { ok: true };
+}
+
+export async function saveRankingAction(_prev: SettingState, form: FormData): Promise<SettingState> {
+  const s = await requireAdmin();
+  if (form.get("intent") === "reset") {
+    await deleteSetting("ranking.weights");
+    refreshAll();
+    return { ok: true };
+  }
+  const parsed = parseWeights((k) => String(form.get(k) ?? ""));
+  if ("error" in parsed) return { error: parsed.error };
+  await setSetting("ranking.weights", parsed.weights, s.userId);
   refreshAll();
   return { ok: true };
 }

@@ -4,6 +4,7 @@ import { decryptJson, encryptJson, hasMasterKey } from "../crypto";
 import { INTEGRATIONS, integrationDef, type IntegrationKey } from "../integrations-def";
 import { getMe } from "../integrations/telegram";
 import { searchOffers } from "../integrations/shopee";
+import { verifySmtp } from "../integrations/smtp";
 import { instanceStatus } from "../integrations/uazapi";
 import { db } from "../supabase/db";
 
@@ -91,7 +92,10 @@ export async function testIntegration(key: IntegrationKey): Promise<{ ok: boolea
   try {
     if (def.fields.some((f) => !cfg[f.name])) throw new Error("Faltam campos para testar.");
     if (key === "telegram") result = { ok: true, message: `Conectado ao bot @${(await getMe(cfg.botToken)).username}.` };
-    else if (key === "shopee") {
+    else if (key === "smtp") {
+      await verifySmtp({ host: cfg.host, port: cfg.port, user: cfg.user, password: cfg.password, from: cfg.from });
+      result = { ok: true, message: `Conectado a ${cfg.host}:${cfg.port} e autenticado.` };
+    } else if (key === "shopee") {
       const offers = await searchOffers({ appId: cfg.appId, secret: cfg.secret }, { keyword: "fone", limit: 1 });
       result = { ok: true, message: `Conectado. A busca de teste devolveu ${offers.length} produto(s).` };
     } else {

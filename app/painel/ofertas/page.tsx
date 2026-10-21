@@ -48,7 +48,7 @@ export default async function PanelDealsPage({ searchParams }: PageProps<"/paine
                 <Link href={`/oferta/${d.slug}`} className="font-bold hover:text-accent">{d.title}</Link>
                 <p className="text-sm text-muted">
                   {STATUS[d.status]} · {d.store} · {d.priceCents != null ? formatPrice(d.priceCents) : `cupom ${d.couponCode}`} · {d.source === "robot" ? "robô" : `por ${d.author}`} · {timeAgo(d.createdAt)}
-                  {isFuture(d.boostedUntil) ? " · em destaque" : ""}
+                  {isFuture(d.boostedUntil) ? " · em destaque" : ""}{d.isSponsored ? " · patrocinada" : ""}
                 </p>
               </div>
               <form action={dealStaffAction} className="flex flex-wrap gap-1">
@@ -57,7 +57,18 @@ export default async function PanelDealsPage({ searchParams }: PageProps<"/paine
                 {d.status === "expired" || d.status === "removed" ? <button name="act" value="republish" className="h-9 rounded-pill px-3 text-sm font-bold hover:bg-surface">Republicar</button> : null}
                 {d.status === "published" ? (isFuture(d.boostedUntil)
                   ? <button name="act" value="unboost" className="h-9 rounded-pill px-3 text-sm font-bold hover:bg-surface">Tirar destaque</button>
-                  : <button name="act" value="boost" className="h-9 rounded-pill px-3 text-sm font-bold hover:bg-surface">Destacar 24h</button>) : null}
+                  : (
+                    <span className="flex items-center gap-1">
+                      <label htmlFor={`h-${d.id}`} className="sr-only">Horas de destaque</label>
+                      <select id={`h-${d.id}`} name="hours" defaultValue="24" className="h-9 rounded-sm border border-border-input bg-bg px-1 text-sm">
+                        {[6, 12, 24, 48, 72].map((h) => <option key={h} value={h}>{h} h</option>)}
+                      </select>
+                      <button name="act" value="boost" className="h-9 rounded-pill px-3 text-sm font-bold hover:bg-surface">Destacar</button>
+                    </span>
+                  )) : null}
+                {d.status === "published" ? (d.isSponsored
+                  ? <button name="act" value="unsponsor" className="h-9 rounded-pill px-3 text-sm font-bold hover:bg-surface">Tirar patrocínio</button>
+                  : <button name="act" value="sponsor" className="h-9 rounded-pill px-3 text-sm font-bold hover:bg-surface">Marcar patrocinada</button>) : null}
                 {d.status !== "removed" ? <button name="act" value="remove" className="h-9 rounded-pill px-3 text-sm text-danger hover:bg-surface">Remover</button> : null}
               </form>
             </div>

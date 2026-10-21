@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { SignupForm } from "@/components/forms/auth-forms";
-import { getSession } from "@/lib/auth";
+import { GoogleButton } from "@/components/forms/google-button";
+import { getSession, googleLoginEnabled } from "@/lib/auth";
 import { safeNext } from "@/lib/links";
 
 export const metadata = { title: "Criar conta" };
@@ -14,6 +15,7 @@ export default async function SignupPage({ searchParams }: PageProps<"/cadastrar
       <div className="rounded-card bg-bg p-6 shadow-card">
         <h1 className="mb-1 text-xl font-bold">Criar conta</h1>
         <p className="mb-6 text-sm text-muted">Publique as promoções que você encontra e use o seu link de afiliado.</p>
+        {googleLoginEnabled() ? <GoogleButton next={next} /> : null}
         <SignupForm next={next} />
       </div>
     </div>

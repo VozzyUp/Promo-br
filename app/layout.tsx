@@ -10,6 +10,7 @@ import { SideRails } from "@/components/consent/side-rails";
 import { Footer } from "@/components/footer";
 import type { MenuNotification } from "@/components/notifications-menu";
 import { getSession } from "@/lib/auth";
+import { newsletterAvailable } from "@/lib/data/newsletter";
 import { listCategories } from "@/lib/data";
 import { DEFAULT_BRAND, getAdsSettings, getSetting, type BrandSettings } from "@/lib/data/settings";
 import { countUnread, listNotifications } from "@/lib/data/social";
@@ -54,7 +55,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <SideRails />
             <main id="conteudo">{children}</main>
           </div>
-          <Footer notice={brand.commissionNotice} />
+          <Footer notice={brand.commissionNotice} newsletter={await newsletterAvailable()} />
           <BottomNav categories={categories} loggedIn={!!session} isStaff={session?.role === "admin" || session?.role === "moderator"} unread={unread} />
           <ConsentBanner />
           <AdScript />

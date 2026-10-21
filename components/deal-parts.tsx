@@ -35,6 +35,14 @@ export function TimeChip({ iso, prefix = "Publicado" }: { iso: string; prefix?: 
   );
 }
 
+export function SponsoredChip() {
+  return (
+    <span className="rounded-sm bg-info-soft px-2 py-1 text-xs font-bold text-info sm:text-sm" title="Um anunciante pagou para esta oferta aparecer aqui. O desconto continua sendo conferido do mesmo jeito.">
+      Patrocinada
+    </span>
+  );
+}
+
 export function PriceBlock({ deal, size = "card" }: { deal: DealView; size?: "card" | "page" }) {
   if (deal.priceCents == null) {
     return deal.couponPercent ? (

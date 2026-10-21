@@ -1,5 +1,6 @@
 import { RunNow } from "@/components/admin/run-now";
 import { requireAdmin } from "@/lib/auth";
+import { newsletterCounts } from "@/lib/data/newsletter";
 import { timeAgo } from "@/lib/format";
 import { db } from "@/lib/supabase/db";
 import { supabaseEnabled } from "@/lib/supabase/server";
@@ -18,6 +19,7 @@ export default async function PanelRunsPage() {
     db().from("robot_rules").select("id, name").order("name"),
   ]);
   const list = (runs.data ?? []) as Run[];
+  const subs = await newsletterCounts().catch(() => null);
   return (
     <div className="mx-auto flex max-w-(--layout-max) flex-col gap-6 px-4 py-8">
       <div>
@@ -32,6 +34,7 @@ export default async function PanelRunsPage() {
         <RunNow job="recheck" label="Reconferir preços" />
         <RunNow job="dispatch" label="Enviar para os canais" />
         <RunNow job="sync:shopee" label="Sincronizar vendas da Shopee" />
+        <RunNow job="newsletter" label={`Enviar o boletim agora${subs ? ` (${subs.active} inscritos ativos, ${subs.pending} aguardando confirmação)` : ""}`} />
         {((rules.data ?? []) as { id: string; name: string }[]).map((r) => <RunNow key={r.id} job={`robot:${r.id}`} label={`Robô: ${r.name}`} />)}
       </section>
       <section aria-labelledby="hist">

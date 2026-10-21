@@ -3,9 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { requireAdmin, requireModerator } from "@/lib/auth";
 import { moderateDeal } from "@/lib/data";
-import { editDeal, getUserRole, logModeration, setDealBoost, setDealStatus, updateUser } from "@/lib/data/staff";
+import { editDeal, getUserRole, logModeration, setDealBoost, setDealSponsored, setDealStatus, updateUser } from "@/lib/data/staff";
 import { canActOn } from "@/lib/staff-rules";
 
+const BOOST_HOURS = [6, 12, 24, 48, 72];
 const UUID = /^[0-9a-f-]{36}$/i;
 const text = (f: FormData, k: string, max: number) => String(f.get(k) ?? "").trim().slice(0, max);
 
@@ -40,7 +41,7 @@ export async function editDealAction(_prev: DealEditState, form: FormData): Prom
   return { ok: true };
 }
 
-/** Ações rápidas numa oferta: expirar, remover, republicar, destacar e tirar o destaque. */
+/** Ações rápidas numa oferta: expirar, remover, republicar, destacar (6 a 72 horas), tirar o destaque e marcar como patrocinada. */
 export async function dealStaffAction(form: FormData) {
   const s = await requireModerator();
   const id = text(form, "id", 40);
@@ -50,7 +51,11 @@ export async function dealStaffAction(form: FormData) {
   if (act === "expire") await setDealStatus(id, "expired", reason);
   else if (act === "remove") await setDealStatus(id, "removed", reason);
   else if (act === "republish") await setDealStatus(id, "published", null);
-  else if (act === "boost") await setDealBoost(id, 24);
+  else if (act === "boost") {
+    const hours = Number(text(form, "hours", 4));
+    if (!BOOST_HOURS.includes(hours)) return;
+    await setDealBoost(id, hours);
+  } else if (act === "sponsor" || act === "unsponsor") await setDealSponsored(id, act === "sponsor");
   else if (act === "unboost") await setDealBoost(id, null);
   else return;
   await logModeration(s.userId, "deal", id, act, reason);

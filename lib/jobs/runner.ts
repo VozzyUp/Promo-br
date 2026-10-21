@@ -44,6 +44,7 @@ const FIXED: Due[] = [
   { job: "recheck", every: 30 },
   { job: "sync:shopee", at: "10 * * * *" },
   { job: "cleanup", at: "30 3 * * *" },
+  { job: "newsletter", at: "0,15,30 9 * * 1" }, // segunda, 9h (Brasília); os 3 horários cobrem listas grandes, sem repetir quem já recebeu
 ];
 
 export async function tick(now = new Date()): Promise<string[]> {

@@ -13,6 +13,7 @@ services:
       MASTER_KEY: ${MASTER_KEY}
       # Liga o agendador interno (robô, envio, reconferência de preços). Mantenha 1 réplica.
       WORKER_ENABLED: "1"
+      GOOGLE_LOGIN: "0"   # troque para "1" depois de ativar o Google no Supabase
       # CSP_REPORT_ONLY: "1"   # descomente se o AdSense for bloqueado: a política só avisa no console, sem bloquear
     networks:
       - traefik_public

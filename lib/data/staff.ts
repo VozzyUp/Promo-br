@@ -5,12 +5,12 @@ import { db } from "../supabase/db";
 export type StaffDeal = {
   id: string; slug: string; title: string; status: "pending" | "published" | "expired" | "rejected" | "removed";
   store: string; priceCents: number | null; couponCode: string | null; source: "user" | "admin" | "robot";
-  author: string; createdAt: string; boostedUntil: string | null; verdict: string; categoryId: string | null;
+  author: string; createdAt: string; boostedUntil: string | null; isSponsored: boolean; verdict: string; categoryId: string | null;
 };
 
 type DealRow = {
   id: string; slug: string; title: string; status: StaffDeal["status"]; price_cents: number | null; coupon_code: string | null;
-  source: StaffDeal["source"]; created_at: string; boosted_until: string | null; verdict: string; category_id: string | null;
+  source: StaffDeal["source"]; created_at: string; boosted_until: string | null; is_sponsored: boolean; verdict: string; category_id: string | null;
   store: { name: string } | null; author: { username: string } | null;
 };
 
@@ -18,7 +18,7 @@ export const STAFF_PAGE = 30;
 
 export async function listStaffDeals(o: { status?: string; q?: string; kind?: "oferta" | "cupom"; page: number }): Promise<{ items: StaffDeal[]; hasNext: boolean }> {
   let q = db().from("deals")
-    .select("id, slug, title, status, price_cents, coupon_code, source, created_at, boosted_until, verdict, category_id, store:stores(name), author:profiles!deals_author_id_fkey(username)")
+    .select("id, slug, title, status, price_cents, coupon_code, source, created_at, boosted_until, is_sponsored, verdict, category_id, store:stores(name), author:profiles!deals_author_id_fkey(username)")
     .order("created_at", { ascending: false });
   if (o.status && ["pending", "published", "expired", "rejected", "removed"].includes(o.status)) q = q.eq("status", o.status);
   if (o.kind === "cupom") q = q.not("coupon_code", "is", null);
@@ -33,7 +33,7 @@ export async function listStaffDeals(o: { status?: string; q?: string; kind?: "o
     items: rows.slice(0, STAFF_PAGE).map((r) => ({
       id: r.id, slug: r.slug, title: r.title, status: r.status, store: r.store?.name ?? "?", priceCents: r.price_cents,
       couponCode: r.coupon_code, source: r.source, author: r.author?.username ?? "removido", createdAt: r.created_at,
-      boostedUntil: r.boosted_until, verdict: r.verdict, categoryId: r.category_id,
+      boostedUntil: r.boosted_until, isSponsored: r.is_sponsored, verdict: r.verdict, categoryId: r.category_id,
     })),
   };
 }
@@ -53,6 +53,12 @@ export async function setDealStatus(id: string, status: "expired" | "removed" | 
   if (status === "expired") upd.expired_reason = reason ?? "expirada pela equipe";
   if (status === "published") { upd.published_at = new Date().toISOString(); upd.expired_reason = null; }
   const { error } = await db().from("deals").update(upd).eq("id", id);
+  if (error) throw error;
+}
+
+/** Selo "Patrocinada": só marca a oferta e avisa o leitor; não muda a posição (isso é o destaque). */
+export async function setDealSponsored(id: string, sponsored: boolean) {
+  const { error } = await db().from("deals").update({ is_sponsored: sponsored }).eq("id", id);
   if (error) throw error;
 }
 

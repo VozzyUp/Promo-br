@@ -137,6 +137,20 @@ function authMessage(code: string | undefined, fallback: string) {
   }
 }
 
+/** Login com Google ligado? É variável de execução (não entra no build): GOOGLE_LOGIN=1 depois de configurar o provedor no Supabase. */
+export const googleLoginEnabled = () => process.env.GOOGLE_LOGIN === "1" && supabaseEnabled();
+
+export async function googleSignInUrl(next: string): Promise<{ url: string } | { error: string }> {
+  if (!googleLoginEnabled()) return { error: "O login com Google não está ligado." };
+  const supabase = await supabaseAuth();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: `${await siteUrl()}/auth/confirm?next=${encodeURIComponent(next)}`, skipBrowserRedirect: true },
+  });
+  if (error || !data.url) return { error: "Não conseguimos abrir o login com Google. Tente de novo ou use e-mail e senha." };
+  return { url: data.url };
+}
+
 async function siteUrl() {
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
   const h = await headers();

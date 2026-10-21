@@ -15,6 +15,7 @@ export default async function PanelLayout({ children }: LayoutProps<"/painel">) 
             <Link href="/painel/metricas" className={tab}>Métricas</Link>
             <Link href="/painel/lojas" className={tab}>Lojas</Link>
             <Link href="/painel/robo" className={tab}>Robô</Link>
+            <Link href="/painel/ranking" className={tab}>Ranking</Link>
             <Link href="/painel/canais" className={tab}>Canais</Link>
             <Link href="/painel/integracoes" className={tab}>Integrações</Link>
             <Link href="/painel/execucoes" className={tab}>Execuções</Link>

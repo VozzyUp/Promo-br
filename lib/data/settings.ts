@@ -1,6 +1,7 @@
 // Configurações editáveis pelo painel (tabela site_settings), com cache curto em memória.
 import "server-only";
 import { db } from "../supabase/db";
+import { mergeWeights, type RankWeights } from "../ranking";
 import { supabaseEnabled } from "../supabase/server";
 
 const TTL_MS = 30_000;
@@ -32,6 +33,17 @@ export async function deleteSetting(key: string): Promise<void> {
   const { error } = await db().from("site_settings").delete().eq("key", key);
   if (error) throw error;
   cache.delete(key);
+}
+
+export async function getRankWeights(): Promise<RankWeights> {
+  return mergeWeights(await getSetting<Partial<RankWeights>>("ranking.weights", {}));
+}
+
+/** A migração 7 (view com pesos) já foi rodada? Sem ela o painel salva, mas o ranking continua com os valores fixos. */
+export async function rankingMigrated(): Promise<boolean> {
+  if (!supabaseEnabled()) return false;
+  const { error } = await db().rpc("rank_weights");
+  return !error;
 }
 
 export type BrandSettings = { siteName: string; description: string; commissionNotice: string };

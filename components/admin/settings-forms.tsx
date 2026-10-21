@@ -1,8 +1,9 @@
 "use client";
 import { useActionState } from "react";
 import { useKeepForm } from "./use-keep-form";
-import { saveAdsAction, saveBrandAction, saveLegalAction, type SettingState } from "@/app/actions/settings-admin";
+import { saveAdsAction, saveBrandAction, saveLegalAction, saveRankingAction, type SettingState } from "@/app/actions/settings-admin";
 import type { AdsSettings, BfSettings, BrandSettings } from "@/lib/data/settings";
+import { WEIGHT_FIELDS, type RankWeights } from "@/lib/ranking";
 
 const input = "h-10 w-full rounded-sm border border-border-input bg-bg px-2 text-sm";
 const submit = "h-10 rounded-pill bg-accent px-5 text-sm font-bold text-on-accent disabled:opacity-50";
@@ -41,6 +42,29 @@ export function AdsForm({ ads, fromEnv }: { ads: AdsSettings; fromEnv: boolean }
       <div><label htmlFor="a-client" className="mb-1 block text-sm font-bold">ID do editor</label><input id="a-client" name="client" defaultValue={ads.client} placeholder="ca-pub-0000000000000000" className={input} /></div>
       <div><label htmlFor="a-slot" className="mb-1 block text-sm font-bold">ID do bloco de anúncio</label><input id="a-slot" name="slot" defaultValue={ads.slot} placeholder="1234567890" className={input} /></div>
       <div className="flex items-center gap-3"><button type="submit" disabled={pending} className={submit}>{pending ? "Salvando…" : "Salvar"}</button><Status s={state} /></div>
+    </form>
+  );
+}
+
+export function RankingForm({ weights }: { weights: RankWeights }) {
+  const [state, action, pending] = useActionState<SettingState, FormData>(saveRankingAction, undefined);
+  const onSubmit = useKeepForm(action);
+  return (
+    <form onSubmit={onSubmit} className="flex flex-col gap-4 rounded-card bg-bg p-4 shadow-card">
+      <div className="grid gap-4 sm:grid-cols-2">
+        {WEIGHT_FIELDS.map((f) => (
+          <div key={f.key}>
+            <label htmlFor={`r-${f.key}`} className="mb-1 block text-sm font-bold">{f.label}</label>
+            <input id={`r-${f.key}`} name={f.key} inputMode="decimal" defaultValue={String(weights[f.key]).replace(".", ",")} className={input} />
+            <p className="mt-1 text-xs text-muted">{f.help} Entre {f.min} e {f.max}.</p>
+          </div>
+        ))}
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <button type="submit" disabled={pending} className={submit}>{pending ? "Salvando…" : "Salvar pesos"}</button>
+        <button type="submit" name="intent" value="reset" disabled={pending} className="h-10 rounded-pill border border-border px-5 text-sm font-bold disabled:opacity-50">Voltar ao padrão</button>
+        <Status s={state} />
+      </div>
     </form>
   );
 }

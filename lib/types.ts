@@ -47,6 +47,7 @@ export type Deal = {
   shipsFrom?: string | null;
   couponKind?: "percent" | "amount" | "free_shipping" | "other" | null;
   couponAmountCents?: number | null;
+  isSponsored?: boolean; // oferta paga por anunciante: leva o selo "Patrocinada"
   priceCents: number | null; // null em cupons sem preço
   listPriceCents: number | null;
   couponCode: string | null;

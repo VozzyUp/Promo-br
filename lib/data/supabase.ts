@@ -12,7 +12,7 @@ type DealRow = {
   id: string; slug: string; code: string; title: string; description: string; author_id: string | null;
   source: Deal["source"]; store_id: string; category_id: string | null; url_submitted: string | null;
   starts_at: string | null; availability: "online" | "offline"; shipping_cents: number | null; ships_from: string | null;
-  coupon_kind: Deal["couponKind"]; coupon_amount_cents: number | null;
+  coupon_kind: Deal["couponKind"]; coupon_amount_cents: number | null; is_sponsored?: boolean;
   price_cents: number | null; list_price_cents: number | null; coupon_code: string | null;
   coupon_percent: number | null; image_path: string | null; verdict: Deal["verdict"];
   real_discount_bp: number | null; status: Deal["status"]; reject_reason: string | null;
@@ -32,7 +32,7 @@ const DEAL_COLS =
   "id, slug, code, title, description, author_id, source, store_id, category_id, url_submitted, price_cents, " +
   "list_price_cents, coupon_code, coupon_percent, image_path, verdict, real_discount_bp, status, reject_reason, " +
   "published_at, expires_at, votes_up, votes_down, clicks_total, comments_count, created_at, " +
-  "starts_at, availability, shipping_cents, ships_from, coupon_kind, coupon_amount_cents";
+  "starts_at, availability, shipping_cents, ships_from, coupon_kind, coupon_amount_cents, is_sponsored";
 export const JOIN =
   `${DEAL_COLS}, store:stores!inner(id, name, slug, domains, logo_url, status), category:categories(id, name, slug), ` +
   "author:profiles!deals_author_id_fkey(id, username, display_name, avatar_url, role)";
@@ -52,7 +52,7 @@ function toDeal(r: DealRow): Deal {
     publishedAt: r.published_at, expiresAt: r.expires_at, votesUp: r.votes_up, votesDown: r.votes_down,
     clicksTotal: r.clicks_total, commentsCount: r.comments_count, createdAt: r.created_at,
     startsAt: r.starts_at, availability: r.availability, shippingCents: r.shipping_cents, shipsFrom: r.ships_from,
-    couponKind: r.coupon_kind, couponAmountCents: r.coupon_amount_cents,
+    couponKind: r.coupon_kind, couponAmountCents: r.coupon_amount_cents, isSponsored: !!r.is_sponsored,
   };
 }
 

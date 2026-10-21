@@ -1,6 +1,7 @@
 // Lista dos jobs que o agendador e o botão "rodar agora" conhecem.
 import "server-only";
 import { expireDueDeals, recheckPublishedDeals } from "../data/verification";
+import { runNewsletter } from "../data/newsletter";
 import { runDispatch } from "../dispatch/run";
 import { runShopeeRule } from "../robot/shopee";
 import { syncShopeeConversions } from "./shopee-sync";
@@ -22,6 +23,10 @@ export const JOBS: Record<string, JobFn> = {
     return { stats: { ...s }, partial: s.failed > 0 && s.sent > 0 };
   },
   "sync:shopee": async () => ({ stats: { ...(await syncShopeeConversions()) } }),
+  newsletter: async () => {
+    const s = await runNewsletter();
+    return { stats: { ...s }, partial: s.failed > 0 && s.sent > 0 };
+  },
   recheck: async () => {
     const s = await recheckPublishedDeals();
     return { stats: { ...s }, partial: s.failed > 0 && s.updated > 0 };

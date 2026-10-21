@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { requestPasswordReset, signIn, signOut, signUp, updatePassword } from "@/lib/auth";
+import { googleSignInUrl, requestPasswordReset, signIn, signOut, signUp, updatePassword } from "@/lib/auth";
 import { clientIp } from "@/lib/auth";
 import { safeNext } from "@/lib/links";
 import { createLimiter } from "@/lib/rate-limit";
@@ -50,6 +50,15 @@ export async function loginAction(_prev: AuthState, form: FormData): Promise<Aut
   const result = await signIn(email, password);
   if ("error" in result) return { error: result.error, fields: { email } };
   redirect(safeNext(form.get("next")));
+}
+
+export async function googleLoginAction(form: FormData) {
+  const limited = loginByIp.hit(await clientIp());
+  const next = safeNext(form.get("next"));
+  if (!limited.ok) redirect(`/entrar?erro=espere&next=${encodeURIComponent(next)}`);
+  const r = await googleSignInUrl(next);
+  if ("error" in r) redirect(`/entrar?erro=google&next=${encodeURIComponent(next)}`);
+  redirect(r.url);
 }
 
 export async function logoutAction() {

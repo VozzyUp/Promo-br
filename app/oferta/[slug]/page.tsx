@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronRight, ExternalLink, Info } from "lucide-react";
 import { CouponCTA } from "@/components/coupon-cta";
-import { ActionBar, AuthorCard, CommentSaveBar, DealImage, ExpiryBanner, GoToDealLink, PriceBlock, TimeChip } from "@/components/deal-parts";
+import { ActionBar, AuthorCard, CommentSaveBar, DealImage, ExpiryBanner, GoToDealLink, PriceBlock, SponsoredChip, TimeChip } from "@/components/deal-parts";
 import { TemperatureVote } from "@/components/temperature-vote";
 import { AdSlot } from "@/components/sidebar";
 import { FormMessage } from "@/components/ui/field";
@@ -98,7 +98,12 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
               )}
               <ActionBar deal={deal} saved={saved} loggedIn={!!session} />
             </div>
-            {deal.publishedAt ? <div><TimeChip iso={deal.publishedAt} /></div> : null}
+            {deal.publishedAt ? (
+              <div className="flex flex-wrap items-center gap-2">
+                {deal.isSponsored ? <SponsoredChip /> : null}
+                <TimeChip iso={deal.publishedAt} />
+              </div>
+            ) : null}
             <h1 id="deal-title" className="text-xl font-bold">{deal.title}</h1>
             <PriceBlock deal={deal} size="page" />
             <p className="text-sm text-muted">
