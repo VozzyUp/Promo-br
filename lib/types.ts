@@ -35,11 +35,17 @@ export type Deal = {
   code: string;
   title: string;
   description: string;
-  authorId: string;
+  authorId: string | null; // null quando a conta do autor foi apagada
   source: DealSource;
   storeId: string;
   categoryId: string | null;
-  urlSubmitted: string;
+  urlSubmitted: string | null; // null em oferta sem link
+  startsAt?: string | null;
+  availability?: "online" | "offline";
+  shippingCents?: number | null;
+  shipsFrom?: string | null;
+  couponKind?: "percent" | "amount" | "free_shipping" | "other" | null;
+  couponAmountCents?: number | null;
   priceCents: number | null; // null em cupons sem preço
   listPriceCents: number | null;
   couponCode: string | null;

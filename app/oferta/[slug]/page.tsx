@@ -12,6 +12,10 @@ import { CommentSection } from "@/components/comments/comment-section";
 import { DealToolbar } from "@/components/deal-toolbar";
 import { isSubscribed, listComments } from "@/lib/data/comments";
 import { savedSet } from "@/lib/data/relations";
+import { isFuture } from "@/lib/format";
+import { DealGallery } from "@/components/deal-gallery";
+import { listDealGallery } from "@/lib/data/publish";
+import { supabaseEnabled } from "@/lib/supabase/server";
 import { RichText } from "@/lib/rich-text";
 
 export async function generateMetadata({ params }: PageProps<"/oferta/[slug]">) {
@@ -37,6 +41,7 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
       ])
     : [null, false];
   const saved = session ? (await savedSet(session.userId, [deal.id])).has(deal.id) : false;
+  const gallery = supabaseEnabled() ? await listDealGallery(deal.id) : [];
   const canClose = !!session && (session.userId === deal.authorId || session.role === "admin" || session.role === "moderator");
   return (
     <div className="mx-auto flex max-w-(--layout-max) flex-col gap-4 px-4 py-4">
@@ -63,7 +68,7 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
         {deal.expiresAt ? <ExpiryBanner iso={deal.expiresAt} /> : null}
         <div className="flex flex-col gap-6 md:flex-row">
           <div className="md:w-80 md:shrink-0">
-            <DealImage deal={deal} size="page" />
+            {gallery.length > 1 ? <DealGallery images={gallery} title={deal.title} /> : <DealImage deal={deal} size="page" />}
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -79,7 +84,15 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
             {deal.publishedAt ? <div><TimeChip iso={deal.publishedAt} /></div> : null}
             <h1 id="deal-title" className="text-xl font-bold">{deal.title}</h1>
             <PriceBlock deal={deal} size="page" />
-            <p className="text-sm text-muted">Disponível em <strong className="text-text">{deal.store.name}</strong></p>
+            <p className="text-sm text-muted">
+              Disponível em <strong className="text-text">{deal.store.name}</strong>
+              {deal.availability === "offline" ? " · loja física" : ""}
+              {deal.shipsFrom ? ` · ${deal.availability === "offline" ? "" : "enviado de "}${deal.shipsFrom}` : ""}
+              {deal.shippingCents != null ? ` · ${deal.shippingCents === 0 ? "frete grátis" : `frete ${(deal.shippingCents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}`}` : ""}
+            </p>
+            {deal.startsAt && isFuture(deal.startsAt) ? (
+              <p className="text-sm font-bold text-warning">Começa em {new Date(deal.startsAt).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: "America/Sao_Paulo" })}</p>
+            ) : null}
             {deal.couponCode ? (
               <div className="flex flex-col gap-1">
                 <span className="text-sm font-bold">Código do cupom</span>

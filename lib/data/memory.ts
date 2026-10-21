@@ -84,7 +84,7 @@ export function hotScore(d: Deal) {
 export function toView(d: Deal, viewerId: string | null): DealView {
   const store = db.stores.find((s) => s.id === d.storeId)!;
   const category = db.categories.find((c) => c.id === d.categoryId) ?? null;
-  const a = db.profiles.get(d.authorId)!;
+  const a = db.profiles.get(d.authorId ?? "")!;
   const myVote = viewerId ? (db.votes.get(`${d.id}:${viewerId}`) ?? 0) : 0;
   return {
     ...d, store, category,
@@ -173,11 +173,20 @@ export type NewDeal = {
   description: string;
   storeId: string;
   categoryId: string | null;
-  urlSubmitted: string;
+  urlSubmitted: string | null;
   priceCents: number | null;
   listPriceCents: number | null;
   couponCode: string | null;
   publish: boolean;
+  urlKey?: string | null;
+  startsAt?: string | null;
+  expiresAt?: string | null;
+  availability?: "online" | "offline";
+  shippingCents?: number | null;
+  shipsFrom?: string | null;
+  couponKind?: "percent" | "amount" | "free_shipping" | "other" | null;
+  couponPercent?: number | null;
+  couponAmountCents?: number | null;
 };
 
 export async function createDeal(input: NewDeal) {
@@ -189,10 +198,12 @@ export async function createDeal(input: NewDeal) {
     title: input.title, description: input.description, authorId: input.authorId, source: "user",
     storeId: input.storeId, categoryId: input.categoryId, urlSubmitted: input.urlSubmitted,
     priceCents: input.priceCents, listPriceCents: input.listPriceCents,
-    couponCode: input.couponCode, couponPercent: null, imageUrl: null,
+    couponCode: input.couponCode, couponPercent: input.couponPercent ?? null, imageUrl: null,
+    startsAt: input.startsAt ?? null, availability: input.availability ?? "online", shippingCents: input.shippingCents ?? null,
+    shipsFrom: input.shipsFrom ?? null, couponKind: input.couponKind ?? null, couponAmountCents: input.couponAmountCents ?? null,
     verdict: "pending", realDiscountBp: null,
     status: input.publish ? "published" : "pending", rejectReason: null,
-    publishedAt: input.publish ? now : null, expiresAt: null,
+    publishedAt: input.publish ? now : null, expiresAt: input.expiresAt ?? null,
     votesUp: 0, votesDown: 0, clicksTotal: 0, commentsCount: 0, createdAt: now,
   };
   db.deals.set(id, deal);
@@ -214,7 +225,7 @@ export async function moderateDeal(id: string, action: "approve" | "reject", rea
   if (action === "approve") {
     d.status = "published";
     d.publishedAt = new Date().toISOString();
-    const author = db.profiles.get(d.authorId);
+    const author = db.profiles.get(d.authorId ?? "");
     if (author) {
       author.approvedPosts += 1;
       author.reputation += 10;

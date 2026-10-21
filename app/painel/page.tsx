@@ -22,7 +22,7 @@ export default async function PanelPage() {
                 {d.store.name}{d.store.status === "pending_review" ? " (loja nova)" : ""} ·{" "}
                 {d.priceCents != null ? formatPrice(d.priceCents) : `cupom ${d.couponCode}`} · por {d.author.username} · {timeAgo(d.createdAt)}
               </p>
-              <p className="truncate text-xs text-muted" title={d.urlSubmitted}>{d.urlSubmitted}</p>
+              <p className="truncate text-xs text-muted" title={d.urlSubmitted ?? undefined}>{d.urlSubmitted ?? "Sem link (loja física ou sem endereço)"}</p>
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2">
               <form action={moderateDealAction}>

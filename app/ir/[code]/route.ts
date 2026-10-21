@@ -18,6 +18,8 @@ export async function GET(request: Request, ctx: RouteContext<"/ir/[code]">) {
   if (!(await isLikelyBot())) {
     await recordClick(deal.id, await visitorHash(), CHANNELS.has(c) ? c : "other");
   }
+  // Oferta sem link (ex.: promoção só em loja física): fica na página da oferta.
+  if (!deal.urlSubmitted) return NextResponse.redirect(new URL(`/oferta/${deal.slug}`, request.url), 302);
   const res = NextResponse.redirect(deal.urlSubmitted, 302);
   res.headers.set("Cache-Control", "no-store");
   res.headers.set("X-Robots-Tag", "noindex, nofollow");

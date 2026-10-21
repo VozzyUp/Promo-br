@@ -48,3 +48,8 @@ export function slugify(text: string): string {
     .replace(/^-+|-+$/g, "")
     .slice(0, 80);
 }
+
+/** true se a data ainda não chegou (fica fora do componente por causa da regra de pureza do React). */
+export function isFuture(iso: string): boolean {
+  return new Date(iso).getTime() > Date.now();
+}

@@ -9,8 +9,10 @@ import type { Category, Deal, DealView, FeedTab, Profile, Role, Store } from "..
 /* ------------------------------------------------------------------ linhas do banco -> domínio */
 
 type DealRow = {
-  id: string; slug: string; code: string; title: string; description: string; author_id: string;
-  source: Deal["source"]; store_id: string; category_id: string | null; url_submitted: string;
+  id: string; slug: string; code: string; title: string; description: string; author_id: string | null;
+  source: Deal["source"]; store_id: string; category_id: string | null; url_submitted: string | null;
+  starts_at: string | null; availability: "online" | "offline"; shipping_cents: number | null; ships_from: string | null;
+  coupon_kind: Deal["couponKind"]; coupon_amount_cents: number | null;
   price_cents: number | null; list_price_cents: number | null; coupon_code: string | null;
   coupon_percent: number | null; image_path: string | null; verdict: Deal["verdict"];
   real_discount_bp: number | null; status: Deal["status"]; reject_reason: string | null;
@@ -23,12 +25,13 @@ type AuthorRow = { id: string; username: string; display_name: string; avatar_ur
 type ProfileRow = AuthorRow & {
   reputation: number; trusted: boolean; approved_posts: number; banned_at: string | null; created_at: string;
 };
-export type DealJoinRow = DealRow & { store: StoreRow; category: CategoryRow | null; author: AuthorRow };
+export type DealJoinRow = DealRow & { store: StoreRow; category: CategoryRow | null; author: AuthorRow | null };
 
 const DEAL_COLS =
   "id, slug, code, title, description, author_id, source, store_id, category_id, url_submitted, price_cents, " +
   "list_price_cents, coupon_code, coupon_percent, image_path, verdict, real_discount_bp, status, reject_reason, " +
-  "published_at, expires_at, votes_up, votes_down, clicks_total, comments_count, created_at";
+  "published_at, expires_at, votes_up, votes_down, clicks_total, comments_count, created_at, " +
+  "starts_at, availability, shipping_cents, ships_from, coupon_kind, coupon_amount_cents";
 export const JOIN =
   `${DEAL_COLS}, store:stores!inner(id, name, slug, domains, status), category:categories(id, name, slug), ` +
   "author:profiles!deals_author_id_fkey(id, username, display_name, avatar_url, role)";
@@ -47,6 +50,8 @@ function toDeal(r: DealRow): Deal {
     realDiscountBp: r.real_discount_bp, status: r.status, rejectReason: r.reject_reason,
     publishedAt: r.published_at, expiresAt: r.expires_at, votesUp: r.votes_up, votesDown: r.votes_down,
     clicksTotal: r.clicks_total, commentsCount: r.comments_count, createdAt: r.created_at,
+    startsAt: r.starts_at, availability: r.availability, shippingCents: r.shipping_cents, shipsFrom: r.ships_from,
+    couponKind: r.coupon_kind, couponAmountCents: r.coupon_amount_cents,
   };
 }
 
@@ -81,7 +86,9 @@ export async function toViews(rows: DealJoinRow[], viewerId: string | null): Pro
       ...d,
       store: r.store,
       category: r.category,
-      author: { id: r.author.id, username: r.author.username, displayName: r.author.display_name, avatarUrl: r.author.avatar_url, role: r.author.role },
+      author: r.author
+        ? { id: r.author.id, username: r.author.username, displayName: r.author.display_name, avatarUrl: r.author.avatar_url, role: r.author.role }
+        : { id: "", username: "removido", displayName: "Usuário removido", avatarUrl: null, role: "user" as const },
       temperature: temperatureOf(d),
       myVote: votes.get(d.id) ?? 0,
     };
@@ -203,11 +210,21 @@ export type NewDeal = {
   description: string;
   storeId: string;
   categoryId: string | null;
-  urlSubmitted: string;
+  urlSubmitted: string | null;
   priceCents: number | null;
   listPriceCents: number | null;
   couponCode: string | null;
   publish: boolean;
+  // Passo a passo de publicar (opcionais: o formulário simples não usa).
+  urlKey?: string | null;
+  startsAt?: string | null;
+  expiresAt?: string | null;
+  availability?: "online" | "offline";
+  shippingCents?: number | null;
+  shipsFrom?: string | null;
+  couponKind?: "percent" | "amount" | "free_shipping" | "other" | null;
+  couponPercent?: number | null;
+  couponAmountCents?: number | null;
 };
 
 export async function createDeal(input: NewDeal) {
@@ -227,9 +244,18 @@ export async function createDeal(input: NewDeal) {
         store_id: input.storeId,
         category_id: input.categoryId,
         url_submitted: input.urlSubmitted,
+        url_key: input.urlKey ?? null,
         price_cents: input.priceCents,
         list_price_cents: input.listPriceCents,
         coupon_code: input.couponCode,
+        coupon_kind: input.couponKind ?? null,
+        coupon_percent: input.couponPercent ?? null,
+        coupon_amount_cents: input.couponAmountCents ?? null,
+        starts_at: input.startsAt ?? null,
+        expires_at: input.expiresAt ?? null,
+        availability: input.availability ?? "online",
+        shipping_cents: input.shippingCents ?? null,
+        ships_from: input.shipsFrom ?? null,
         status: input.publish ? "published" : "pending",
         published_at: input.publish ? now : null,
       } as never)
