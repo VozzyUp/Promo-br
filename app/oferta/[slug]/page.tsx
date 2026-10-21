@@ -8,6 +8,10 @@ import { AdSlot } from "@/components/sidebar";
 import { FormMessage } from "@/components/ui/field";
 import { getDealBySlug } from "@/lib/data";
 import { getSession } from "@/lib/auth";
+import { CommentSection } from "@/components/comments/comment-section";
+import { DealToolbar } from "@/components/deal-toolbar";
+import { isSubscribed, listComments } from "@/lib/data/comments";
+import { RichText } from "@/lib/rich-text";
 
 export async function generateMetadata({ params }: PageProps<"/oferta/[slug]">) {
   const { slug } = await params;
@@ -24,6 +28,14 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
   if (!deal) notFound();
 
   const expired = deal.status === "expired";
+  const live = deal.status === "published" || expired;
+  const [thread, subscribed] = live
+    ? await Promise.all([
+        listComments(deal.id, session?.userId ?? null, sp.ordem === "novos" ? "desc" : "asc"),
+        session ? isSubscribed(deal.id, session.userId) : Promise.resolve(false),
+      ])
+    : [null, false];
+  const canClose = !!session && (session.userId === deal.authorId || session.role === "admin" || session.role === "moderator");
   return (
     <div className="mx-auto flex max-w-(--layout-max) flex-col gap-4 px-4 py-4">
       <nav aria-label="Trilha" className="flex items-center gap-1 text-sm text-muted">
@@ -102,7 +114,10 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
             Postado por <Link href={`/u/${deal.author.username}`} className="font-bold hover:text-accent">{deal.author.username}</Link>
           </p>
         </div>
-        {deal.description ? <p className="whitespace-pre-line text-base">{deal.description}</p> : <p className="text-sm text-muted">O autor não deixou detalhes.</p>}
+        {deal.description ? <RichText text={deal.description} className="text-base" /> : <p className="text-sm text-muted">O autor não deixou detalhes.</p>}
+        {deal.status === "published" ? (
+          <DealToolbar dealId={deal.id} hasCoupon={!!deal.couponCode} canClose={canClose} loggedIn={!!session} />
+        ) : null}
         <a href={`/ir/${deal.code}`} target="_blank" rel="sponsored noopener" className="flex w-fit items-center gap-1.5 text-sm font-bold text-accent">
           Ver na {deal.store.name} <ExternalLink className="size-4" aria-hidden /><span className="sr-only">(abre em nova aba)</span>
         </a>
@@ -112,10 +127,19 @@ export default async function DealPage({ params, searchParams }: PageProps<"/ofe
         </p>
       </section>
 
-      <section id="comentarios" aria-labelledby="com-title" className="rounded-card bg-bg p-4 shadow-card md:p-6">
-        <h2 id="com-title" className="text-title font-bold">Comentários</h2>
-        <p className="mt-2 text-sm text-muted">Os comentários chegam na próxima etapa.</p>
-      </section>
+      {thread ? (
+        <CommentSection
+          dealId={deal.id}
+          slug={deal.slug}
+          comments={thread.comments}
+          total={thread.total}
+          order={sp.ordem === "novos" ? "desc" : "asc"}
+          loggedIn={!!session}
+          viewerId={session?.userId ?? null}
+          viewerRole={session?.role ?? null}
+          subscribed={subscribed}
+        />
+      ) : null}
     </div>
   );
 }

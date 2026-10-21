@@ -69,3 +69,20 @@ export type DealView = Deal & {
 export type FeedTab = "quentes" | "descontos" | "novas";
 
 export type Session = { userId: string; role: Role; username: string };
+
+export type CommentReaction = "like" | "helpful" | "haha";
+
+export type CommentView = {
+  id: string;
+  dealId: string;
+  parentId: string | null;
+  body: string;
+  removed: boolean;
+  createdAt: string;
+  author: { id: string; username: string; displayName: string; avatarUrl: string | null; role: Role } | null;
+  likes: number;
+  helpful: number;
+  haha: number;
+  mine: CommentReaction | null;
+  replies: CommentView[];
+};
