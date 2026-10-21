@@ -1,6 +1,6 @@
 "use client";
 import * as Dialog from "@radix-ui/react-dialog";
-import { BellPlus, Gift, LayoutGrid, LogOut, MessagesSquare, Tag, Ticket, X } from "lucide-react";
+import { Bell, BellPlus, Gift, LogIn, LogOut, MessagesSquare, ShieldCheck, Tag, Ticket, User, X } from "lucide-react";
 import Link from "next/link";
 import { logoutAction } from "@/app/actions/auth";
 import { useState, type ReactNode } from "react";
@@ -47,15 +47,15 @@ export function MenuDrawer({
             ))}
             {loggedIn ? (
               <>
-                <Link href="/conta/notificacoes" onClick={close} className={row}><LayoutGrid className="size-5 text-muted" aria-hidden /> Notificações{unread > 0 ? ` (${unread})` : ""}</Link>
-                <Link href="/conta" onClick={close} className={row}><LayoutGrid className="size-5 text-muted" aria-hidden /> Minha conta</Link>
-                {isStaff ? <Link href="/painel" onClick={close} className={row}><LayoutGrid className="size-5 text-muted" aria-hidden /> Painel da equipe</Link> : null}
+                <Link href="/conta/notificacoes" onClick={close} className={row}><Bell className="size-5 text-muted" aria-hidden /> Notificações{unread > 0 ? ` (${unread})` : ""}</Link>
+                <Link href="/conta" onClick={close} className={row}><User className="size-5 text-muted" aria-hidden /> Minha conta</Link>
+                {isStaff ? <Link href="/painel" onClick={close} className={row}><ShieldCheck className="size-5 text-muted" aria-hidden /> Painel da equipe</Link> : null}
                 <form action={logoutAction}>
                   <button type="submit" className={`${row} w-full text-left text-danger`}><LogOut className="size-5" aria-hidden /> Sair</button>
                 </form>
               </>
             ) : (
-              <Link href="/entrar" onClick={close} className={row}><LayoutGrid className="size-5 text-muted" aria-hidden /> Entrar ou cadastrar</Link>
+              <Link href="/entrar" onClick={close} className={row}><LogIn className="size-5 text-muted" aria-hidden /> Entrar ou cadastrar</Link>
             )}
           </nav>
           {categories.length > 0 ? (
