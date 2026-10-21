@@ -1,10 +1,11 @@
 "use client";
 import Script from "next/script";
-import { ADSENSE_CLIENT } from "@/lib/consent";
+import { useAdsConfig } from "./ads-context";
 import { useConsent } from "./use-consent";
 
 /** Só injeta o script do AdSense depois do aceite. */
 export function AdScript() {
+  const { client: ADSENSE_CLIENT } = useAdsConfig();
   const consent = useConsent();
   if (consent !== "all" || !ADSENSE_CLIENT) return null;
   return (

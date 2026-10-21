@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { ADSENSE_CLIENT, ADSENSE_SLOT } from "@/lib/consent";
+import { useAdsConfig } from "./ads-context";
 import { useConsent } from "./use-consent";
 
 declare global {
@@ -9,6 +9,7 @@ declare global {
 
 /** Unidade do AdSense dentro do espaço reservado. Sem aceite ou sem ID configurado, não renderiza nada. */
 export function AdUnit({ minHeight }: { minHeight: number }) {
+  const { client: ADSENSE_CLIENT, slot: ADSENSE_SLOT } = useAdsConfig();
   const consent = useConsent();
   const pushed = useRef(false);
   const live = consent === "all" && !!ADSENSE_CLIENT && !!ADSENSE_SLOT;

@@ -10,6 +10,3 @@ export function parseConsent(cookieHeader: string): Consent {
   const m = cookieHeader.match(new RegExp(`(?:^|; )${CONSENT_COOKIE}=([^;]*)`));
   return m?.[1] === "all" || m?.[1] === "essential" ? m[1] : "none";
 }
-
-export const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT ?? "";
-export const ADSENSE_SLOT = process.env.NEXT_PUBLIC_ADSENSE_SLOT ?? "";

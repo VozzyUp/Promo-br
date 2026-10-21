@@ -12,11 +12,15 @@ export default async function PanelLayout({ children }: LayoutProps<"/painel">) 
         <Link href="/painel" className={tab}>Fila de ofertas</Link>
         {session.role === "admin" ? (
           <>
+            <Link href="/painel/metricas" className={tab}>Métricas</Link>
             <Link href="/painel/lojas" className={tab}>Lojas</Link>
             <Link href="/painel/robo" className={tab}>Robô</Link>
             <Link href="/painel/canais" className={tab}>Canais</Link>
             <Link href="/painel/integracoes" className={tab}>Integrações</Link>
             <Link href="/painel/execucoes" className={tab}>Execuções</Link>
+            <Link href="/painel/anuncios" className={tab}>Anúncios</Link>
+            <Link href="/painel/aparencia" className={tab}>Aparência</Link>
+            <Link href="/painel/paginas" className={tab}>Páginas</Link>
           </>
         ) : null}
         <Link href="/painel/ofertas" className={tab}>Ofertas e cupons</Link>
