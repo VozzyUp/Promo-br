@@ -31,8 +31,10 @@ export function isProductUrl(u: URL): boolean {
   const host = hostOf(u);
   const path = u.pathname;
   if (/(^|\.)amazon\./.test(host)) return ASIN.test(path);
-  if (/mercadoli[bv]re\.com/.test(host)) return !/\/social\//i.test(path) && /MLB-?\d{6,}/i.test(path);
-  if (under(host, "shopee.com.br")) return /-i\.\d+\.\d+/.test(path) || /^\/product\/\d+\/\d+/.test(path);
+  // MLBU... é o "produto do vendedor" (/up/MLBU123), além do catálogo (/p/MLB123) e do anúncio (MLB-123).
+  if (/mercadoli[bv]re\.com/.test(host)) return !/\/social\//i.test(path) && /MLBU?-?\d{6,}/i.test(path);
+  // Shopee: nome-i.loja.produto, /product/loja/produto ou /nomedaloja/loja/produto (destino dos links curtos).
+  if (under(host, "shopee.com.br")) return /-i\.\d+\.\d+/.test(path) || /^\/product\/\d+\/\d+/.test(path) || /^\/[^/]+\/\d{3,}\/\d{3,}\/?$/.test(path);
   if (under(host, "magazineluiza.com.br") || under(host, "magazinevoce.com.br")) return /\/p\/[a-z0-9]{6,}/i.test(path);
   if (under(host, "kabum.com.br")) return /^\/produto\/\d+/.test(path);
   if (/aliexpress\./.test(host)) return /\/item\/\d+\.html/.test(path);
@@ -109,10 +111,17 @@ export function extractLinks(html: string, base: URL): URL[] {
 /**
  * Link de afiliado do Mercado Livre (meli.la) abre a vitrine de quem divulgou (/social/fulano?ref=...).
  * O produto divulgado é o card em destaque; os outros cards são recomendações.
+ * Também pode abrir uma lista montada por quem divulgou (/social/fulano/lists/...): com um produto só, é ele.
  */
 export function mercadoLivreFeatured(html: string, base: URL): URL | null {
   const links = extractLinks(html, base).filter((u) => /mercadoli[bv]re\.com/.test(hostOf(u)) && isProductUrl(u));
-  return links.find((u) => /card-featured/.test(u.toString())) ?? null;
+  const featured = links.find((u) => /card-featured/.test(u.toString()));
+  if (featured) return featured;
+  if (/^\/social\/[^/]+\/lists\//i.test(base.pathname)) {
+    const distinct = new Map(links.map((u) => [cleanStoreUrl(u).toString(), u]));
+    if (distinct.size === 1) return [...distinct.values()][0];
+  }
+  return null;
 }
 
 export function isMercadoLivreSocial(u: URL): boolean {

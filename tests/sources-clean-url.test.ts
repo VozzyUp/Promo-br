@@ -116,3 +116,38 @@ describe("do link da publicação até o produto", () => {
     expect(r.reason).toMatch(/não tem link/);
   });
 });
+
+describe("formatos de produto vistos no canal Promoções Do Dia (21/10/2026)", () => {
+  it("Mercado Livre: produto de vendedor em /up/MLBU... é produto e perde os parâmetros", () => {
+    expect(isProductUrl(U("https://www.mercadolivre.com.br/jogo-de-panelas-brinox/up/MLBU5406933380?pdp_filters=item_id%3AMLB7753299392"))).toBe(true);
+    expect(clean("https://www.mercadolivre.com.br/jogo-de-panelas-brinox/up/MLBU5406933380?pdp_filters=item_id%3AMLB7753299392&matt_tool=1#polycard_client=x"))
+      .toBe("https://www.mercadolivre.com.br/jogo-de-panelas-brinox/up/MLBU5406933380");
+  });
+  it("vitrine do Mercado Livre com o destaque em /up/", () => {
+    const html = `<a href="https://www.mercadolivre.com.br/outro/p/MLB79735337#reco_client=home_affiliate_profile_v2p">r</a>
+      <a href="https://www.mercadolivre.com.br/jogo-de-panelas/up/MLBU5406933380?pdp_filters=item_id%3AMLB7753299392#polycard_client=x&amp;c_id=/home/card-featured/element">f</a>`;
+    expect(mercadoLivreFeatured(html, U("https://www.mercadolivre.com.br/social/promocoesdodia"))?.pathname).toBe("/jogo-de-panelas/up/MLBU5406933380");
+  });
+  it("Shopee: /loja/número-da-loja/número-do-produto é produto; cupons e página da loja não", () => {
+    expect(isProductUrl(U("https://shopee.com.br/opaanlp/1284002787/23793978215?__mobile__=1&mmp_pid=an_1"))).toBe(true);
+    expect(clean("https://shopee.com.br/opaanlp/1284002787/23793978215?__mobile__=1&mmp_pid=an_1&utm_source=an_1")).toBe("https://shopee.com.br/opaanlp/1284002787/23793978215");
+    expect(isProductUrl(U("https://shopee.com.br/m/cupom-de-desconto?mmp_pid=an_1"))).toBe(false);
+    expect(isProductUrl(U("https://shopee.com.br/opaanlp"))).toBe(false);
+    expect(isProductUrl(U("https://shopee.com.br/opaanlp/1284002787"))).toBe(false);
+  });
+});
+
+describe("lista montada pelo divulgador no Mercado Livre (/social/fulano/lists/...)", () => {
+  const LIST = U("https://www.mercadolivre.com.br/social/promocoesdodia/lists/d813c528-7740-4dd4-b1d4-019c6c695331?matt_tool=1");
+  const card = (path: string) => `<a href="https://www.mercadolivre.com.br/${path}?pdp_filters=item_id%3AMLB5095130581&amp;matt_d2id=x#polycard_client=social-profile-middleend">c</a>`;
+  it("com um produto só, é ele", () => {
+    const html = `<a href="https://www.mercadolivre.com.br/ajuda">ajuda</a>${card("tv-lg-55/p/MLB76779701")}${card("tv-lg-55/p/MLB76779701")}`;
+    expect(mercadoLivreFeatured(html, LIST)?.pathname).toBe("/tv-lg-55/p/MLB76779701");
+  });
+  it("com vários produtos, não chuta", () => {
+    expect(mercadoLivreFeatured(`${card("tv-lg-55/p/MLB76779701")}${card("tv-lg-65/p/MLB76779702")}`, LIST)).toBeNull();
+  });
+  it("vitrine comum sem destaque continua sem produto (os cards são recomendações)", () => {
+    expect(mercadoLivreFeatured(card("tv-lg-55/p/MLB76779701"), U("https://www.mercadolivre.com.br/social/promocoesdodia?ref=x"))).toBeNull();
+  });
+});
