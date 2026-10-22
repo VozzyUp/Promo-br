@@ -17,6 +17,7 @@ import { hostOf, isKnownStoreHost } from "./clean-url";
 import { cleanPageTitle, parsePost, type CouponInfo } from "./parse-post";
 import { resolveStoreLink, type Fetcher } from "./resolve";
 import { readAccountPosts, withAccount } from "./telegram-account";
+import { channelLabel } from "./parse-web";
 import { fetchPublicChannel } from "./telegram-web";
 import type { RawPost } from "./types";
 
@@ -28,7 +29,7 @@ const IMAGE_MAX = 3 * 1024 * 1024;
 export type SourceRow = {
   id: string; name: string; kind: "telegram_public" | "telegram_account"; target: string; active: boolean; category_id: string | null;
   min_discount_bp: number; max_price_cents: number | null; block_words: string[]; per_run: number; take_coupons: boolean;
-  auto_publish: boolean; last_message_id: number | null;
+  auto_publish: boolean; last_message_id: number | null; target_title: string | null;
 };
 
 export type SourceStats = { read: number; new: number; created: number; published: number; duplicates: number; filtered: number; noStoreLink: number; ignored: number; errors: number };
@@ -62,8 +63,10 @@ export async function runSource(id: string): Promise<SourceStats> {
   if (!src) throw new Error("Fonte não encontrada.");
   try {
     if (src.kind === "telegram_public") {
-      const posts = await fetchPublicChannel(src.target);
-      return await processPosts(src, posts, async (p) => (p.imageUrl && !offline() ? fetchImageBytes(p.imageUrl, IMAGE_MAX) : null));
+      const page = await fetchPublicChannel(src.target);
+      const label = channelLabel(page);
+      if (label !== src.target_title) await db().from("sources").update({ target_title: label }).eq("id", id);
+      return await processPosts(src, page.posts, async (p) => (p.imageUrl && !offline() ? fetchImageBytes(p.imageUrl, IMAGE_MAX) : null));
     }
     return await withAccount(async (c) => {
       const { posts, photo } = await readAccountPosts(c, src.target, src.last_message_id, 40);

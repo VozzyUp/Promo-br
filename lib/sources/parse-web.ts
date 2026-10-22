@@ -33,13 +33,39 @@ export function htmlToPost(html: string): Pick<RawPost, "text" | "links" | "bold
   return { text, links, bold, strike };
 }
 
+/**
+ * Nome principal do canal. Aberto por um apelido (t.me/s/apelido), o Telegram mostra as publicações
+ * com o nome principal no data-post; vale o nome que mais aparece na página.
+ */
+function pageChannelName(html: string, channel: string): string {
+  const count = new Map<string, number>();
+  for (const m of html.matchAll(/data-post="([^"/]+)\/\d+"/g)) {
+    if (m[1].toLowerCase() === channel.toLowerCase()) return m[1];
+    count.set(m[1], (count.get(m[1]) ?? 0) + 1);
+  }
+  let best = channel;
+  let max = 0;
+  for (const [name, n] of count) if (n > max) [best, max] = [name, n];
+  return best;
+}
+
+/** Nome principal e título do canal (o título só serve para mostrar no painel). */
+export function channelPageInfo(html: string, channel: string): { name: string; title: string | null } {
+  const og = /<meta property="og:title" content="([^"]*)"/.exec(html)?.[1];
+  return { name: pageChannelName(html, channel), title: og ? decodeEntities(og).trim() || null : null };
+}
+
+/** Como o canal aparece na lista de fontes: "Título (@nome)", ou só "@nome". */
+export const channelLabel = (c: { name: string; title: string | null }) => (c.title ? `${c.title} (@${c.name})` : `@${c.name}`).slice(0, 120);
+
 /** Publicações da página t.me/s/<canal>, da mais antiga para a mais nova. */
 export function parseChannelPage(html: string, channel: string): RawPost[] {
   const out: RawPost[] = [];
+  const name = pageChannelName(html, channel).toLowerCase();
   const blocks = html.split(/<div class="tgme_widget_message_wrap\b/).slice(1);
   for (const block of blocks) {
     const post = /data-post="([^"/]+)\/(\d+)"/.exec(block);
-    if (!post || post[1].toLowerCase() !== channel.toLowerCase()) continue;
+    if (!post || post[1].toLowerCase() !== name) continue;
     const id = Number(post[2]);
     const body = /<div class="tgme_widget_message_text js-message_text"[^>]*>([\s\S]*?)<\/div>/.exec(block)?.[1] ?? "";
     const parsed = htmlToPost(body);

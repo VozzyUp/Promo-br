@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeChannel, parseChannelPage } from "../lib/sources/parse-web";
+import { channelLabel, channelPageInfo, normalizeChannel, parseChannelPage } from "../lib/sources/parse-web";
 import { cleanPageTitle, parsePost } from "../lib/sources/parse-post";
 import type { RawPost } from "../lib/sources/types";
 
@@ -32,8 +32,22 @@ describe("página pública do canal", () => {
     expect(p.postUrl).toBe("https://t.me/canalteste/101");
     expect(posts[2].imageUrl).toBeNull();
   });
-  it("ignora blocos de outro canal", () => {
-    expect(parseChannelPage(PAGE, "outrocanal")).toEqual([]);
+  it("canal cadastrado por apelido: lê as publicações da página, que vêm com o nome principal", () => {
+    const viaAlias = parseChannelPage(PAGE, "apelidodocanal");
+    expect(viaAlias.map((p) => p.id)).toEqual([100, 101, 102]);
+    expect(viaAlias[1].postUrl).toBe("https://t.me/canalteste/101");
+    expect(channelPageInfo(PAGE, "apelidodocanal").name).toBe("canalteste");
+  });
+  it("ignora bloco solto de outro canal no meio da página", () => {
+    const intruso = msg(5, "x").split("canalteste/").join("intruso/");
+    const mixed = PAGE.replace("</section>", `${intruso}</section>`);
+    expect(parseChannelPage(mixed, "canalteste").map((p) => p.id)).toEqual([100, 101, 102]);
+  });
+  it("pega o nome do canal para mostrar no painel", () => {
+    const withTitle = PAGE.replace("<html>", `<html><head><meta property="og:title" content="[CANAL] Teste &amp; Cia 💥"></head>`);
+    expect(channelPageInfo(withTitle, "canalteste")).toEqual({ name: "canalteste", title: "[CANAL] Teste & Cia 💥" });
+    expect(channelLabel(channelPageInfo(withTitle, "canalteste"))).toBe("[CANAL] Teste & Cia 💥 (@canalteste)");
+    expect(channelLabel(channelPageInfo(PAGE, "canalteste"))).toBe("@canalteste");
   });
   it("aceita o canal escrito de vários jeitos", () => {
     expect(normalizeChannel("@PromoTop")).toBe("PromoTop");

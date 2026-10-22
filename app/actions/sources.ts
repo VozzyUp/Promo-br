@@ -4,9 +4,9 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth";
 import { parsePriceToCents } from "@/lib/format";
 import { isValidCron } from "@/lib/jobs/cron";
-import { normalizeChannel } from "@/lib/sources/parse-web";
+import { channelLabel, normalizeChannel } from "@/lib/sources/parse-web";
 import { listAccountChats, logoutAccount, startLogin, submitCode, submitPassword, type AccountChat } from "@/lib/sources/telegram-account";
-import { fetchPublicChannel } from "@/lib/sources/telegram-web";
+import { fetchPublicChannel, type PublicChannel } from "@/lib/sources/telegram-web";
 import { db } from "@/lib/supabase/db";
 
 export type SourceState = { ok?: boolean; error?: string } | undefined;
@@ -49,12 +49,14 @@ export async function saveSourceAction(_prev: SourceState, form: FormData): Prom
     if (kind === "telegram_public") {
       const channel = normalizeChannel(String(form.get("channel") ?? ""));
       if (!channel) return { error: "Informe o canal como @nome ou t.me/nome. Link de convite (t.me/+...) é de grupo privado: use a conta logada." };
+      let page: PublicChannel;
       try {
-        await fetchPublicChannel(channel); // confere já se o canal abre sem login
+        page = await fetchPublicChannel(channel); // confere já se o canal abre sem login
       } catch (e) {
         return { error: e instanceof Error ? e.message : "Não consegui abrir o canal." };
       }
-      Object.assign(row, { kind, target: channel, target_title: `@${channel}` });
+      // Guarda o nome principal (o @ digitado pode ser só um apelido) e o título, para a lista mostrar qual canal é.
+      Object.assign(row, { kind, target: page.name, target_title: channelLabel(page) });
     } else if (kind === "telegram_account") {
       const [target, title] = String(form.get("chat") ?? "").split("::");
       if (!ACCOUNT_TARGET.test(target ?? "")) return { error: "Escolha o grupo ou canal na lista da conta." };
