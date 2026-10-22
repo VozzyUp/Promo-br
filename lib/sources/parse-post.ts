@@ -41,20 +41,28 @@ export function cleanLine(s: string): string {
 const NOISE = /\b(oferta|ofertas|promo[çc][aã]o|promo|exclusiv\w*|aten[çc][aã]o|corr[ae]|aproveit\w*|imperd[ií]ve\w*|baixou|menor pre[çc]o|hist[oó]ric\w*|rel[aâ]mpago|frete|link|compre|clique|seja prime|membros|grupo|canal|estoque|acabando|urgente|desconto|achadinh\w*|off|resgate|vai sair|novo cupom|cupom|app)\b/i;
 const SPEC = /\b\d+(?:[.,]\d+)?\s?(gb|tb|mb|kg|g|mg|ml|l|w|mah|hz|pol|polegadas|cm|mm|m|v|un|unidades|pe[çc]as)\b|\b\d{2,3}["”]|\b[A-Z]{1,6}-?\d{2,}[A-Z0-9-]*\b|\b(4k|8k|full ?hd|ssd|bivolt|wi-?fi|bluetooth|usb|led|oled)\b/i;
 
-function upperRatio(s: string): number {
-  const letters = s.replace(/[^\p{L}]/gu, "");
-  if (letters.length < 8) return 0;
-  return letters.replace(/[^\p{Lu}]/gu, "").length / letters.length;
+/**
+ * Frase "gritada" (toda em maiúsculas). Conta só palavras de 4+ letras sem números: siglas (TV, LG, UHD)
+ * e códigos de modelo (55UN85CBPSA) são normais no nome do produto e não contam como grito.
+ */
+function isShouting(s: string): boolean {
+  const words = s.split(/\s+/).filter((w) => !/\d/.test(w)).map((w) => w.replace(/[^\p{L}]/gu, "")).filter((w) => w.length >= 4);
+  if (words.length < 2) return false;
+  return words.filter((w) => w === w.toUpperCase()).length / words.length > 0.8;
 }
 
 const HOOK_START = /^(possui|ideal|perfeit\w*|garant\w*|chegou|olha|imagina|quem|para quem|sabe|voc[eê]|seu|sua|deixe|n[aã]o perca|[uú]ltimas?|s[oó] hoje|hoje)\b/i;
+/** Linha que só diz onde comprar ("Loja Oficial X na Amazon:", "Vendido por ..."). */
+const WHERE = /\b(loja oficial|lojas oficiais|vendido (por|pela|pelo)|dispon[ií]vel (na|no|em)|compre (na|no|aqui))\b/i;
 
 /** Nota de cada linha: o nome do produto costuma ser longo, ter marca/modelo/medida e não terminar em "!". */
 function scoreLine(line: string, raw: string, bold: string[]): number {
   let score = 0;
-  const allCaps = upperRatio(line) > 0.8;
+  const allCaps = isShouting(line);
   if (allCaps) score -= 3;
   if (NOISE.test(line)) score -= 3;
+  if (WHERE.test(line)) score -= 3;
+  if (/[:：]\s*$/u.test(raw.trim())) score -= 3; // rótulo do link que vem embaixo
   if (/[!‼❗❕?]️?\s*$/u.test(raw.trim())) score -= 2; // frase de chamada
   if (HOOK_START.test(line)) score -= 2;
   if (!allCaps && bold.some((b) => b === line || (b.length >= 10 && line.includes(b)))) score += 1;

@@ -127,3 +127,29 @@ describe("título: chamada x nome do produto", () => {
     expect(b.priceCents).toBe(255203);
   });
 });
+
+describe("nome do produto com siglas e linha de loja (Promoções Do Dia, 21/10/2026)", () => {
+  const text = `BAIXOU A NANO AI UHD DA LG, MODELO 4K COM 55"
+
+Smart TV LG 55" 4K UHD NANO AI 55UN85CBPSA.BWZ
+
+De: R$ 2.763 Por: R$ 2.299 no pix 💥
+
+Loja Oficial Vikings na Amazon:
+https://link.amazon/B0dw5smxY`;
+  it("siglas e código do modelo não são grito; 'Loja Oficial ... :' é rótulo do link, não o nome", () => {
+    const r = parsePost(post(text, { bold: [`BAIXOU A NANO AI UHD DA LG, MODELO 4K COM 55"`], strike: ["De: R$ 2.763"] }));
+    expect(r.title).toBe(`Smart TV LG 55" 4K UHD NANO AI 55UN85CBPSA.BWZ`);
+    expect(r.priceCents).toBe(229900);
+    expect(r.listPriceCents).toBe(276300);
+  });
+  it("frase toda em maiúsculas continua sendo chamada, não nome", () => {
+    const r = parsePost(post(`O QUARTO NOVO COMEÇA COM UMA PAREDE LISINHA
+
+Massa Corrida Reveste Mais 23kg
+
+Vendido por Loja Parceira Oficial:
+https://meli.la/abc`));
+    expect(r.title).toBe("Massa Corrida Reveste Mais 23kg");
+  });
+});
