@@ -93,3 +93,4 @@ Denunciar anúncio (Publicidade > Denunciar),monetização,could,yes,yes,botão 
 Onboarding de alertas com sugestões populares,conta,should,yes,no,
 Boletim diário por e-mail,distribuição,should,yes,partial,"boletim semanal (segunda 9h) com confirmação e cancelamento; precisa de SMTP no painel e da migração 7"
 Feed Para você / Tendências / Todas,descoberta,should,yes,yes,temos Quentes/Descontos/Novas
+Menus do cabeçalho com painel (Categorias / Cupons / Grátis),descoberta,should,yes,yes,"painel com Ver todos e fechar; no celular entre o topo e a barra inferior, no computador gaveta à esquerda; Grátis por tipo (/gratis?tipo=); /categorias; sem subcategorias (não existem no banco)"

@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
+import { redirectToPath } from "@/lib/redirect";
 import { getSession } from "@/lib/auth";
 import { db } from "@/lib/supabase/db";
 import { supabaseAuth } from "@/lib/supabase/server";
 
 /** LGPD: entrega ao titular uma cópia dos dados da própria conta, em JSON. */
-export async function GET(request: Request) {
+export async function GET() {
   const session = await getSession();
-  if (!session) return NextResponse.redirect(new URL("/entrar?next=/conta/exportar", request.url));
+  if (!session) return redirectToPath("/entrar?next=/conta/exportar");
 
   const d = db();
   const uid = session.userId;

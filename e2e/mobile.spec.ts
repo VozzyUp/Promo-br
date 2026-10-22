@@ -60,9 +60,12 @@ test.describe("celular @mobile", () => {
     const sticky = page.locator("div.fixed.bottom-16").filter({ has: page.locator('a[href^="/ir/"], button') });
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.waitForTimeout(400);
-    // com o botão principal na tela, não há botão fixo duplicado
-    const mainVisible = await page.locator("#deal-cta").isVisible();
-    if (mainVisible) await expect(sticky).toHaveCount(0);
+    // com o botão principal na tela não há botão fixo duplicado; abaixo da dobra (título longo), o fixo aparece
+    const mainInView = await page.locator("#deal-cta").evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return r.top < window.innerHeight && r.bottom > 0;
+    });
+    await expect(sticky).toHaveCount(mainInView ? 0 : 1);
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(600);
     await expect(sticky).toHaveCount(0); // fim da página: não cobre o rodapé

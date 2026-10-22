@@ -1,27 +1,30 @@
 import Link from "next/link";
-import { BellPlus, Gift, LayoutGrid, Menu, MessagesSquare, Plus, Search, Tag, Ticket, User } from "lucide-react";
+import { BellPlus, Menu, MessagesSquare, Plus, Search, Tag, User } from "lucide-react";
 import { AccountMenu } from "@/components/account-menu";
 import { NotificationsMenu, type MenuNotification } from "@/components/notifications-menu";
 import { buttonClasses } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { MenuDrawer, type MenuCategory } from "@/components/menu-drawer";
+import { NavMenu } from "@/components/nav-menus";
+import { categoryIcon, FREE_KINDS } from "@/lib/menus";
 import type { Session } from "@/lib/types";
 
+// Categorias, Cupons e Grátis abrem um painel com as opções (NavMenu); estes são links diretos.
 const nav = [
-  { href: "/c/eletronicos", label: "Categorias", icon: LayoutGrid },
-  { href: "/cupons", label: "Cupons", icon: Ticket },
-  { href: "/gratis", label: "Grátis", icon: Gift },
   { href: "/?aba=novas", label: "Ofertas", icon: Tag },
   { href: "/discussoes", label: "Discussões", icon: MessagesSquare },
 ];
 
 export function AppHeader({
-  siteName = "promo-br", session, unread = 0, notifications = [], categories = [],
-}: { siteName?: string; session: Session | null; unread?: number; notifications?: MenuNotification[]; categories?: MenuCategory[] }) {
+  siteName = "promo-br", session, unread = 0, notifications = [], categories = [], couponStores = [],
+}: {
+  siteName?: string; session: Session | null; unread?: number; notifications?: MenuNotification[];
+  categories?: MenuCategory[]; couponStores?: MenuCategory[];
+}) {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-bg/95 backdrop-blur">
       <a href="#conteudo" className="skip-link">Pular para o conteúdo</a>
-      <div className="mx-auto flex h-14 max-w-(--layout-max) items-center gap-3 px-4">
+      <div id="topo" className="mx-auto flex h-14 max-w-(--layout-max) items-center gap-3 px-4">
         <Logo name={siteName} />
         <MenuDrawer categories={categories} loggedIn={!!session} isStaff={session?.role === "admin" || session?.role === "moderator"} unread={unread} className="hidden items-center gap-1.5 rounded-pill border border-border px-3 py-1.5 text-sm md:flex">
           <Menu className="size-4" aria-hidden /> Menu
@@ -56,6 +59,10 @@ export function AppHeader({
         </div>
       </div>
       <nav aria-label="Seções" className="mx-auto flex h-(--header-nav) max-w-(--layout-max) items-center gap-5 overflow-x-auto px-4 text-sm [scrollbar-width:none]">
+        <NavMenu label="Categorias" icon="grid" seeAll="/categorias" chevrons
+          items={categories.map((c) => ({ href: `/c/${c.slug}`, label: c.name, icon: categoryIcon(c.slug) }))} />
+        <NavMenu label="Cupons" icon="ticket" seeAll="/cupons" items={couponStores.map((s) => ({ href: `/loja/${s.slug}`, label: s.name }))} />
+        <NavMenu label="Grátis" icon="gift" seeAll="/gratis" items={FREE_KINDS.map((k) => ({ href: `/gratis?tipo=${k.slug}`, label: k.label, icon: k.icon }))} />
         {nav.map(({ href, label, icon: Icon }) => (
           <Link key={href} href={href} className="flex shrink-0 items-center gap-1.5 hover:text-accent">
             <Icon className="size-4 text-muted" aria-hidden /> {label}

@@ -36,6 +36,16 @@ test("S-IR código inexistente volta para a home sem vazar nada", async ({ reque
   expect(new URL(res.headers().location, "http://x").pathname).toBe("/");
 });
 
+// No Docker o servidor escuta em 0.0.0.0; o redirecionamento não pode levar o visitante para esse endereço.
+test("S-HOST redirecionamentos internos ficam no endereço que o visitante usou", async ({ request, baseURL }) => {
+  for (const path of ["/conta/exportar", "/ir/naoexiste"]) {
+    const res = await request.get(path, { maxRedirects: 0 });
+    const location = res.headers().location ?? "";
+    expect(location, path).not.toContain("0.0.0.0");
+    expect(new URL(location, baseURL).origin, path).toBe(new URL(baseURL!).origin);
+  }
+});
+
 test("S-IR oferta real: 302 para a loja, sem cache e sem indexação", async ({ page, request }) => {
   await page.goto("/");
   const href = await page.locator('a[href^="/ir/"]').first().getAttribute("href");
