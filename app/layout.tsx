@@ -12,7 +12,7 @@ import type { MenuNotification } from "@/components/notifications-menu";
 import { getSession } from "@/lib/auth";
 import { newsletterAvailable } from "@/lib/data/newsletter";
 import { listCategories, listStores } from "@/lib/data";
-import { DEFAULT_BRAND, getAdsSettings, getSetting, type BrandSettings } from "@/lib/data/settings";
+import { getAdsSettings, getBrandSettings } from "@/lib/data/settings";
 import { countUnread, listNotifications } from "@/lib/data/social";
 import { timeAgo } from "@/lib/format";
 import { describeNotification } from "@/lib/notifications";
@@ -22,9 +22,9 @@ import "./globals.css";
 const figtree = Figtree({ variable: "--font-figtree", subsets: ["latin"], display: "swap" });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const brand = await getSetting<BrandSettings>("public.brand", DEFAULT_BRAND);
+  const brand = await getBrandSettings();
   return {
-    title: { default: `${brand.siteName}: ofertas que a comunidade aprova`, template: `%s | ${brand.siteName}` },
+    title: { default: `${brand.siteName}: ofertas que valem a pena compartilhar`, template: `%s | ${brand.siteName}` },
     description: brand.description,
   };
 }
@@ -46,7 +46,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Lojas do menu "Cupons": só as ativas (as que o robô cria ficam em revisão até alguém aprovar).
   const couponStores = (await listStores().catch(() => [])).filter((s) => s.status === "active").slice(0, 30).map((s) => ({ name: s.name, slug: s.slug }));
   const ads = await getAdsSettings();
-  const brand = await getSetting<BrandSettings>("public.brand", DEFAULT_BRAND);
+  const brand = await getBrandSettings();
   return (
     <html lang="pt-BR" className={`${figtree.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col font-sans">

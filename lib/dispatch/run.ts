@@ -115,7 +115,7 @@ export async function sendTest(channelId: string): Promise<string> {
   const row = deal.data as unknown as DealRow | null;
   if (row) return deliver(ch, row);
   const demo: DealRow = {
-    id: "demo", slug: "teste", code: "teste", title: "Mensagem de teste do promo-br", price_cents: 9990, list_price_cents: 14990, coupon_code: null,
+    id: "demo", slug: "teste", code: "teste", title: "Mensagem de teste do PromoValeu", price_cents: 9990, list_price_cents: 14990, coupon_code: null,
     coupon_percent: null, verdict: "no_comparison", real_discount_bp: null, image_path: null, status: "published", store: { name: "Loja de teste" },
   };
   return deliver(ch, demo);

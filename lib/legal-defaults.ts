@@ -7,9 +7,9 @@ export const LEGAL_SLUGS: LegalSlug[] = ["sobre", "como-ganhamos-dinheiro", "pri
 
 export const LEGAL_DEFAULTS: Record<LegalSlug, LegalDoc> = {
   sobre: {
-    title: "Sobre o promo-br",
+    title: "Sobre o PromoValeu",
     description: "Quem somos e como o site funciona.",
-    body: `O promo-br é um site de ofertas e cupons feito pela comunidade. Quem acha uma promoção boa publica, quem a usa vota, e as melhores sobem.
+    body: `O PromoValeu é um site de ofertas e cupons feito pela comunidade. Quem acha uma promoção boa publica, quem a usa vota, e as melhores sobem.
 
 ## Como funciona
 - Qualquer pessoa com conta pode publicar uma oferta, um cupom ou abrir uma discussão.

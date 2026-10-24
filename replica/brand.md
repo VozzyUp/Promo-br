@@ -1,18 +1,11 @@
-# Marca (replica-brand), 21/10/2026
+# Marca: PromoValeu, 23/10/2026
 
 ## Nome
-**Decisão do Fernando.** O nome segue "promo-br" (provisório) e é editável em Painel > Aparência, então a troca não exige código.
-Cinco candidatos para triagem (descritivos/compostos, sem relação com a referência). Nenhuma checagem foi feita ainda: tudo **a rodar**.
+**Decisão do Fernando:** PromoValeu. Assinatura: **"Ofertas que valem a pena compartilhar."**
 
-| candidato | INPI (classes 35, 36 e 42) | domínio .com.br | App Store/Play | @ nas redes | busca "nome + ofertas" |
-| --- | --- | --- | --- | --- | --- |
-| Achei Barato | a rodar | a rodar | a rodar | a rodar | a rodar |
-| Garimpo de Ofertas | a rodar | a rodar | a rodar | a rodar | a rodar |
-| Preço Certo | a rodar | a rodar | a rodar | a rodar | a rodar |
-| Pechincha Viva | a rodar | a rodar | a rodar | a rodar | a rodar |
-| Oferta de Verdade | a rodar | a rodar | a rodar | a rodar | a rodar |
+O nome continua editável em Painel > Aparência. A leitura da marca troca apenas o nome provisório exato `promo-br` por `PromoValeu`, inclusive quando a aparência já foi salva. Outros nomes e textos personalizados são preservados.
 
-Triagem não é parecer jurídico: antes de investir no nome, um advogado de marcas faz a busca no INPI.
+O domínio escolhido é `promovaleu.com.br`; registro e hospedagem ficam com o responsável. A disponibilidade consultada durante a escolha não confirma o registro ou a publicação do site.
 
 ## Paleta (valores novos, mesmos papéis)
 - Destaque: violeta `#6d28d9` (hover `#5b21b6`, fundo suave `#f3ecff`). Família diferente da referência (laranja/vermelho).
@@ -23,10 +16,11 @@ Triagem não é parecer jurídico: antes de investir no nome, um advogado de mar
 ## Tipografia
 Figtree (OFL), a mesma que já era usada; é aberta e não é a fonte da referência.
 
-## Logo (briefing e versão inicial)
-- Ideia: uma etiqueta de preço com um visto, ou seja, "preço conferido".
-- Tipo: símbolo + nome. Versão inicial pronta em `components/logo-mark.tsx` e `app/icon.svg` (favicon).
-- Falta para o lançamento: ícone 1024x1024 sem transparência, imagem social 1200x630 e versão final do desenhista.
+## Logo aprovado
+- Símbolo: **sacola de compras branca com porcentagem**, sobre fundo violeta. Fernando aprovou esta direção por comunicar compras e descontos com mais clareza.
+- Tipo: símbolo + nome. O cabeçalho (`components/logo-mark.tsx`) e o ícone da aba (`app/icon.svg`) usam a mesma geometria vetorial, adaptada para leitura em tamanhos pequenos.
+- A foto de perfil aprovada está disponível em `public/brand/promovaleu-profile.png` como referência da identidade.
+- A imagem social 1200x630 continua pendente.
 - Não pode lembrar a marca da referência: nenhum formato, par de cores ou letra em comum (a referência usa um ícone de pimenta/chama).
 
 ## Voz

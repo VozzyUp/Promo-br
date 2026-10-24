@@ -38,7 +38,7 @@ async function ensureUser({ email, password, username, displayName, role, truste
 const adminPassword = process.env.SEED_ADMIN_PASSWORD;
 if (!adminPassword || adminPassword.length < 8) throw new Error("Defina SEED_ADMIN_PASSWORD (8+ caracteres) em .env.local");
 
-const equipe = await ensureUser({ email: "equipe@promo-br.test", username: "equipe", displayName: "Equipe promo-br", role: "system", trusted: true });
+const equipe = await ensureUser({ email: "equipe@promo-br.test", username: "equipe", displayName: "Equipe PromoValeu", role: "system", trusted: true });
 await ensureUser({ email: "admin@promo-br.test", password: adminPassword, username: "admin", displayName: "Admin", role: "admin", trusted: true });
 const cacadora = await ensureUser({ email: "cacadora@promo-br.test", username: "cacadora_de_preco", displayName: "Caçadora de preço", role: "user", trusted: true });
 // Usuário comum, ainda não confiável (as ofertas dele vão para a fila). Só existe se SEED_USER_PASSWORD estiver definido.

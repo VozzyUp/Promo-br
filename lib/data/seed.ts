@@ -29,7 +29,7 @@ export const ADMIN_USER_ID = "u-admin";
 
 export const seedProfiles: Profile[] = [
   {
-    id: SYSTEM_USER_ID, username: "equipe", displayName: "Equipe promo-br", avatarUrl: null, role: "system",
+    id: SYSTEM_USER_ID, username: "equipe", displayName: "Equipe PromoValeu", avatarUrl: null, role: "system",
     reputation: 0, trusted: true, approvedPosts: 0, bannedAt: null, createdAt: hoursAgo(24 * 30),
   },
   {

@@ -16,7 +16,7 @@ const nav = [
 ];
 
 export function AppHeader({
-  siteName = "promo-br", session, unread = 0, notifications = [], categories = [], couponStores = [],
+  siteName = "PromoValeu", session, unread = 0, notifications = [], categories = [], couponStores = [],
 }: {
   siteName?: string; session: Session | null; unread?: number; notifications?: MenuNotification[];
   categories?: MenuCategory[]; couponStores?: MenuCategory[];

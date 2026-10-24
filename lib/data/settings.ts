@@ -51,10 +51,17 @@ export type BfSettings = { enabled: boolean; title: string; text: string };
 export type AdsSettings = { client: string; slot: string };
 
 export const DEFAULT_BRAND: BrandSettings = {
-  siteName: "promo-br",
-  description: "Promoções, cupons e descontos de verdade, publicados e votados por quem entende de preço.",
+  siteName: "PromoValeu",
+  description: "Ofertas para casa, utilidades, eletrônicos e compras do dia a dia, compartilhadas pela comunidade.",
   commissionNotice: "Alguns links nos pagam comissão quando você compra. Isso não muda a ordem nem o que aparece aqui: quem decide é a comunidade e o desconto real.",
 };
+
+/** Troca a marca provisória também em instalações que já salvaram a aparência no painel. */
+export async function getBrandSettings(): Promise<BrandSettings> {
+  const brand = await getSetting<BrandSettings>("public.brand", DEFAULT_BRAND);
+  return brand.siteName === "promo-br" ? { ...brand, siteName: DEFAULT_BRAND.siteName } : brand;
+}
+
 export const DEFAULT_BF: BfSettings = { enabled: false, title: "Black Friday", text: "As ofertas com desconto conferido já estão aqui." };
 
 /** Anúncios: o painel manda; se estiver vazio, vale o que veio do ambiente. */

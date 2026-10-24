@@ -6,7 +6,7 @@ import { confirmationMail, digestMail, isValidEmail, normalizeEmail, NEWSLETTER_
 import { getIntegrationConfig } from "./integrations";
 import { sendMails, type SmtpConfig } from "../integrations/smtp";
 import { listFeedPage } from "./feed";
-import { DEFAULT_BRAND, getSetting, type BrandSettings } from "./settings";
+import { getBrandSettings } from "./settings";
 import { db } from "../supabase/db";
 
 const SEND_BATCH = 100;
@@ -60,7 +60,7 @@ export async function subscribe(rawEmail: string, userId: string | null): Promis
     if (ins.error) return { error: "Não conseguimos salvar agora. Tente de novo." };
     row = ins.data as Row;
   }
-  const brand = await getSetting<BrandSettings>("public.brand", DEFAULT_BRAND);
+  const brand = await getBrandSettings();
   const mail = confirmationMail({ siteName: brand.siteName, confirmUrl: `${baseUrl()}/boletim/confirmar?t=${row.token}` });
   const [sent] = await sendMails(cfg, [{ to: email, mail }]);
   if (!sent.ok) {
@@ -111,7 +111,7 @@ export async function runNewsletter(): Promise<{ sent: number; failed: number; s
 
   const { items } = await listFeedPage({ tab: "quentes", viewerId: null, limit: NEWSLETTER_MAX_DEALS });
   if (items.length === 0) return { sent: 0, failed: 0, skipped: "nenhuma oferta no ar" };
-  const brand = await getSetting<BrandSettings>("public.brand", DEFAULT_BRAND);
+  const brand = await getBrandSettings();
   const base = baseUrl();
   const deals = items.map((d) => ({
     title: d.title, url: `${base}/oferta/${d.slug}`, priceCents: d.priceCents, couponCode: d.couponCode, store: d.store.name,

@@ -32,7 +32,7 @@ export async function GET() {
 
   const payload = {
     gerado_em: new Date().toISOString(),
-    aviso: "Cópia dos dados da sua conta no promo-br. Guarde com cuidado: contém seu e-mail e suas atividades.",
+    aviso: "Cópia dos dados da sua conta no PromoValeu. Guarde com cuidado: contém seu e-mail e suas atividades.",
     conta: { email: auth.data.user?.email ?? null, ...(profile.data ?? {}) },
     ofertas_publicadas: deals.data ?? [],
     comentarios: comments.data ?? [],
@@ -47,7 +47,7 @@ export async function GET() {
   return new NextResponse(JSON.stringify(payload, null, 2), {
     headers: {
       "Content-Type": "application/json; charset=utf-8",
-      "Content-Disposition": `attachment; filename="promo-br-meus-dados-${day}.json"`,
+      "Content-Disposition": `attachment; filename="promovaleu-meus-dados-${day}.json"`,
       "Cache-Control": "no-store",
       "X-Robots-Tag": "noindex",
     },

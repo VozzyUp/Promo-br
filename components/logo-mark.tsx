@@ -1,11 +1,13 @@
-/** Símbolo da marca: uma etiqueta de preço com um visto, em violeta. Mesmo desenho do app/icon.svg. */
+/** PromoValeu: sacola de compras com porcentagem. Mesmo desenho do app/icon.svg. */
 export function LogoMark({ className = "size-8" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 32 32" className={className} aria-hidden focusable="false">
-      <rect width="32" height="32" rx="8" className="fill-accent" />
-      <path d="M9 8.5h7.2c.5 0 1 .2 1.4.6l6.3 6.3c.8.8.8 2 0 2.8l-5.2 5.2c-.8.8-2 .8-2.8 0L8.6 17c-.4-.4-.6-.9-.6-1.4V9.5c0-.6.4-1 1-1Z" className="fill-on-accent" />
-      <circle cx="12.2" cy="12.2" r="1.5" className="fill-accent" />
-      <path d="m15 17.4 1.8 1.8 3.4-3.6" fill="none" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="stroke-accent" />
+    <svg viewBox="0 0 64 64" className={className} aria-hidden focusable="false">
+      <rect width="64" height="64" rx="16" className="fill-accent" />
+      <path d="M24 25v-6a8 8 0 0 1 16 0v6" fill="none" strokeWidth="4.5" strokeLinecap="round" className="stroke-on-accent" />
+      <path d="M19 23h26a3 3 0 0 1 3 2.7l2.7 24a3 3 0 0 1-3 3.3H16.3a3 3 0 0 1-3-3.3l2.7-24a3 3 0 0 1 3-2.7Z" className="fill-on-accent" />
+      <circle cx="26" cy="33" r="3" fill="none" strokeWidth="3" className="stroke-accent" />
+      <circle cx="38" cy="44" r="3" fill="none" strokeWidth="3" className="stroke-accent" />
+      <path d="m25 45 14-14" fill="none" strokeWidth="4" strokeLinecap="round" className="stroke-accent" />
     </svg>
   );
 }
