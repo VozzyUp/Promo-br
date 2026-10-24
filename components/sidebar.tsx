@@ -42,7 +42,7 @@ export function AdSlot({ minHeight = 100, className = "", format = "horizontal" 
         <span>Publicidade</span>
         <button type="button" className="flex items-center gap-1 hover:text-text">Denunciar <Flag className="size-3" aria-hidden /></button>
       </div>
-      <div className="rounded-sm bg-surface" style={{ minHeight }}>
+      <div className={`rounded-sm bg-surface${format === "horizontal" ? " ad-unit-horizontal-frame" : ""}`} style={format === "horizontal" ? undefined : { minHeight }}>
         <AdUnit minHeight={minHeight} format={format} />
       </div>
     </aside>

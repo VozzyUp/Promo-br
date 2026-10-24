@@ -23,14 +23,17 @@ export function AdUnit({ minHeight, format = "auto" }: { minHeight: number; form
     }
   }, [live]);
   if (!live) return null;
+  const horizontal = format === "horizontal";
   return (
     <ins
-      className="adsbygoogle block"
-      style={{ minHeight }}
+      className={`adsbygoogle${horizontal ? " ad-unit-horizontal" : " block"}`}
+      style={horizontal ? undefined : { minHeight }}
       data-ad-client={ADSENSE_CLIENT}
       data-ad-slot={ADSENSE_SLOT}
-      data-ad-format={format}
-      data-full-width-responsive={format === "vertical" ? "false" : "true"}
+      {...(!horizontal ? {
+        "data-ad-format": format,
+        "data-full-width-responsive": format === "vertical" ? "false" : "true",
+      } : {})}
     />
   );
 }

@@ -4,6 +4,7 @@ import { AppHeader } from "@/components/app-header";
 import { BfBanner } from "@/components/bf-banner";
 import { BottomNav } from "@/components/bottom-nav";
 import { AdScript } from "@/components/consent/ad-script";
+import { AdLayoutStyles } from "@/components/consent/ad-layout";
 import { AdsProvider } from "@/components/consent/ads-context";
 import { ConsentBanner } from "@/components/consent/consent-banner";
 import { SideRails } from "@/components/consent/side-rails";
@@ -50,6 +51,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="pt-BR" className={`${figtree.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col font-sans">
+        <AdLayoutStyles />
         <AdsProvider config={ads}>
           <BfBanner />
           <AppHeader siteName={brand.siteName} session={session} unread={unread} notifications={notifications} categories={categories} couponStores={couponStores} />

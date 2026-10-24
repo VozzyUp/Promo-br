@@ -52,6 +52,16 @@ test.describe("celular @mobile", () => {
     await expect(card.locator("p.line-clamp-3")).toBeHidden(); // descrição só a partir de telas maiores
   });
 
+  test("MOB-5 espaço de anúncio mantém proporção de banner no celular e desktop @mobile", async ({ page }) => {
+    const frame = page.locator('aside[aria-label="Publicidade"] > div.rounded-sm.bg-surface').first();
+    await page.goto("/");
+    await expect(frame).toBeVisible();
+    expect((await frame.boundingBox())!.height).toBe(100);
+
+    await page.setViewportSize({ width: 1024, height: 900 });
+    expect((await frame.boundingBox())!.height).toBe(90);
+  });
+
   test("MOB-4 página da oferta: botão fixo aparece ao rolar e some no fim da página @mobile", async ({ page }) => {
     await page.goto("/");
     const href = await page.locator('a[href^="/oferta/"]').first().getAttribute("href");
