@@ -94,7 +94,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           <HotSidebar deals={hot} />
           <CouponsWidget deals={coupons} />
           <CategoriesWidget categories={categories} />
-          <AdSlot minHeight={600} className="hidden lg:block" />
+          <AdSlot minHeight={600} format="vertical" className="hidden lg:block" />
         </div>
       </div>
     </div>

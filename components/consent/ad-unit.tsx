@@ -8,7 +8,7 @@ declare global {
 }
 
 /** Unidade do AdSense dentro do espaço reservado. Sem aceite ou sem ID configurado, não renderiza nada. */
-export function AdUnit({ minHeight, format = "auto" }: { minHeight: number; format?: "auto" | "vertical" }) {
+export function AdUnit({ minHeight, format = "auto" }: { minHeight: number; format?: "auto" | "vertical" | "horizontal" }) {
   const { client: ADSENSE_CLIENT, slot: ADSENSE_SLOT } = useAdsConfig();
   const consent = useConsent();
   const pushed = useRef(false);
@@ -30,7 +30,7 @@ export function AdUnit({ minHeight, format = "auto" }: { minHeight: number; form
       data-ad-client={ADSENSE_CLIENT}
       data-ad-slot={ADSENSE_SLOT}
       data-ad-format={format}
-      data-full-width-responsive={format === "auto" ? "true" : "false"}
+      data-full-width-responsive={format === "vertical" ? "false" : "true"}
     />
   );
 }

@@ -35,7 +35,7 @@ export function HotSidebar({ deals }: { deals: DealView[] }) {
 }
 
 /** Espaço de anúncio com altura reservada (sem CLS). O AdSense só carrega depois do aceite de cookies. */
-export function AdSlot({ minHeight = 250, className = "" }: { minHeight?: number; className?: string }) {
+export function AdSlot({ minHeight = 100, className = "", format = "horizontal" }: { minHeight?: number; className?: string; format?: "auto" | "vertical" | "horizontal" }) {
   return (
     <aside aria-label="Publicidade" className={`rounded-card bg-bg p-3 shadow-card ${className}`}>
       <div className="mb-2 flex items-center justify-between text-xs text-muted">
@@ -43,7 +43,7 @@ export function AdSlot({ minHeight = 250, className = "" }: { minHeight?: number
         <button type="button" className="flex items-center gap-1 hover:text-text">Denunciar <Flag className="size-3" aria-hidden /></button>
       </div>
       <div className="rounded-sm bg-surface" style={{ minHeight }}>
-        <AdUnit minHeight={minHeight} />
+        <AdUnit minHeight={minHeight} format={format} />
       </div>
     </aside>
   );
